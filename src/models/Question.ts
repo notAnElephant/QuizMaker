@@ -1,0 +1,14 @@
+export type QuestionType = 'text' | 'image' | 'video' | 'audio';
+
+export class Question {
+    constructor(
+        public type: QuestionType,
+        public content: string,
+        public isUsed: boolean = false,
+        public list?: string[] // optional list of choices
+    ) {}
+
+    markUsed() {
+        this.isUsed = true;
+    }
+}

@@ -1,35 +1,28 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import './index.css';
+import {Board} from './components/Board';
+import {useQuiz} from './context/QuizContext';
+import {useNavigate} from 'react-router-dom';
+import { FaCog } from 'react-icons/fa';
 
 function App() {
-  const [count, setCount] = useState(0)
+    const {categories, markUsed} = useQuiz();
+    const navigate = useNavigate();
 
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    return (
+        <div className="min-h-screen flex items-center justify-center text-black">
+            <div className="w-full max-w-screen-lg px-4 flex flex-col items-center text-center">
+                <h1 className="text-4xl font-bold mb-8">Vágó Pesta</h1>
+                <Board data={categories} onSelect={(catIndex, qIndex, used) => markUsed(catIndex, qIndex, used)}/>
+            </div>
+            <button
+                onClick={() => navigate('/settings')}
+                className="absolute bottom-4 right-4 bg-gray-800 text-white p-3 rounded-full shadow-lg hover:bg-gray-700"
+                aria-label="Settings"
+            >
+                <FaCog size={20} />
+            </button>
+        </div>
+    );
 }
 
-export default App
+export default App;

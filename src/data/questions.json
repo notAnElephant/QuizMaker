@@ -1,0 +1,97 @@
+[
+  {
+    "category": "Éjáj",
+    "questions": [
+      { "type": "image", "content": "https://drive.google.com/file/d/17HrYA2u_-Rx6YpqDMUsqtURPsOoWkQGf/view?usp=sharing" },
+      { "type": "image", "content": "https://drive.google.com/file/d/1SZz1M3n5UVw7kphEJyAUEsNFYi_327hj/view?usp=sharing" },
+      { "type": "image", "content": "https://drive.google.com/file/d/1-u6cwIGTVwfzeGdX0n5_pbPm7AxK9tc1/view?usp=sharing" },
+      { "type": "image", "content": "https://drive.google.com/file/d/12A1TZ_LZFRWmw3H5-csH4JdoGmIB4XCR/view?usp=sharing" },
+      { "type": "image", "content": "https://drive.google.com/file/d/1Vh5-FAlSwNN59zSBReK5OXyrRerQ1SCO/view?usp=sharing" }
+    ]
+  },
+  {
+    "category": "Közs területt",
+    "questions": [
+      {
+        "type": "text",
+        "content": "Az alábbi hat-hat közterület-jelleg közül melyik az a kettő, amelyik nem létezik Magyarországon?",
+        "list": ["mellékút", "elágazás", "udvar", "körtér", "lépcső", "puszta"]
+      },
+      {
+        "type": "text",
+        "content": "Az alábbi hat-hat közterület-jelleg közül melyik az a kettő, amelyik nem létezik Magyarországon?",
+        "list": ["házsor", "gyársor", "határsor", "lépcsősor", "villasor", "kertsor"]
+      },
+      {
+        "type": "text",
+        "content": "Az alábbi hat-hat közterület-jelleg közül melyik az a kettő, amelyik nem létezik Magyarországon?",
+        "list": ["barlang", "csapás", "vár", "zug", "sikátor", "part"]
+      },
+      {
+        "type": "text",
+        "content": "Az alábbi hat-hat közterület-jelleg közül melyik az a kettő, amelyik nem létezik Magyarországon?",
+        "list": ["körforgalom", "utcza", "szektor", "tető", "üdülőpart", "dűlő"]
+      },
+      {
+        "type": "text",
+        "content": "Az alábbi hat-hat közterület-jelleg közül melyik az a kettő, amelyik nem létezik Magyarországon?",
+        "list": ["lagúna", "járda", "tere", "negyed", "liget", "major"]
+      }
+    ]
+  },
+  {
+    "category": "Mutsarötsöge",
+    "questions": [
+      {
+        "type": "text",
+        "content": "Melyik település van az alábbiak közül Magyarország területén?",
+        "list": ["Kisjakabfalva", "Mákfalva", "Tiszakarácsonyfalva", "Küküllőkeményfalva"]
+      },
+      {
+        "type": "text",
+        "content": "Melyik település van az alábbiak közül Magyarország területén?",
+        "list": ["Monyorókerék", "Fugyivásárhely", "Kakáktelep", "Egyházasdengeleg"]
+      },
+      {
+        "type": "text",
+        "content": "Melyik település van az alábbiak közül Magyarország területén?",
+        "list": ["Chernelházadamonya", "Magyarkapus", "Bojt", "Göcs"]
+      },
+      {
+        "type": "text",
+        "content": "Melyik település van az alábbiak közül Európa területén?",
+        "list": ["Bré", "Ribi", "Pina", "Tanga"]
+      },
+      {
+        "type": "text",
+        "content": "Melyik településnek van az alábbiak közül magyar vonatkozása?",
+        "list": ["Borod", "Söre", "Rum"]
+      }
+    ]
+  },
+  {
+    "category": "Nemmkelidearabzám",
+    "questions": [
+      {
+        "type": "text",
+        "content": "Hány karakterből áll a leghosszabb európai település neve?"
+      },
+      {
+        "type": "text",
+        "content": "Mennyi idő végiggyalogolni a Földön a két legtávolabbi pont közt megtehető legrövidebb utat a Google Maps szerint?"
+      },
+      {
+        "type": "text",
+        "content": "Hány olyan tó van, ami egy olyan szigeten van, ami egy olyan tavon van, ami egy olyan szigeten van, ami egy tavon van?"
+      },
+      {
+        "type": "text",
+        "content": "Hány nyelvet beszélnek abban az országban, ahol a világon a legtöbbet beszélik?"
+      },
+      {
+        "type": "text",
+        "content": "Hány szóból áll Bangkok neve?"
+      }
+    ]
+  }
+]
