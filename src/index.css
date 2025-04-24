@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+@theme {
+  --font-display: "Lobster", "sans-serif";
+}
+
 html,
 body {
   height: 100%;

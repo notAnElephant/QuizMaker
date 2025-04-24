@@ -15,7 +15,7 @@ export type Settings = {
 
 const initialData: Category[] = rawData.map((cat) => ({
     category: cat.category,
-    questions: cat.questions.map((q: any) => new Question(q.type, q.content, q.isUsed, q.list))
+    questions: cat.questions.map((q: any) => new Question(q.type, q.content, q.source, q.isUsed, q.list))
 }));
 
 const defaultSettings: Settings = {
