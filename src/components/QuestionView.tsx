@@ -1,6 +1,7 @@
 import {useNavigate, useParams} from 'react-router-dom';
 import {useQuiz} from '../context/QuizContext';
 import {FaArrowLeft} from 'react-icons/fa';
+import TeamBar from "./TeamBar.tsx";
 
 export default function QuestionView() {
     const {catIndex, qIndex} = useParams();
@@ -16,7 +17,7 @@ export default function QuestionView() {
             <div className="flex-1 flex items-center justify-center w-full">
                 <div className="max-w-3xl w-full bg-yellow-100 bg-opacity-90 p-8 rounded-xl shadow text-center">
                     <h1 className="text-3xl font-bold mb-6 font-display">
-                        {categories[+catIndex! - 1].category} {+qIndex!}.
+                        {categories[+catIndex! - 1].category} {question.points}
                     </h1>
 
                     {question.type === 'text' && (
@@ -62,6 +63,7 @@ export default function QuestionView() {
             >
                 <FaArrowLeft size={20} />
             </button>
+            <TeamBar mode={'question'} questionPoints={question.points}/>
         </div>
     );
 }

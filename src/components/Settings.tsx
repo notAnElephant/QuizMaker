@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useQuiz } from '../context/QuizContext';
+import {FaArrowLeft} from "react-icons/fa";
 
 export default function Settings() {
     const navigate = useNavigate();
@@ -53,9 +54,10 @@ export default function Settings() {
 
             <button
                 onClick={() => navigate('/')}
-                className="px-6 py-2 bg-gray-800 text-white rounded"
+                className="absolute bottom-4 left-4 bg-gray-800 text-white p-3 rounded-full shadow-lg hover:bg-gray-700"
+                aria-label="Back"
             >
-                Vissza a játékhoz
+                <FaArrowLeft size={20} />
             </button>
         </div>
     );

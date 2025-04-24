@@ -5,27 +5,32 @@
       {
         "type": "image",
         "content": "Melyik település látható a képen?",
-        "source": "/assets/ai1.jpg"
+        "source": "/assets/ai1.jpg",
+        "points": 1000
       },
       {
         "type": "image",
         "content": "Melyik település látható a képen?",
-        "source": "/assets/ai2.jpg"
+        "source": "/assets/ai2.jpg",
+        "points": 2000
       },
       {
         "type": "image",
         "content": "Melyik település látható a képen?",
-        "source": "/assets/ai3.jpg"
+        "source": "/assets/ai3.jpg",
+        "points": 3000
       },
       {
         "type": "image",
         "content": "Melyik település látható a képen?",
-        "source": "/assets/ai4.jpg"
+        "source": "/assets/ai4.jpg",
+        "points": 4000
       },
       {
         "type": "image",
         "content": "Melyik település látható a képen?",
-        "source": "/assets/ai5.jpg"
+        "source": "/assets/ai5.jpg",
+        "points": 5000
       }
     ]
   },
@@ -42,7 +47,8 @@
           "körtér",
           "lépcső",
           "puszta"
-        ]
+        ],
+        "points": 1000
       },
       {
         "type": "text",
@@ -54,7 +60,8 @@
           "lépcsősor",
           "villasor",
           "kertsor"
-        ]
+        ],
+        "points": 2000
       },
       {
         "type": "text",
@@ -66,7 +73,8 @@
           "zug",
           "sikátor",
           "part"
-        ]
+        ],
+        "points": 3000
       },
       {
         "type": "text",
@@ -78,7 +86,8 @@
           "tető",
           "üdülőpart",
           "dűlő"
-        ]
+        ],
+        "points": 4000
       },
       {
         "type": "text",
@@ -90,7 +99,8 @@
           "negyed",
           "liget",
           "major"
-        ]
+        ],
+        "points": 5000
       }
     ]
   },
@@ -107,7 +117,8 @@
           "körtér",
           "lépcső",
           "puszta"
-        ]
+        ],
+        "points": 1000
       },
       {
         "type": "text",
@@ -119,7 +130,8 @@
           "lépcsősor",
           "villasor",
           "kertsor"
-        ]
+        ],
+        "points": 2000
       },
       {
         "type": "text",
@@ -131,7 +143,8 @@
           "zug",
           "sikátor",
           "part"
-        ]
+        ],
+        "points": 3000
       },
       {
         "type": "text",
@@ -143,7 +156,8 @@
           "tető",
           "üdülőpart",
           "dűlő"
-        ]
+        ],
+        "points": 4000
       },
       {
         "type": "text",
@@ -155,7 +169,8 @@
           "negyed",
           "liget",
           "major"
-        ]
+        ],
+        "points": 5000
       }
     ]
   },
@@ -170,7 +185,8 @@
           "Mákfalva",
           "Tiszakarácsonyfalva",
           "Küküllőkeményfalva"
-        ]
+        ],
+        "points": 1000
       },
       {
         "type": "text",
@@ -180,7 +196,8 @@
           "Fugyivásárhely",
           "Kakáktelep",
           "Egyházasdengeleg"
-        ]
+        ],
+        "points": 2000
       },
       {
         "type": "text",
@@ -190,7 +207,8 @@
           "Magyarkapus",
           "Bojt",
           "Göcs"
-        ]
+        ],
+        "points": 3000
       },
       {
         "type": "text",
@@ -200,7 +218,8 @@
           "Ribi",
           "Pina",
           "Tanga"
-        ]
+        ],
+        "points": 4000
       },
       {
         "type": "text",
@@ -209,7 +228,8 @@
           "Borod",
           "Söre",
           "Rum"
-        ]
+        ],
+        "points": 5000
       }
     ]
   },
@@ -218,23 +238,28 @@
     "questions": [
       {
         "type": "text",
-        "content": "Hány karakterből áll a leghosszabb európai település neve?"
+        "content": "Hány karakterből áll a leghosszabb európai település neve?",
+        "points": 1000
       },
       {
         "type": "text",
-        "content": "Mennyi idő végiggyalogolni a Földön a két legtávolabbi pont közt megtehető legrövidebb utat a Google Maps szerint?"
+        "content": "Mennyi idő végiggyalogolni a Földön a két legtávolabbi pont közt megtehető legrövidebb utat a Google Maps szerint?",
+        "points": 2000
       },
       {
         "type": "text",
-        "content": "Hány olyan tó van, ami egy olyan szigeten van, ami egy olyan tavon van, ami egy olyan szigeten van, ami egy tavon van?"
+        "content": "Hány olyan tó van, ami egy olyan szigeten van, ami egy olyan tavon van, ami egy olyan szigeten van, ami egy tavon van?",
+        "points": 3000
       },
       {
         "type": "text",
-        "content": "Hány nyelvet beszélnek abban az országban, ahol a világon a legtöbbet beszélik?"
+        "content": "Hány nyelvet beszélnek abban az országban, ahol a világon a legtöbbet beszélik?",
+        "points": 4000
       },
       {
         "type": "text",
-        "content": "Hány szóból áll Bangkok neve?"
+        "content": "Hány szóból áll Bangkok neve?",
+        "points": 5000
       }
     ]
   }

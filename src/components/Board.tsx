@@ -53,7 +53,7 @@ export function Board({data, onSelect, font}: Props) {
                                                         : 'bg-blue-500 hover:bg-blue-600'
                                             }`}
                                         >
-                                            {rowIndex + 1}
+                                            {q.points}
                                         </button>
                                     );
                                 })}

@@ -2,6 +2,13 @@ import { createContext, useContext, useState, ReactNode } from 'react';
 import rawData from '../data/questions.json';
 import { Question } from '../models/Question';
 
+export type Team = {
+    name: string;
+    members: string[];
+    color: string;
+    points: number;
+};
+
 export type Category = {
     category: string;
     questions: Question[];
@@ -15,7 +22,7 @@ export type Settings = {
 
 const initialData: Category[] = rawData.map((cat) => ({
     category: cat.category,
-    questions: cat.questions.map((q: any) => new Question(q.type, q.content, q.source, q.isUsed, q.list))
+    questions: cat.questions.map((q: any) => new Question(q.type, q.content, q.source, q.points, q.isUsed, q.list))
 }));
 
 const defaultSettings: Settings = {
@@ -29,6 +36,8 @@ const QuizContext = createContext<{
     markUsed: (catIndex: number, qIndex: number, value: boolean) => void;
     settings: Settings;
     setSettings: React.Dispatch<React.SetStateAction<Settings>>;
+    teams: Team[];
+    setTeams: React.Dispatch<React.SetStateAction<Team[]>>;
 } | null>(null);
 
 export const useQuiz = () => {
@@ -40,6 +49,22 @@ export const useQuiz = () => {
 export function QuizProvider({ children }: { children: ReactNode }) {
     const [categories, setCategories] = useState(initialData);
     const [settings, setSettings] = useState<Settings>(defaultSettings);
+    const [teams, setTeams] = useState<Team[]>(
+        [
+            {
+                name: 'Team 1',
+                members: ['Member 1', 'Member 2'],
+                color: '#3498db',
+                points: 0
+            },
+            {
+                name: 'Team 2',
+                members: ['Member 3', 'Member 4'],
+                color: '#e74c3c',
+                points: 0
+            }
+        ]
+    );
 
     const markUsed = (catIndex: number, qIndex: number, value: boolean) => {
         const copy = [...categories];
@@ -48,7 +73,7 @@ export function QuizProvider({ children }: { children: ReactNode }) {
     };
 
     return (
-        <QuizContext.Provider value={{ categories, markUsed, settings, setSettings }}>
+        <QuizContext.Provider value={{ categories, markUsed, settings, setSettings, teams, setTeams }}>
             {children}
         </QuizContext.Provider>
     );

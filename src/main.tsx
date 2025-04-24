@@ -6,6 +6,7 @@ import './index.css';
 import QuestionView from './components/QuestionView';
 import {QuizProvider} from './context/QuizContext';
 import Settings from "./components/Settings.tsx";
+import Teams from "./components/Teams.tsx";
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
     <React.StrictMode>
@@ -15,6 +16,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
                     <Route path="/" element={<App/>}/>
                     <Route path="/question/:catIndex/:qIndex" element={<QuestionView/>}/>
                     <Route path="/settings" element={<Settings/>}/>
+                    <Route path="/teams" element={<Teams/>}/>
                 </Routes>
             </QuizProvider>
         </BrowserRouter>
