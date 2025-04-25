@@ -45,7 +45,7 @@ export function Board({data, onSelect, font}: Props) {
                                             }}
                                             onAuxClick={() => onSelect(colIndex, rowIndex, false)}
                                             disabled={isDisabled}
-                                            className={`p-4 rounded text-white w-28 ${
+                                            className={`p-4 rounded text-white w-full ${
                                                 q.isUsed
                                                     ? 'bg-green-500'
                                                     : isDisabled

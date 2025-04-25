@@ -10,9 +10,9 @@ function App() {
     const navigate = useNavigate();
 
     return (
-        <div className="min-h-screen flex items-center flex-col justify-center text-black">
+        <div className="min-h-screen flex items-center flex-col justify-between text-black">
             <div className="w-full h-full max-w-screen-lg px-4 flex flex-col items-center text-center">
-                <h1 className="text-6xl font-bold mb-8 font-display">Vágó Pesta</h1>
+                <h1 className="text-6xl font-bold mb-8 mt-16 font-display">Vágó Pesta</h1>
                 <Board data={categories} font="font-display"
                        onSelect={(catIndex, qIndex, used) => markUsed(catIndex, qIndex, used)}/>
             </div>
