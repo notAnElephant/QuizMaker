@@ -40,7 +40,6 @@ export default function TeamBar({ mode, questionPoints = 0 }: TeamBarProps) {
 
     return (
         <div className="w-full p-4 flex gap-4 justify-center flex-wrap">
-            <ConfettiExplosion />
             {teams.map((team, i) => (
                 <div
                     key={i}
