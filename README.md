@@ -14,3 +14,7 @@ TODO
 - Vite
 - Firebase auth
 - Neon
+
+## Development
+
+Run `npm run server` to start the API backend. In another terminal run `npm run dev` to start the Vite dev server.

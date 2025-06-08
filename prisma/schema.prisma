@@ -45,6 +45,7 @@ model quizzes {
   quiz_id         String       @id @db.Uuid
   title           String
   description     String?
+  content         Json?
   owner_id        String?      @db.Uuid
   shared_user_ids String[]     @db.Uuid
   created_at      DateTime     @default(now()) @db.Timestamp(6)
