@@ -10,8 +10,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@prisma/client": "^6.9.0",
     "@tailwindcss/vite": "^4.1.4",
     "clsx": "^2.1.1",
+    "firebase": "^11.6.1",
+    "prisma": "^6.9.0",
     "react": "^19.0.0",
     "react-confetti-explosion": "^2.1.2",
     "react-dom": "^19.0.0",

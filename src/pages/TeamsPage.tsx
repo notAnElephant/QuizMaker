@@ -1,9 +1,9 @@
 import {useNavigate} from 'react-router-dom';
-import {useQuiz} from '../context/QuizContext';
+import {useQuiz} from '../context/QuizContext.tsx';
 import {useRef, useState} from 'react';
 import {FaArrowLeft, FaPen, FaTrash} from "react-icons/fa";
 
-export default function Teams() {
+export default function TeamsPage() {
     const navigate = useNavigate();
     const {teams, setTeams} = useQuiz();
 

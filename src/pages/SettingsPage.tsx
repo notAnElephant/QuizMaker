@@ -1,8 +1,8 @@
 import { useNavigate } from 'react-router-dom';
-import { useQuiz } from '../context/QuizContext';
+import { useQuiz } from '../context/QuizContext.tsx';
 import {FaArrowLeft} from "react-icons/fa";
 
-export default function Settings() {
+export default function SettingsPage() {
     const navigate = useNavigate();
     const { settings, setSettings } = useQuiz();
 

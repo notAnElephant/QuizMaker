@@ -1,9 +1,9 @@
 import {useNavigate, useParams} from 'react-router-dom';
-import {useQuiz} from '../context/QuizContext';
+import {useQuiz} from '../context/QuizContext.tsx';
 import {FaArrowLeft} from 'react-icons/fa';
-import TeamBar from "./TeamBar.tsx";
+import TeamBar from "../components/TeamBar.tsx";
 
-export default function QuestionView() {
+export default function QuestionPage() {
     const {catIndex, qIndex} = useParams();
     const {categories} = useQuiz();
     const navigate = useNavigate();

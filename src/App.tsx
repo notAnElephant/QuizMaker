@@ -2,7 +2,7 @@ import './index.css';
 import {Board} from './components/Board';
 import {useQuiz} from './context/QuizContext';
 import {useNavigate} from 'react-router-dom';
-import {FaCog, FaUsers} from 'react-icons/fa';
+import {FaCog, FaUsers, FaUser} from 'react-icons/fa';
 import TeamBar from "./components/TeamBar.tsx";
 
 function App() {
@@ -18,16 +18,23 @@ function App() {
             </div>
             <div className="absolute bottom-4 left-4 flex-1 flex items-start gap-2 flex-col">
                 <button
+                    onClick={() => navigate('/account')}
+                    className="bg-gray-800 text-white p-3 rounded-full shadow-lg hover:bg-gray-700"
+                    aria-label="Account"
+                >
+                    <FaUser size={20}/>
+                </button>
+                <button
                     onClick={() => navigate('/teams')}
                     className="bg-gray-800 text-white p-3 rounded-full shadow-lg hover:bg-gray-700"
-                    aria-label="Teams"
+                    aria-label="TeamsPage"
                 >
                     <FaUsers size={20}/>
                 </button>
                 <button
                     onClick={() => navigate('/settings')}
                     className="bg-gray-800 text-white p-3 rounded-full shadow-lg hover:bg-gray-700"
-                    aria-label="Settings"
+                    aria-label="SettingsPage"
                 >
                     <FaCog size={20}/>
                 </button>

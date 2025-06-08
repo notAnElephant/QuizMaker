@@ -3,22 +3,29 @@ import ReactDOM from 'react-dom/client';
 import {BrowserRouter, Route, Routes} from 'react-router-dom';
 import App from './App';
 import './index.css';
-import QuestionView from './components/QuestionView';
+import QuestionPage from './pages/QuestionPage.tsx';
 import {QuizProvider} from './context/QuizContext';
-import Settings from "./components/Settings.tsx";
-import Teams from "./components/Teams.tsx";
+import SettingsPage from "./pages/SettingsPage.tsx";
+import TeamsPage from "./pages/TeamsPage.tsx";
+import {AuthGate} from "./auth/AuthGate.tsx";
+import NotFoundPage from './pages/NotFoundPage.tsx';
+import AccountPage from "./pages/AccountPage.tsx";
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
     <React.StrictMode>
-        <BrowserRouter>
-            <QuizProvider>
-                <Routes>
-                    <Route path="/" element={<App/>}/>
-                    <Route path="/question/:catIndex/:qIndex" element={<QuestionView/>}/>
-                    <Route path="/settings" element={<Settings/>}/>
-                    <Route path="/teams" element={<Teams/>}/>
-                </Routes>
-            </QuizProvider>
-        </BrowserRouter>
+        <AuthGate>
+            <BrowserRouter>
+                <QuizProvider>
+                    <Routes>
+                        <Route path="/" element={<App />} />
+                        <Route path="/question/:catIndex/:qIndex" element={<QuestionPage />} />
+                        <Route path="/settings" element={<SettingsPage />} />
+                        <Route path="/teams" element={<TeamsPage />} />
+                        <Route path="/account" element={<AccountPage />} />
+                        <Route path="*" element={<NotFoundPage />} />
+                    </Routes>
+                </QuizProvider>
+            </BrowserRouter>
+        </AuthGate>
     </React.StrictMode>
 );

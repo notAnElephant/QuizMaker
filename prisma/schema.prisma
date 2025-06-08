@@ -1,0 +1,64 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model answers {
+  answer_id   String      @id @db.Uuid
+  play_id     String?     @db.Uuid
+  question_id String?     @db.Uuid
+  answer_text String
+  quiz_plays  quiz_plays? @relation(fields: [play_id], references: [play_id], onDelete: Cascade, onUpdate: NoAction)
+  questions   questions?  @relation(fields: [question_id], references: [question_id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model questions {
+  question_id    String    @id @db.Uuid
+  quiz_id        String?   @db.Uuid
+  question_text  String
+  question_type  String
+  answer_options String[]
+  correct_answer String?
+  points         Int?      @default(1000)
+  answers        answers[]
+  quizzes        quizzes?  @relation(fields: [quiz_id], references: [quiz_id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model quiz_plays {
+  play_id    String    @id @db.Uuid
+  quiz_id    String?   @db.Uuid
+  user_id    String?   @db.Uuid
+  play_time  DateTime  @default(now()) @db.Timestamp(6)
+  score      Int?      @default(0)
+  team_name  String?
+  team_score Int?
+  answers    answers[]
+  quizzes    quizzes?  @relation(fields: [quiz_id], references: [quiz_id], onDelete: Cascade, onUpdate: NoAction)
+  users      users?    @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model quizzes {
+  quiz_id         String       @id @db.Uuid
+  title           String
+  description     String?
+  owner_id        String?      @db.Uuid
+  shared_user_ids String[]     @db.Uuid
+  created_at      DateTime     @default(now()) @db.Timestamp(6)
+  updated_at      DateTime     @default(now()) @db.Timestamp(6)
+  questions       questions[]
+  quiz_plays      quiz_plays[]
+  users           users?       @relation(fields: [owner_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model users {
+  user_id      String       @id @db.Uuid
+  created_at   DateTime     @default(now()) @db.Timestamp(6)
+  display_name String?
+  email        String?
+  quiz_plays   quiz_plays[]
+  quizzes      quizzes[]
+}
