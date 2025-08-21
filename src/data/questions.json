@@ -111,9 +111,9 @@
         "type": "text",
         "content": "Melyik település van az alábbiak közül Magyarország területén?",
         "list": [
-          "Kisjakabfalva",
           "Mákfalva",
           "Tiszakarácsonyfalva",
+          "Kisjakabfalva",
           "Küküllőkeményfalva"
         ],
         "points": 1000
@@ -144,8 +144,8 @@
         "type": "text",
         "content": "Melyik település van az alábbiak közül Európa területén?",
         "list": [
-          "Bré",
           "Ribi",
+          "Bré",
           "Pina",
           "Tanga"
         ],
@@ -155,9 +155,9 @@
         "type": "text",
         "content": "Melyik településnek van az alábbiak közül magyar vonatkozása?",
         "list": [
-          "Borod",
+          "Rum",
           "Söre",
-          "Rum"
+          "Borod"
         ],
         "points": 5000
       }
