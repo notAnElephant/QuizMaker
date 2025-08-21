@@ -41,12 +41,12 @@
         "type": "text",
         "content": "Az alábbi hat közterület-jelleg közül melyik az a kettő, amelyik nem létezik Magyarországon?",
         "list": [
-          "mellékút",
-          "elágazás",
-          "udvar",
-          "körtér",
           "lépcső",
-          "puszta"
+          "udvar",
+          "puszta",
+          "elágazás",
+          "körtér",
+          "mellékút"
         ],
         "points": 1000
       },
@@ -54,11 +54,11 @@
         "type": "text",
         "content": "Az alábbi hat közterület-jelleg közül melyik az a kettő, amelyik nem létezik Magyarországon?",
         "list": [
-          "házsor",
-          "gyársor",
-          "határsor",
           "lépcsősor",
+          "gyársor",
+          "házsor",
           "villasor",
+          "határsor",
           "kertsor"
         ],
         "points": 2000
@@ -67,11 +67,11 @@
         "type": "text",
         "content": "Az alábbi hat közterület-jelleg közül melyik az a kettő, amelyik nem létezik Magyarországon?",
         "list": [
-          "barlang",
-          "csapás",
-          "vár",
-          "zug",
           "sikátor",
+          "zug",
+          "barlang",
+          "vár",
+          "csapás",
           "part"
         ],
         "points": 3000
@@ -80,12 +80,12 @@
         "type": "text",
         "content": "Az alábbi hat közterület-jelleg közül melyik az a kettő, amelyik nem létezik Magyarországon?",
         "list": [
-          "körforgalom",
+          "tető",
+          "dűlő",
           "utcza",
           "szektor",
-          "tető",
           "üdülőpart",
-          "dűlő"
+          "körforgalom"
         ],
         "points": 4000
       },
@@ -93,82 +93,12 @@
         "type": "text",
         "content": "Az alábbi hat közterület-jelleg közül melyik az a kettő, amelyik nem létezik Magyarországon?",
         "list": [
-          "lagúna",
-          "járda",
+          "major",
           "tere",
-          "negyed",
-          "liget",
-          "major"
-        ],
-        "points": 5000
-      }
-    ]
-  },
-  {
-    "category": "Közs területt",
-    "questions": [
-      {
-        "type": "text",
-        "content": "Az alábbi hat közterület-jelleg közül melyik az a kettő, amelyik nem létezik Magyarországon?",
-        "list": [
-          "mellékút",
-          "elágazás",
-          "udvar",
-          "körtér",
-          "lépcső",
-          "puszta"
-        ],
-        "points": 1000
-      },
-      {
-        "type": "text",
-        "content": "Az alábbi hat közterület-jelleg közül melyik az a kettő, amelyik nem létezik Magyarországon?",
-        "list": [
-          "házsor",
-          "gyársor",
-          "határsor",
-          "lépcsősor",
-          "villasor",
-          "kertsor"
-        ],
-        "points": 2000
-      },
-      {
-        "type": "text",
-        "content": "Az alábbi hat közterület-jelleg közül melyik az a kettő, amelyik nem létezik Magyarországon?",
-        "list": [
-          "barlang",
-          "csapás",
-          "vár",
-          "zug",
-          "sikátor",
-          "part"
-        ],
-        "points": 3000
-      },
-      {
-        "type": "text",
-        "content": "Az alábbi hat közterület-jelleg közül melyik az a kettő, amelyik nem létezik Magyarországon?",
-        "list": [
-          "körforgalom",
-          "utcza",
-          "szektor",
-          "tető",
-          "üdülőpart",
-          "dűlő"
-        ],
-        "points": 4000
-      },
-      {
-        "type": "text",
-        "content": "Az alábbi hat közterület-jelleg közül melyik az a kettő, amelyik nem létezik Magyarországon?",
-        "list": [
-          "lagúna",
           "járda",
-          "tere",
-          "negyed",
+          "lagúna",
           "liget",
-          "major"
+          "negyed"
         ],
         "points": 5000
       }
