@@ -10,8 +10,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@apollo/client": "^3.11.8",
     "@tailwindcss/vite": "^4.1.4",
     "clsx": "^2.1.1",
+    "graphql": "^16.9.0",
     "react": "^19.0.0",
     "react-confetti-explosion": "^2.1.2",
     "react-dom": "^19.0.0",
@@ -21,6 +23,8 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.22.0",
+    "@graphql-codegen/cli": "^5.0.3",
+    "@graphql-codegen/client-preset": "^4.4.0",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
     "@vitejs/plugin-react": "^4.3.4",

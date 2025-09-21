@@ -1,0 +1,187 @@
+---
+kind: ObjectType
+version: v1
+definition:
+  name: Questions
+  fields:
+    - name: answerOptions
+      type: "[String_1]"
+    - name: correctAnswer
+      type: String_1
+    - name: points
+      type: Int32
+    - name: questionId
+      type: Uuid!
+    - name: questionText
+      type: String_1!
+    - name: questionType
+      type: String_1!
+    - name: quizId
+      type: Uuid
+  graphql:
+    typeName: Questions
+    inputTypeName: QuestionsInput
+  dataConnectorTypeMapping:
+    - dataConnectorName: my_connector
+      dataConnectorObjectType: questions
+      fieldMapping:
+        answerOptions:
+          column:
+            name: answer_options
+        correctAnswer:
+          column:
+            name: correct_answer
+        points:
+          column:
+            name: points
+        questionId:
+          column:
+            name: question_id
+        questionText:
+          column:
+            name: question_text
+        questionType:
+          column:
+            name: question_type
+        quizId:
+          column:
+            name: quiz_id
+
+---
+kind: TypePermissions
+version: v1
+definition:
+  typeName: Questions
+  permissions:
+    - role: admin
+      output:
+        allowedFields:
+          - answerOptions
+          - correctAnswer
+          - points
+          - questionId
+          - questionText
+          - questionType
+          - quizId
+
+---
+kind: BooleanExpressionType
+version: v1
+definition:
+  name: QuestionsBoolExp
+  operand:
+    object:
+      type: Questions
+      comparableFields:
+        - fieldName: correctAnswer
+          booleanExpressionType: TextBoolExp
+        - fieldName: points
+          booleanExpressionType: Int4BoolExp
+        - fieldName: questionId
+          booleanExpressionType: UuidBoolExp
+        - fieldName: questionText
+          booleanExpressionType: TextBoolExp
+        - fieldName: questionType
+          booleanExpressionType: TextBoolExp
+        - fieldName: quizId
+          booleanExpressionType: UuidBoolExp
+      comparableRelationships: []
+  logicalOperators:
+    enable: true
+  isNull:
+    enable: true
+  graphql:
+    typeName: QuestionsBoolExp
+
+---
+kind: AggregateExpression
+version: v1
+definition:
+  name: QuestionsAggExp
+  operand:
+    object:
+      aggregatedType: Questions
+      aggregatableFields:
+        - fieldName: correctAnswer
+          aggregateExpression: TextAggExp
+        - fieldName: points
+          aggregateExpression: Int4AggExp
+        - fieldName: questionId
+          aggregateExpression: UuidAggExp
+        - fieldName: questionText
+          aggregateExpression: TextAggExp
+        - fieldName: questionType
+          aggregateExpression: TextAggExp
+        - fieldName: quizId
+          aggregateExpression: UuidAggExp
+  count:
+    enable: true
+    returnType: Int64
+  graphql:
+    selectTypeName: QuestionsAggExp
+
+---
+kind: OrderByExpression
+version: v1
+definition:
+  name: QuestionsOrderByExp
+  operand:
+    object:
+      orderedType: Questions
+      orderableFields:
+        - fieldName: correctAnswer
+          orderByExpression: String1OrderByExp
+        - fieldName: points
+          orderByExpression: Int32OrderByExp
+        - fieldName: questionId
+          orderByExpression: UuidOrderByExp
+        - fieldName: questionText
+          orderByExpression: String1OrderByExp
+        - fieldName: questionType
+          orderByExpression: String1OrderByExp
+        - fieldName: quizId
+          orderByExpression: UuidOrderByExp
+      orderableRelationships: []
+  graphql:
+    expressionTypeName: QuestionsOrderByExp
+
+---
+kind: Model
+version: v2
+definition:
+  name: Questions
+  objectType: Questions
+  source:
+    dataConnectorName: my_connector
+    collection: questions
+  filterExpressionType: QuestionsBoolExp
+  aggregateExpression: QuestionsAggExp
+  orderByExpression: QuestionsOrderByExp
+  graphql:
+    selectMany:
+      queryRootField: questions
+      subscription:
+        rootField: questions
+    selectUniques:
+      - queryRootField: questionsByQuestionId
+        uniqueIdentifier:
+          - questionId
+        subscription:
+          rootField: questionsByQuestionId
+    filterInputTypeName: QuestionsFilterInput
+    aggregate:
+      queryRootField: questionsAggregate
+      subscription:
+        rootField: questionsAggregate
+
+---
+kind: ModelPermissions
+version: v1
+definition:
+  modelName: Questions
+  permissions:
+    - role: admin
+      select:
+        filter: null
+        allowSubscriptions: true
+

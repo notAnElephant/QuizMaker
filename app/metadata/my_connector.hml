@@ -1,0 +1,1960 @@
+kind: DataConnectorLink
+version: v1
+definition:
+  name: my_connector
+  url:
+    readWriteUrls:
+      read:
+        valueFromEnv: APP_MY_CONNECTOR_READ_URL
+      write:
+        valueFromEnv: APP_MY_CONNECTOR_WRITE_URL
+  headers:
+    Authorization:
+      valueFromEnv: APP_MY_CONNECTOR_AUTHORIZATION_HEADER
+  schema:
+    version: v0.2
+    schema:
+      capabilities:
+        query:
+          aggregates:
+            count_scalar_type: int8
+      collections:
+        - arguments: {}
+          name: answers
+          type: answers
+          uniqueness_constraints:
+            answers_pkey:
+              unique_columns:
+                - answer_id
+        - arguments: {}
+          name: questions
+          type: questions
+          uniqueness_constraints:
+            questions_pkey:
+              unique_columns:
+                - question_id
+        - arguments: {}
+          name: quiz_plays
+          type: quiz_plays
+          uniqueness_constraints:
+            quiz_plays_pkey:
+              unique_columns:
+                - play_id
+        - arguments: {}
+          name: quizzes
+          type: quizzes
+          uniqueness_constraints:
+            quizzes_pkey:
+              unique_columns:
+                - quiz_id
+        - arguments: {}
+          name: users
+          type: users
+          uniqueness_constraints:
+            users_pkey:
+              unique_columns:
+                - user_id
+      functions: []
+      object_types:
+        answers:
+          fields:
+            answer_id:
+              type:
+                name: uuid
+                type: named
+            answer_text:
+              type:
+                name: text
+                type: named
+            play_id:
+              type:
+                type: nullable
+                underlying_type:
+                  name: uuid
+                  type: named
+            question_id:
+              type:
+                type: nullable
+                underlying_type:
+                  name: uuid
+                  type: named
+          foreign_keys:
+            answers_play_id_fkey:
+              column_mapping:
+                play_id:
+                  - play_id
+              foreign_collection: quiz_plays
+            answers_question_id_fkey:
+              column_mapping:
+                question_id:
+                  - question_id
+              foreign_collection: questions
+        delete_answers_by_answer_id_response:
+          description: Responses from the 'delete_answers_by_answer_id' procedure
+          fields:
+            affected_rows:
+              description: The number of rows affected by the mutation
+              type:
+                name: int4
+                type: named
+            returning:
+              description: Data from rows affected by the mutation
+              type:
+                element_type:
+                  name: answers
+                  type: named
+                type: array
+          foreign_keys: {}
+        delete_questions_by_question_id_response:
+          description: Responses from the 'delete_questions_by_question_id' procedure
+          fields:
+            affected_rows:
+              description: The number of rows affected by the mutation
+              type:
+                name: int4
+                type: named
+            returning:
+              description: Data from rows affected by the mutation
+              type:
+                element_type:
+                  name: questions
+                  type: named
+                type: array
+          foreign_keys: {}
+        delete_quiz_plays_by_play_id_response:
+          description: Responses from the 'delete_quiz_plays_by_play_id' procedure
+          fields:
+            affected_rows:
+              description: The number of rows affected by the mutation
+              type:
+                name: int4
+                type: named
+            returning:
+              description: Data from rows affected by the mutation
+              type:
+                element_type:
+                  name: quiz_plays
+                  type: named
+                type: array
+          foreign_keys: {}
+        delete_quizzes_by_quiz_id_response:
+          description: Responses from the 'delete_quizzes_by_quiz_id' procedure
+          fields:
+            affected_rows:
+              description: The number of rows affected by the mutation
+              type:
+                name: int4
+                type: named
+            returning:
+              description: Data from rows affected by the mutation
+              type:
+                element_type:
+                  name: quizzes
+                  type: named
+                type: array
+          foreign_keys: {}
+        delete_users_by_user_id_response:
+          description: Responses from the 'delete_users_by_user_id' procedure
+          fields:
+            affected_rows:
+              description: The number of rows affected by the mutation
+              type:
+                name: int4
+                type: named
+            returning:
+              description: Data from rows affected by the mutation
+              type:
+                element_type:
+                  name: users
+                  type: named
+                type: array
+          foreign_keys: {}
+        insert_answers_object:
+          fields:
+            answer_id:
+              type:
+                name: uuid
+                type: named
+            answer_text:
+              type:
+                name: text
+                type: named
+            play_id:
+              type:
+                type: nullable
+                underlying_type:
+                  name: uuid
+                  type: named
+            question_id:
+              type:
+                type: nullable
+                underlying_type:
+                  name: uuid
+                  type: named
+          foreign_keys: {}
+        insert_answers_response:
+          description: Responses from the 'insert_answers' procedure
+          fields:
+            affected_rows:
+              description: The number of rows affected by the mutation
+              type:
+                name: int4
+                type: named
+            returning:
+              description: Data from rows affected by the mutation
+              type:
+                element_type:
+                  name: answers
+                  type: named
+                type: array
+          foreign_keys: {}
+        insert_questions_object:
+          fields:
+            answer_options:
+              type:
+                type: nullable
+                underlying_type:
+                  element_type:
+                    type: nullable
+                    underlying_type:
+                      name: text
+                      type: named
+                  type: array
+            correct_answer:
+              type:
+                type: nullable
+                underlying_type:
+                  name: text
+                  type: named
+            points:
+              type:
+                type: nullable
+                underlying_type:
+                  name: int4
+                  type: named
+            question_id:
+              type:
+                name: uuid
+                type: named
+            question_text:
+              type:
+                name: text
+                type: named
+            question_type:
+              type:
+                name: text
+                type: named
+            quiz_id:
+              type:
+                type: nullable
+                underlying_type:
+                  name: uuid
+                  type: named
+          foreign_keys: {}
+        insert_questions_response:
+          description: Responses from the 'insert_questions' procedure
+          fields:
+            affected_rows:
+              description: The number of rows affected by the mutation
+              type:
+                name: int4
+                type: named
+            returning:
+              description: Data from rows affected by the mutation
+              type:
+                element_type:
+                  name: questions
+                  type: named
+                type: array
+          foreign_keys: {}
+        insert_quiz_plays_object:
+          fields:
+            play_id:
+              type:
+                name: uuid
+                type: named
+            play_time:
+              type:
+                type: nullable
+                underlying_type:
+                  name: timestamp
+                  type: named
+            quiz_id:
+              type:
+                type: nullable
+                underlying_type:
+                  name: uuid
+                  type: named
+            score:
+              type:
+                type: nullable
+                underlying_type:
+                  name: int4
+                  type: named
+            team_name:
+              type:
+                type: nullable
+                underlying_type:
+                  name: text
+                  type: named
+            team_score:
+              type:
+                type: nullable
+                underlying_type:
+                  name: int4
+                  type: named
+            user_id:
+              type:
+                type: nullable
+                underlying_type:
+                  name: uuid
+                  type: named
+          foreign_keys: {}
+        insert_quiz_plays_response:
+          description: Responses from the 'insert_quiz_plays' procedure
+          fields:
+            affected_rows:
+              description: The number of rows affected by the mutation
+              type:
+                name: int4
+                type: named
+            returning:
+              description: Data from rows affected by the mutation
+              type:
+                element_type:
+                  name: quiz_plays
+                  type: named
+                type: array
+          foreign_keys: {}
+        insert_quizzes_object:
+          fields:
+            created_at:
+              type:
+                type: nullable
+                underlying_type:
+                  name: timestamp
+                  type: named
+            description:
+              type:
+                type: nullable
+                underlying_type:
+                  name: text
+                  type: named
+            owner_id:
+              type:
+                type: nullable
+                underlying_type:
+                  name: uuid
+                  type: named
+            quiz_id:
+              type:
+                name: uuid
+                type: named
+            shared_user_ids:
+              type:
+                type: nullable
+                underlying_type:
+                  element_type:
+                    type: nullable
+                    underlying_type:
+                      name: uuid
+                      type: named
+                  type: array
+            title:
+              type:
+                name: text
+                type: named
+            updated_at:
+              type:
+                type: nullable
+                underlying_type:
+                  name: timestamp
+                  type: named
+          foreign_keys: {}
+        insert_quizzes_response:
+          description: Responses from the 'insert_quizzes' procedure
+          fields:
+            affected_rows:
+              description: The number of rows affected by the mutation
+              type:
+                name: int4
+                type: named
+            returning:
+              description: Data from rows affected by the mutation
+              type:
+                element_type:
+                  name: quizzes
+                  type: named
+                type: array
+          foreign_keys: {}
+        insert_users_object:
+          fields:
+            created_at:
+              type:
+                type: nullable
+                underlying_type:
+                  name: timestamp
+                  type: named
+            display_name:
+              type:
+                type: nullable
+                underlying_type:
+                  name: text
+                  type: named
+            email:
+              type:
+                type: nullable
+                underlying_type:
+                  name: text
+                  type: named
+            user_id:
+              type:
+                name: uuid
+                type: named
+          foreign_keys: {}
+        insert_users_response:
+          description: Responses from the 'insert_users' procedure
+          fields:
+            affected_rows:
+              description: The number of rows affected by the mutation
+              type:
+                name: int4
+                type: named
+            returning:
+              description: Data from rows affected by the mutation
+              type:
+                element_type:
+                  name: users
+                  type: named
+                type: array
+          foreign_keys: {}
+        questions:
+          fields:
+            answer_options:
+              type:
+                type: nullable
+                underlying_type:
+                  element_type:
+                    type: nullable
+                    underlying_type:
+                      name: text
+                      type: named
+                  type: array
+            correct_answer:
+              type:
+                type: nullable
+                underlying_type:
+                  name: text
+                  type: named
+            points:
+              type:
+                type: nullable
+                underlying_type:
+                  name: int4
+                  type: named
+            question_id:
+              type:
+                name: uuid
+                type: named
+            question_text:
+              type:
+                name: text
+                type: named
+            question_type:
+              type:
+                name: text
+                type: named
+            quiz_id:
+              type:
+                type: nullable
+                underlying_type:
+                  name: uuid
+                  type: named
+          foreign_keys:
+            questions_quiz_id_fkey:
+              column_mapping:
+                quiz_id:
+                  - quiz_id
+              foreign_collection: quizzes
+        quiz_plays:
+          fields:
+            play_id:
+              type:
+                name: uuid
+                type: named
+            play_time:
+              type:
+                name: timestamp
+                type: named
+            quiz_id:
+              type:
+                type: nullable
+                underlying_type:
+                  name: uuid
+                  type: named
+            score:
+              type:
+                type: nullable
+                underlying_type:
+                  name: int4
+                  type: named
+            team_name:
+              type:
+                type: nullable
+                underlying_type:
+                  name: text
+                  type: named
+            team_score:
+              type:
+                type: nullable
+                underlying_type:
+                  name: int4
+                  type: named
+            user_id:
+              type:
+                type: nullable
+                underlying_type:
+                  name: uuid
+                  type: named
+          foreign_keys:
+            quiz_plays_quiz_id_fkey:
+              column_mapping:
+                quiz_id:
+                  - quiz_id
+              foreign_collection: quizzes
+            quiz_plays_user_id_fkey:
+              column_mapping:
+                user_id:
+                  - user_id
+              foreign_collection: users
+        quizzes:
+          fields:
+            created_at:
+              type:
+                name: timestamp
+                type: named
+            description:
+              type:
+                type: nullable
+                underlying_type:
+                  name: text
+                  type: named
+            owner_id:
+              type:
+                type: nullable
+                underlying_type:
+                  name: uuid
+                  type: named
+            quiz_id:
+              type:
+                name: uuid
+                type: named
+            shared_user_ids:
+              type:
+                type: nullable
+                underlying_type:
+                  element_type:
+                    type: nullable
+                    underlying_type:
+                      name: uuid
+                      type: named
+                  type: array
+            title:
+              type:
+                name: text
+                type: named
+            updated_at:
+              type:
+                name: timestamp
+                type: named
+          foreign_keys:
+            quizzes_owner_id_fkey:
+              column_mapping:
+                owner_id:
+                  - user_id
+              foreign_collection: users
+        update_answers_by_answer_id_response:
+          description: Responses from the 'update_answers_by_answer_id' procedure
+          fields:
+            affected_rows:
+              description: The number of rows affected by the mutation
+              type:
+                name: int4
+                type: named
+            returning:
+              description: Data from rows affected by the mutation
+              type:
+                element_type:
+                  name: answers
+                  type: named
+                type: array
+          foreign_keys: {}
+        update_answers_by_answer_id_update_columns:
+          description: Update the columns of the 'answers' collection
+          fields:
+            answer_id:
+              description: Update the 'answer_id' column in the 'answers' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_answers_answer_id
+                  type: named
+            answer_text:
+              description: Update the 'answer_text' column in the 'answers' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_answers_answer_text
+                  type: named
+            play_id:
+              description: Update the 'play_id' column in the 'answers' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_answers_play_id
+                  type: named
+            question_id:
+              description: Update the 'question_id' column in the 'answers' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_answers_question_id
+                  type: named
+          foreign_keys: {}
+        update_column_answers_answer_id:
+          description: Update the 'answer_id' column in the 'answers' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                name: uuid
+                type: named
+          foreign_keys: {}
+        update_column_answers_answer_text:
+          description: Update the 'answer_text' column in the 'answers' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                name: text
+                type: named
+          foreign_keys: {}
+        update_column_answers_play_id:
+          description: Update the 'play_id' column in the 'answers' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                type: nullable
+                underlying_type:
+                  name: uuid
+                  type: named
+          foreign_keys: {}
+        update_column_answers_question_id:
+          description: Update the 'question_id' column in the 'answers' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                type: nullable
+                underlying_type:
+                  name: uuid
+                  type: named
+          foreign_keys: {}
+        update_column_questions_answer_options:
+          description: Update the 'answer_options' column in the 'questions' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                type: nullable
+                underlying_type:
+                  element_type:
+                    type: nullable
+                    underlying_type:
+                      name: text
+                      type: named
+                  type: array
+          foreign_keys: {}
+        update_column_questions_correct_answer:
+          description: Update the 'correct_answer' column in the 'questions' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                type: nullable
+                underlying_type:
+                  name: text
+                  type: named
+          foreign_keys: {}
+        update_column_questions_points:
+          description: Update the 'points' column in the 'questions' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                type: nullable
+                underlying_type:
+                  name: int4
+                  type: named
+          foreign_keys: {}
+        update_column_questions_question_id:
+          description: Update the 'question_id' column in the 'questions' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                name: uuid
+                type: named
+          foreign_keys: {}
+        update_column_questions_question_text:
+          description: Update the 'question_text' column in the 'questions' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                name: text
+                type: named
+          foreign_keys: {}
+        update_column_questions_question_type:
+          description: Update the 'question_type' column in the 'questions' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                name: text
+                type: named
+          foreign_keys: {}
+        update_column_questions_quiz_id:
+          description: Update the 'quiz_id' column in the 'questions' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                type: nullable
+                underlying_type:
+                  name: uuid
+                  type: named
+          foreign_keys: {}
+        update_column_quiz_plays_play_id:
+          description: Update the 'play_id' column in the 'quiz_plays' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                name: uuid
+                type: named
+          foreign_keys: {}
+        update_column_quiz_plays_play_time:
+          description: Update the 'play_time' column in the 'quiz_plays' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                name: timestamp
+                type: named
+          foreign_keys: {}
+        update_column_quiz_plays_quiz_id:
+          description: Update the 'quiz_id' column in the 'quiz_plays' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                type: nullable
+                underlying_type:
+                  name: uuid
+                  type: named
+          foreign_keys: {}
+        update_column_quiz_plays_score:
+          description: Update the 'score' column in the 'quiz_plays' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                type: nullable
+                underlying_type:
+                  name: int4
+                  type: named
+          foreign_keys: {}
+        update_column_quiz_plays_team_name:
+          description: Update the 'team_name' column in the 'quiz_plays' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                type: nullable
+                underlying_type:
+                  name: text
+                  type: named
+          foreign_keys: {}
+        update_column_quiz_plays_team_score:
+          description: Update the 'team_score' column in the 'quiz_plays' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                type: nullable
+                underlying_type:
+                  name: int4
+                  type: named
+          foreign_keys: {}
+        update_column_quiz_plays_user_id:
+          description: Update the 'user_id' column in the 'quiz_plays' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                type: nullable
+                underlying_type:
+                  name: uuid
+                  type: named
+          foreign_keys: {}
+        update_column_quizzes_created_at:
+          description: Update the 'created_at' column in the 'quizzes' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                name: timestamp
+                type: named
+          foreign_keys: {}
+        update_column_quizzes_description:
+          description: Update the 'description' column in the 'quizzes' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                type: nullable
+                underlying_type:
+                  name: text
+                  type: named
+          foreign_keys: {}
+        update_column_quizzes_owner_id:
+          description: Update the 'owner_id' column in the 'quizzes' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                type: nullable
+                underlying_type:
+                  name: uuid
+                  type: named
+          foreign_keys: {}
+        update_column_quizzes_quiz_id:
+          description: Update the 'quiz_id' column in the 'quizzes' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                name: uuid
+                type: named
+          foreign_keys: {}
+        update_column_quizzes_shared_user_ids:
+          description: Update the 'shared_user_ids' column in the 'quizzes' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                type: nullable
+                underlying_type:
+                  element_type:
+                    type: nullable
+                    underlying_type:
+                      name: uuid
+                      type: named
+                  type: array
+          foreign_keys: {}
+        update_column_quizzes_title:
+          description: Update the 'title' column in the 'quizzes' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                name: text
+                type: named
+          foreign_keys: {}
+        update_column_quizzes_updated_at:
+          description: Update the 'updated_at' column in the 'quizzes' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                name: timestamp
+                type: named
+          foreign_keys: {}
+        update_column_users_created_at:
+          description: Update the 'created_at' column in the 'users' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                name: timestamp
+                type: named
+          foreign_keys: {}
+        update_column_users_display_name:
+          description: Update the 'display_name' column in the 'users' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                type: nullable
+                underlying_type:
+                  name: text
+                  type: named
+          foreign_keys: {}
+        update_column_users_email:
+          description: Update the 'email' column in the 'users' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                type: nullable
+                underlying_type:
+                  name: text
+                  type: named
+          foreign_keys: {}
+        update_column_users_user_id:
+          description: Update the 'user_id' column in the 'users' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                name: uuid
+                type: named
+          foreign_keys: {}
+        update_questions_by_question_id_response:
+          description: Responses from the 'update_questions_by_question_id' procedure
+          fields:
+            affected_rows:
+              description: The number of rows affected by the mutation
+              type:
+                name: int4
+                type: named
+            returning:
+              description: Data from rows affected by the mutation
+              type:
+                element_type:
+                  name: questions
+                  type: named
+                type: array
+          foreign_keys: {}
+        update_questions_by_question_id_update_columns:
+          description: Update the columns of the 'questions' collection
+          fields:
+            answer_options:
+              description: Update the 'answer_options' column in the 'questions' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_questions_answer_options
+                  type: named
+            correct_answer:
+              description: Update the 'correct_answer' column in the 'questions' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_questions_correct_answer
+                  type: named
+            points:
+              description: Update the 'points' column in the 'questions' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_questions_points
+                  type: named
+            question_id:
+              description: Update the 'question_id' column in the 'questions' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_questions_question_id
+                  type: named
+            question_text:
+              description: Update the 'question_text' column in the 'questions' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_questions_question_text
+                  type: named
+            question_type:
+              description: Update the 'question_type' column in the 'questions' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_questions_question_type
+                  type: named
+            quiz_id:
+              description: Update the 'quiz_id' column in the 'questions' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_questions_quiz_id
+                  type: named
+          foreign_keys: {}
+        update_quiz_plays_by_play_id_response:
+          description: Responses from the 'update_quiz_plays_by_play_id' procedure
+          fields:
+            affected_rows:
+              description: The number of rows affected by the mutation
+              type:
+                name: int4
+                type: named
+            returning:
+              description: Data from rows affected by the mutation
+              type:
+                element_type:
+                  name: quiz_plays
+                  type: named
+                type: array
+          foreign_keys: {}
+        update_quiz_plays_by_play_id_update_columns:
+          description: Update the columns of the 'quiz_plays' collection
+          fields:
+            play_id:
+              description: Update the 'play_id' column in the 'quiz_plays' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_quiz_plays_play_id
+                  type: named
+            play_time:
+              description: Update the 'play_time' column in the 'quiz_plays' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_quiz_plays_play_time
+                  type: named
+            quiz_id:
+              description: Update the 'quiz_id' column in the 'quiz_plays' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_quiz_plays_quiz_id
+                  type: named
+            score:
+              description: Update the 'score' column in the 'quiz_plays' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_quiz_plays_score
+                  type: named
+            team_name:
+              description: Update the 'team_name' column in the 'quiz_plays' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_quiz_plays_team_name
+                  type: named
+            team_score:
+              description: Update the 'team_score' column in the 'quiz_plays' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_quiz_plays_team_score
+                  type: named
+            user_id:
+              description: Update the 'user_id' column in the 'quiz_plays' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_quiz_plays_user_id
+                  type: named
+          foreign_keys: {}
+        update_quizzes_by_quiz_id_response:
+          description: Responses from the 'update_quizzes_by_quiz_id' procedure
+          fields:
+            affected_rows:
+              description: The number of rows affected by the mutation
+              type:
+                name: int4
+                type: named
+            returning:
+              description: Data from rows affected by the mutation
+              type:
+                element_type:
+                  name: quizzes
+                  type: named
+                type: array
+          foreign_keys: {}
+        update_quizzes_by_quiz_id_update_columns:
+          description: Update the columns of the 'quizzes' collection
+          fields:
+            created_at:
+              description: Update the 'created_at' column in the 'quizzes' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_quizzes_created_at
+                  type: named
+            description:
+              description: Update the 'description' column in the 'quizzes' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_quizzes_description
+                  type: named
+            owner_id:
+              description: Update the 'owner_id' column in the 'quizzes' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_quizzes_owner_id
+                  type: named
+            quiz_id:
+              description: Update the 'quiz_id' column in the 'quizzes' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_quizzes_quiz_id
+                  type: named
+            shared_user_ids:
+              description: Update the 'shared_user_ids' column in the 'quizzes' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_quizzes_shared_user_ids
+                  type: named
+            title:
+              description: Update the 'title' column in the 'quizzes' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_quizzes_title
+                  type: named
+            updated_at:
+              description: Update the 'updated_at' column in the 'quizzes' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_quizzes_updated_at
+                  type: named
+          foreign_keys: {}
+        update_users_by_user_id_response:
+          description: Responses from the 'update_users_by_user_id' procedure
+          fields:
+            affected_rows:
+              description: The number of rows affected by the mutation
+              type:
+                name: int4
+                type: named
+            returning:
+              description: Data from rows affected by the mutation
+              type:
+                element_type:
+                  name: users
+                  type: named
+                type: array
+          foreign_keys: {}
+        update_users_by_user_id_update_columns:
+          description: Update the columns of the 'users' collection
+          fields:
+            created_at:
+              description: Update the 'created_at' column in the 'users' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_users_created_at
+                  type: named
+            display_name:
+              description: Update the 'display_name' column in the 'users' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_users_display_name
+                  type: named
+            email:
+              description: Update the 'email' column in the 'users' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_users_email
+                  type: named
+            user_id:
+              description: Update the 'user_id' column in the 'users' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_users_user_id
+                  type: named
+          foreign_keys: {}
+        users:
+          fields:
+            created_at:
+              type:
+                name: timestamp
+                type: named
+            display_name:
+              type:
+                type: nullable
+                underlying_type:
+                  name: text
+                  type: named
+            email:
+              type:
+                type: nullable
+                underlying_type:
+                  name: text
+                  type: named
+            user_id:
+              type:
+                name: uuid
+                type: named
+          foreign_keys: {}
+      procedures:
+        - arguments:
+            key_answer_id:
+              type:
+                name: uuid
+                type: named
+            pre_check:
+              description: Delete permission predicate over the 'answers' collection
+              type:
+                type: nullable
+                underlying_type:
+                  object_type_name: answers
+                  type: predicate
+          description: Delete any row on the 'answers' collection using the 'answer_id' key
+          name: delete_answers_by_answer_id
+          result_type:
+            name: delete_answers_by_answer_id_response
+            type: named
+        - arguments:
+            key_question_id:
+              type:
+                name: uuid
+                type: named
+            pre_check:
+              description: Delete permission predicate over the 'questions' collection
+              type:
+                type: nullable
+                underlying_type:
+                  object_type_name: questions
+                  type: predicate
+          description: Delete any row on the 'questions' collection using the 'question_id' key
+          name: delete_questions_by_question_id
+          result_type:
+            name: delete_questions_by_question_id_response
+            type: named
+        - arguments:
+            key_play_id:
+              type:
+                name: uuid
+                type: named
+            pre_check:
+              description: Delete permission predicate over the 'quiz_plays' collection
+              type:
+                type: nullable
+                underlying_type:
+                  object_type_name: quiz_plays
+                  type: predicate
+          description: Delete any row on the 'quiz_plays' collection using the 'play_id' key
+          name: delete_quiz_plays_by_play_id
+          result_type:
+            name: delete_quiz_plays_by_play_id_response
+            type: named
+        - arguments:
+            key_quiz_id:
+              type:
+                name: uuid
+                type: named
+            pre_check:
+              description: Delete permission predicate over the 'quizzes' collection
+              type:
+                type: nullable
+                underlying_type:
+                  object_type_name: quizzes
+                  type: predicate
+          description: Delete any row on the 'quizzes' collection using the 'quiz_id' key
+          name: delete_quizzes_by_quiz_id
+          result_type:
+            name: delete_quizzes_by_quiz_id_response
+            type: named
+        - arguments:
+            key_user_id:
+              type:
+                name: uuid
+                type: named
+            pre_check:
+              description: Delete permission predicate over the 'users' collection
+              type:
+                type: nullable
+                underlying_type:
+                  object_type_name: users
+                  type: predicate
+          description: Delete any row on the 'users' collection using the 'user_id' key
+          name: delete_users_by_user_id
+          result_type:
+            name: delete_users_by_user_id_response
+            type: named
+        - arguments:
+            objects:
+              type:
+                element_type:
+                  name: insert_answers_object
+                  type: named
+                type: array
+            post_check:
+              description: Insert permission predicate over the 'answers' collection
+              type:
+                type: nullable
+                underlying_type:
+                  object_type_name: answers
+                  type: predicate
+          description: Insert into the answers table
+          name: insert_answers
+          result_type:
+            name: insert_answers_response
+            type: named
+        - arguments:
+            objects:
+              type:
+                element_type:
+                  name: insert_questions_object
+                  type: named
+                type: array
+            post_check:
+              description: Insert permission predicate over the 'questions' collection
+              type:
+                type: nullable
+                underlying_type:
+                  object_type_name: questions
+                  type: predicate
+          description: Insert into the questions table
+          name: insert_questions
+          result_type:
+            name: insert_questions_response
+            type: named
+        - arguments:
+            objects:
+              type:
+                element_type:
+                  name: insert_quiz_plays_object
+                  type: named
+                type: array
+            post_check:
+              description: Insert permission predicate over the 'quiz_plays' collection
+              type:
+                type: nullable
+                underlying_type:
+                  object_type_name: quiz_plays
+                  type: predicate
+          description: Insert into the quiz_plays table
+          name: insert_quiz_plays
+          result_type:
+            name: insert_quiz_plays_response
+            type: named
+        - arguments:
+            objects:
+              type:
+                element_type:
+                  name: insert_quizzes_object
+                  type: named
+                type: array
+            post_check:
+              description: Insert permission predicate over the 'quizzes' collection
+              type:
+                type: nullable
+                underlying_type:
+                  object_type_name: quizzes
+                  type: predicate
+          description: Insert into the quizzes table
+          name: insert_quizzes
+          result_type:
+            name: insert_quizzes_response
+            type: named
+        - arguments:
+            objects:
+              type:
+                element_type:
+                  name: insert_users_object
+                  type: named
+                type: array
+            post_check:
+              description: Insert permission predicate over the 'users' collection
+              type:
+                type: nullable
+                underlying_type:
+                  object_type_name: users
+                  type: predicate
+          description: Insert into the users table
+          name: insert_users
+          result_type:
+            name: insert_users_response
+            type: named
+        - arguments:
+            key_answer_id:
+              type:
+                name: uuid
+                type: named
+            post_check:
+              description: Update permission post-condition predicate over the 'answers' collection
+              type:
+                type: nullable
+                underlying_type:
+                  object_type_name: answers
+                  type: predicate
+            pre_check:
+              description: Update permission pre-condition predicate over the 'answers' collection
+              type:
+                type: nullable
+                underlying_type:
+                  object_type_name: answers
+                  type: predicate
+            update_columns:
+              type:
+                name: update_answers_by_answer_id_update_columns
+                type: named
+          description: Update any row on the 'answers' collection using the 'answer_id' key
+          name: update_answers_by_answer_id
+          result_type:
+            name: update_answers_by_answer_id_response
+            type: named
+        - arguments:
+            key_question_id:
+              type:
+                name: uuid
+                type: named
+            post_check:
+              description: Update permission post-condition predicate over the 'questions' collection
+              type:
+                type: nullable
+                underlying_type:
+                  object_type_name: questions
+                  type: predicate
+            pre_check:
+              description: Update permission pre-condition predicate over the 'questions' collection
+              type:
+                type: nullable
+                underlying_type:
+                  object_type_name: questions
+                  type: predicate
+            update_columns:
+              type:
+                name: update_questions_by_question_id_update_columns
+                type: named
+          description: Update any row on the 'questions' collection using the 'question_id' key
+          name: update_questions_by_question_id
+          result_type:
+            name: update_questions_by_question_id_response
+            type: named
+        - arguments:
+            key_play_id:
+              type:
+                name: uuid
+                type: named
+            post_check:
+              description: Update permission post-condition predicate over the 'quiz_plays' collection
+              type:
+                type: nullable
+                underlying_type:
+                  object_type_name: quiz_plays
+                  type: predicate
+            pre_check:
+              description: Update permission pre-condition predicate over the 'quiz_plays' collection
+              type:
+                type: nullable
+                underlying_type:
+                  object_type_name: quiz_plays
+                  type: predicate
+            update_columns:
+              type:
+                name: update_quiz_plays_by_play_id_update_columns
+                type: named
+          description: Update any row on the 'quiz_plays' collection using the 'play_id' key
+          name: update_quiz_plays_by_play_id
+          result_type:
+            name: update_quiz_plays_by_play_id_response
+            type: named
+        - arguments:
+            key_quiz_id:
+              type:
+                name: uuid
+                type: named
+            post_check:
+              description: Update permission post-condition predicate over the 'quizzes' collection
+              type:
+                type: nullable
+                underlying_type:
+                  object_type_name: quizzes
+                  type: predicate
+            pre_check:
+              description: Update permission pre-condition predicate over the 'quizzes' collection
+              type:
+                type: nullable
+                underlying_type:
+                  object_type_name: quizzes
+                  type: predicate
+            update_columns:
+              type:
+                name: update_quizzes_by_quiz_id_update_columns
+                type: named
+          description: Update any row on the 'quizzes' collection using the 'quiz_id' key
+          name: update_quizzes_by_quiz_id
+          result_type:
+            name: update_quizzes_by_quiz_id_response
+            type: named
+        - arguments:
+            key_user_id:
+              type:
+                name: uuid
+                type: named
+            post_check:
+              description: Update permission post-condition predicate over the 'users' collection
+              type:
+                type: nullable
+                underlying_type:
+                  object_type_name: users
+                  type: predicate
+            pre_check:
+              description: Update permission pre-condition predicate over the 'users' collection
+              type:
+                type: nullable
+                underlying_type:
+                  object_type_name: users
+                  type: predicate
+            update_columns:
+              type:
+                name: update_users_by_user_id_update_columns
+                type: named
+          description: Update any row on the 'users' collection using the 'user_id' key
+          name: update_users_by_user_id
+          result_type:
+            name: update_users_by_user_id_response
+            type: named
+      request_arguments: null
+      scalar_types:
+        int4:
+          aggregate_functions:
+            avg:
+              result_type:
+                type: nullable
+                underlying_type:
+                  name: numeric
+                  type: named
+              type: custom
+            bit_and:
+              result_type:
+                type: nullable
+                underlying_type:
+                  name: int4
+                  type: named
+              type: custom
+            bit_or:
+              result_type:
+                type: nullable
+                underlying_type:
+                  name: int4
+                  type: named
+              type: custom
+            bit_xor:
+              result_type:
+                type: nullable
+                underlying_type:
+                  name: int4
+                  type: named
+              type: custom
+            max:
+              type: max
+            min:
+              type: min
+            stddev:
+              result_type:
+                type: nullable
+                underlying_type:
+                  name: numeric
+                  type: named
+              type: custom
+            stddev_pop:
+              result_type:
+                type: nullable
+                underlying_type:
+                  name: numeric
+                  type: named
+              type: custom
+            stddev_samp:
+              result_type:
+                type: nullable
+                underlying_type:
+                  name: numeric
+                  type: named
+              type: custom
+            sum:
+              result_type: int8
+              type: sum
+            var_pop:
+              result_type:
+                type: nullable
+                underlying_type:
+                  name: numeric
+                  type: named
+              type: custom
+            var_samp:
+              result_type:
+                type: nullable
+                underlying_type:
+                  name: numeric
+                  type: named
+              type: custom
+            variance:
+              result_type:
+                type: nullable
+                underlying_type:
+                  name: numeric
+                  type: named
+              type: custom
+          comparison_operators:
+            _eq:
+              type: equal
+            _gt:
+              type: greater_than
+            _gte:
+              type: greater_than_or_equal
+            _in:
+              type: in
+            _lt:
+              type: less_than
+            _lte:
+              type: less_than_or_equal
+            _neq:
+              argument_type:
+                name: int4
+                type: named
+              type: custom
+          extraction_functions: {}
+          representation:
+            type: int32
+        int8:
+          aggregate_functions:
+            avg:
+              result_type:
+                type: nullable
+                underlying_type:
+                  name: numeric
+                  type: named
+              type: custom
+            bit_and:
+              result_type:
+                type: nullable
+                underlying_type:
+                  name: int8
+                  type: named
+              type: custom
+            bit_or:
+              result_type:
+                type: nullable
+                underlying_type:
+                  name: int8
+                  type: named
+              type: custom
+            bit_xor:
+              result_type:
+                type: nullable
+                underlying_type:
+                  name: int8
+                  type: named
+              type: custom
+            max:
+              type: max
+            min:
+              type: min
+            stddev:
+              result_type:
+                type: nullable
+                underlying_type:
+                  name: numeric
+                  type: named
+              type: custom
+            stddev_pop:
+              result_type:
+                type: nullable
+                underlying_type:
+                  name: numeric
+                  type: named
+              type: custom
+            stddev_samp:
+              result_type:
+                type: nullable
+                underlying_type:
+                  name: numeric
+                  type: named
+              type: custom
+            sum:
+              result_type:
+                type: nullable
+                underlying_type:
+                  name: numeric
+                  type: named
+              type: custom
+            var_pop:
+              result_type:
+                type: nullable
+                underlying_type:
+                  name: numeric
+                  type: named
+              type: custom
+            var_samp:
+              result_type:
+                type: nullable
+                underlying_type:
+                  name: numeric
+                  type: named
+              type: custom
+            variance:
+              result_type:
+                type: nullable
+                underlying_type:
+                  name: numeric
+                  type: named
+              type: custom
+          comparison_operators:
+            _eq:
+              type: equal
+            _gt:
+              type: greater_than
+            _gte:
+              type: greater_than_or_equal
+            _in:
+              type: in
+            _lt:
+              type: less_than
+            _lte:
+              type: less_than_or_equal
+            _neq:
+              argument_type:
+                name: int8
+                type: named
+              type: custom
+          extraction_functions: {}
+          representation:
+            type: int64
+        numeric:
+          aggregate_functions:
+            avg:
+              result_type:
+                type: nullable
+                underlying_type:
+                  name: numeric
+                  type: named
+              type: custom
+            max:
+              type: max
+            min:
+              type: min
+            stddev:
+              result_type:
+                type: nullable
+                underlying_type:
+                  name: numeric
+                  type: named
+              type: custom
+            stddev_pop:
+              result_type:
+                type: nullable
+                underlying_type:
+                  name: numeric
+                  type: named
+              type: custom
+            stddev_samp:
+              result_type:
+                type: nullable
+                underlying_type:
+                  name: numeric
+                  type: named
+              type: custom
+            sum:
+              result_type:
+                type: nullable
+                underlying_type:
+                  name: numeric
+                  type: named
+              type: custom
+            var_pop:
+              result_type:
+                type: nullable
+                underlying_type:
+                  name: numeric
+                  type: named
+              type: custom
+            var_samp:
+              result_type:
+                type: nullable
+                underlying_type:
+                  name: numeric
+                  type: named
+              type: custom
+            variance:
+              result_type:
+                type: nullable
+                underlying_type:
+                  name: numeric
+                  type: named
+              type: custom
+          comparison_operators:
+            _eq:
+              type: equal
+            _gt:
+              type: greater_than
+            _gte:
+              type: greater_than_or_equal
+            _in:
+              type: in
+            _lt:
+              type: less_than
+            _lte:
+              type: less_than_or_equal
+            _neq:
+              argument_type:
+                name: numeric
+                type: named
+              type: custom
+          extraction_functions: {}
+          representation:
+            type: bigdecimal
+        text:
+          aggregate_functions:
+            max:
+              type: max
+            min:
+              type: min
+          comparison_operators:
+            _eq:
+              type: equal
+            _gt:
+              type: greater_than
+            _gte:
+              type: greater_than_or_equal
+            _ilike:
+              argument_type:
+                name: text
+                type: named
+              type: custom
+            _in:
+              type: in
+            _iregex:
+              argument_type:
+                name: text
+                type: named
+              type: custom
+            _like:
+              argument_type:
+                name: text
+                type: named
+              type: custom
+            _lt:
+              type: less_than
+            _lte:
+              type: less_than_or_equal
+            _neq:
+              argument_type:
+                name: text
+                type: named
+              type: custom
+            _nilike:
+              argument_type:
+                name: text
+                type: named
+              type: custom
+            _niregex:
+              argument_type:
+                name: text
+                type: named
+              type: custom
+            _nlike:
+              argument_type:
+                name: text
+                type: named
+              type: custom
+            _nregex:
+              argument_type:
+                name: text
+                type: named
+              type: custom
+            _regex:
+              argument_type:
+                name: text
+                type: named
+              type: custom
+            starts_with:
+              argument_type:
+                name: text
+                type: named
+              type: custom
+            ts_match_tt:
+              argument_type:
+                name: text
+                type: named
+              type: custom
+          extraction_functions: {}
+          representation:
+            type: string
+        timestamp:
+          aggregate_functions:
+            max:
+              type: max
+            min:
+              type: min
+          comparison_operators:
+            _eq:
+              type: equal
+            _gt:
+              type: greater_than
+            _gte:
+              type: greater_than_or_equal
+            _in:
+              type: in
+            _lt:
+              type: less_than
+            _lte:
+              type: less_than_or_equal
+            _neq:
+              argument_type:
+                name: timestamp
+                type: named
+              type: custom
+          extraction_functions: {}
+          representation:
+            type: timestamp
+        uuid:
+          aggregate_functions: {}
+          comparison_operators:
+            _eq:
+              type: equal
+            _gt:
+              type: greater_than
+            _gte:
+              type: greater_than_or_equal
+            _in:
+              type: in
+            _lt:
+              type: less_than
+            _lte:
+              type: less_than_or_equal
+            _neq:
+              argument_type:
+                name: uuid
+                type: named
+              type: custom
+          extraction_functions: {}
+          representation:
+            type: uuid
+    capabilities:
+      capabilities:
+        mutation:
+          explain: {}
+          transactional: {}
+        query:
+          aggregates: {}
+          exists:
+            nested_collections: {}
+          explain: {}
+          nested_fields:
+            aggregates: {}
+            filter_by: {}
+            order_by: {}
+          variables: {}
+        relationships:
+          nested:
+            array: {}
+          order_by_aggregate: {}
+          relation_comparisons: {}
+      version: 0.2.4

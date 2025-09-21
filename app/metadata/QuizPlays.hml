@@ -1,0 +1,193 @@
+---
+kind: ObjectType
+version: v1
+definition:
+  name: QuizPlays
+  fields:
+    - name: playId
+      type: Uuid!
+    - name: playTime
+      type: Timestamp!
+    - name: quizId
+      type: Uuid
+    - name: score
+      type: Int32
+    - name: teamName
+      type: String_1
+    - name: teamScore
+      type: Int32
+    - name: userId
+      type: Uuid
+  graphql:
+    typeName: QuizPlays
+    inputTypeName: QuizPlaysInput
+  dataConnectorTypeMapping:
+    - dataConnectorName: my_connector
+      dataConnectorObjectType: quiz_plays
+      fieldMapping:
+        playId:
+          column:
+            name: play_id
+        playTime:
+          column:
+            name: play_time
+        quizId:
+          column:
+            name: quiz_id
+        score:
+          column:
+            name: score
+        teamName:
+          column:
+            name: team_name
+        teamScore:
+          column:
+            name: team_score
+        userId:
+          column:
+            name: user_id
+
+---
+kind: TypePermissions
+version: v1
+definition:
+  typeName: QuizPlays
+  permissions:
+    - role: admin
+      output:
+        allowedFields:
+          - playId
+          - playTime
+          - quizId
+          - score
+          - teamName
+          - teamScore
+          - userId
+
+---
+kind: BooleanExpressionType
+version: v1
+definition:
+  name: QuizPlaysBoolExp
+  operand:
+    object:
+      type: QuizPlays
+      comparableFields:
+        - fieldName: playId
+          booleanExpressionType: UuidBoolExp
+        - fieldName: playTime
+          booleanExpressionType: TimestampBoolExp
+        - fieldName: quizId
+          booleanExpressionType: UuidBoolExp
+        - fieldName: score
+          booleanExpressionType: Int4BoolExp
+        - fieldName: teamName
+          booleanExpressionType: TextBoolExp
+        - fieldName: teamScore
+          booleanExpressionType: Int4BoolExp
+        - fieldName: userId
+          booleanExpressionType: UuidBoolExp
+      comparableRelationships: []
+  logicalOperators:
+    enable: true
+  isNull:
+    enable: true
+  graphql:
+    typeName: QuizPlaysBoolExp
+
+---
+kind: AggregateExpression
+version: v1
+definition:
+  name: QuizPlaysAggExp
+  operand:
+    object:
+      aggregatedType: QuizPlays
+      aggregatableFields:
+        - fieldName: playId
+          aggregateExpression: UuidAggExp
+        - fieldName: playTime
+          aggregateExpression: TimestampAggExp
+        - fieldName: quizId
+          aggregateExpression: UuidAggExp
+        - fieldName: score
+          aggregateExpression: Int4AggExp
+        - fieldName: teamName
+          aggregateExpression: TextAggExp
+        - fieldName: teamScore
+          aggregateExpression: Int4AggExp
+        - fieldName: userId
+          aggregateExpression: UuidAggExp
+  count:
+    enable: true
+    returnType: Int64
+  graphql:
+    selectTypeName: QuizPlaysAggExp
+
+---
+kind: OrderByExpression
+version: v1
+definition:
+  name: QuizPlaysOrderByExp
+  operand:
+    object:
+      orderedType: QuizPlays
+      orderableFields:
+        - fieldName: playId
+          orderByExpression: UuidOrderByExp
+        - fieldName: playTime
+          orderByExpression: TimestampOrderByExp
+        - fieldName: quizId
+          orderByExpression: UuidOrderByExp
+        - fieldName: score
+          orderByExpression: Int32OrderByExp
+        - fieldName: teamName
+          orderByExpression: String1OrderByExp
+        - fieldName: teamScore
+          orderByExpression: Int32OrderByExp
+        - fieldName: userId
+          orderByExpression: UuidOrderByExp
+      orderableRelationships: []
+  graphql:
+    expressionTypeName: QuizPlaysOrderByExp
+
+---
+kind: Model
+version: v2
+definition:
+  name: QuizPlays
+  objectType: QuizPlays
+  source:
+    dataConnectorName: my_connector
+    collection: quiz_plays
+  filterExpressionType: QuizPlaysBoolExp
+  aggregateExpression: QuizPlaysAggExp
+  orderByExpression: QuizPlaysOrderByExp
+  graphql:
+    selectMany:
+      queryRootField: quizPlays
+      subscription:
+        rootField: quizPlays
+    selectUniques:
+      - queryRootField: quizPlaysByPlayId
+        uniqueIdentifier:
+          - playId
+        subscription:
+          rootField: quizPlaysByPlayId
+    filterInputTypeName: QuizPlaysFilterInput
+    aggregate:
+      queryRootField: quizPlaysAggregate
+      subscription:
+        rootField: quizPlaysAggregate
+
+---
+kind: ModelPermissions
+version: v1
+definition:
+  modelName: QuizPlays
+  permissions:
+    - role: admin
+      select:
+        filter: null
+        allowSubscriptions: true
+

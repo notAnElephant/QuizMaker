@@ -1,0 +1,157 @@
+---
+kind: ObjectType
+version: v1
+definition:
+  name: Answers
+  fields:
+    - name: answerId
+      type: Uuid!
+    - name: answerText
+      type: String_1!
+    - name: playId
+      type: Uuid
+    - name: questionId
+      type: Uuid
+  graphql:
+    typeName: Answers
+    inputTypeName: AnswersInput
+  dataConnectorTypeMapping:
+    - dataConnectorName: my_connector
+      dataConnectorObjectType: answers
+      fieldMapping:
+        answerId:
+          column:
+            name: answer_id
+        answerText:
+          column:
+            name: answer_text
+        playId:
+          column:
+            name: play_id
+        questionId:
+          column:
+            name: question_id
+
+---
+kind: TypePermissions
+version: v1
+definition:
+  typeName: Answers
+  permissions:
+    - role: admin
+      output:
+        allowedFields:
+          - answerId
+          - answerText
+          - playId
+          - questionId
+
+---
+kind: BooleanExpressionType
+version: v1
+definition:
+  name: AnswersBoolExp
+  operand:
+    object:
+      type: Answers
+      comparableFields:
+        - fieldName: answerId
+          booleanExpressionType: UuidBoolExp
+        - fieldName: answerText
+          booleanExpressionType: TextBoolExp
+        - fieldName: playId
+          booleanExpressionType: UuidBoolExp
+        - fieldName: questionId
+          booleanExpressionType: UuidBoolExp
+      comparableRelationships: []
+  logicalOperators:
+    enable: true
+  isNull:
+    enable: true
+  graphql:
+    typeName: AnswersBoolExp
+
+---
+kind: AggregateExpression
+version: v1
+definition:
+  name: AnswersAggExp
+  operand:
+    object:
+      aggregatedType: Answers
+      aggregatableFields:
+        - fieldName: answerId
+          aggregateExpression: UuidAggExp
+        - fieldName: answerText
+          aggregateExpression: TextAggExp
+        - fieldName: playId
+          aggregateExpression: UuidAggExp
+        - fieldName: questionId
+          aggregateExpression: UuidAggExp
+  count:
+    enable: true
+    returnType: Int64
+  graphql:
+    selectTypeName: AnswersAggExp
+
+---
+kind: OrderByExpression
+version: v1
+definition:
+  name: AnswersOrderByExp
+  operand:
+    object:
+      orderedType: Answers
+      orderableFields:
+        - fieldName: answerId
+          orderByExpression: UuidOrderByExp
+        - fieldName: answerText
+          orderByExpression: String1OrderByExp
+        - fieldName: playId
+          orderByExpression: UuidOrderByExp
+        - fieldName: questionId
+          orderByExpression: UuidOrderByExp
+      orderableRelationships: []
+  graphql:
+    expressionTypeName: AnswersOrderByExp
+
+---
+kind: Model
+version: v2
+definition:
+  name: Answers
+  objectType: Answers
+  source:
+    dataConnectorName: my_connector
+    collection: answers
+  filterExpressionType: AnswersBoolExp
+  aggregateExpression: AnswersAggExp
+  orderByExpression: AnswersOrderByExp
+  graphql:
+    selectMany:
+      queryRootField: answers
+      subscription:
+        rootField: answers
+    selectUniques:
+      - queryRootField: answersByAnswerId
+        uniqueIdentifier:
+          - answerId
+        subscription:
+          rootField: answersByAnswerId
+    filterInputTypeName: AnswersFilterInput
+    aggregate:
+      queryRootField: answersAggregate
+      subscription:
+        rootField: answersAggregate
+
+---
+kind: ModelPermissions
+version: v1
+definition:
+  modelName: Answers
+  permissions:
+    - role: admin
+      select:
+        filter: null
+        allowSubscriptions: true
+

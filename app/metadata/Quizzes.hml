@@ -1,0 +1,187 @@
+---
+kind: ObjectType
+version: v1
+definition:
+  name: Quizzes
+  fields:
+    - name: createdAt
+      type: Timestamp!
+    - name: description
+      type: String_1
+    - name: ownerId
+      type: Uuid
+    - name: quizId
+      type: Uuid!
+    - name: sharedUserIds
+      type: "[Uuid]"
+    - name: title
+      type: String_1!
+    - name: updatedAt
+      type: Timestamp!
+  graphql:
+    typeName: Quizzes
+    inputTypeName: QuizzesInput
+  dataConnectorTypeMapping:
+    - dataConnectorName: my_connector
+      dataConnectorObjectType: quizzes
+      fieldMapping:
+        createdAt:
+          column:
+            name: created_at
+        description:
+          column:
+            name: description
+        ownerId:
+          column:
+            name: owner_id
+        quizId:
+          column:
+            name: quiz_id
+        sharedUserIds:
+          column:
+            name: shared_user_ids
+        title:
+          column:
+            name: title
+        updatedAt:
+          column:
+            name: updated_at
+
+---
+kind: TypePermissions
+version: v1
+definition:
+  typeName: Quizzes
+  permissions:
+    - role: admin
+      output:
+        allowedFields:
+          - createdAt
+          - description
+          - ownerId
+          - quizId
+          - sharedUserIds
+          - title
+          - updatedAt
+
+---
+kind: BooleanExpressionType
+version: v1
+definition:
+  name: QuizzesBoolExp
+  operand:
+    object:
+      type: Quizzes
+      comparableFields:
+        - fieldName: createdAt
+          booleanExpressionType: TimestampBoolExp
+        - fieldName: description
+          booleanExpressionType: TextBoolExp
+        - fieldName: ownerId
+          booleanExpressionType: UuidBoolExp
+        - fieldName: quizId
+          booleanExpressionType: UuidBoolExp
+        - fieldName: title
+          booleanExpressionType: TextBoolExp
+        - fieldName: updatedAt
+          booleanExpressionType: TimestampBoolExp
+      comparableRelationships: []
+  logicalOperators:
+    enable: true
+  isNull:
+    enable: true
+  graphql:
+    typeName: QuizzesBoolExp
+
+---
+kind: AggregateExpression
+version: v1
+definition:
+  name: QuizzesAggExp
+  operand:
+    object:
+      aggregatedType: Quizzes
+      aggregatableFields:
+        - fieldName: createdAt
+          aggregateExpression: TimestampAggExp
+        - fieldName: description
+          aggregateExpression: TextAggExp
+        - fieldName: ownerId
+          aggregateExpression: UuidAggExp
+        - fieldName: quizId
+          aggregateExpression: UuidAggExp
+        - fieldName: title
+          aggregateExpression: TextAggExp
+        - fieldName: updatedAt
+          aggregateExpression: TimestampAggExp
+  count:
+    enable: true
+    returnType: Int64
+  graphql:
+    selectTypeName: QuizzesAggExp
+
+---
+kind: OrderByExpression
+version: v1
+definition:
+  name: QuizzesOrderByExp
+  operand:
+    object:
+      orderedType: Quizzes
+      orderableFields:
+        - fieldName: createdAt
+          orderByExpression: TimestampOrderByExp
+        - fieldName: description
+          orderByExpression: String1OrderByExp
+        - fieldName: ownerId
+          orderByExpression: UuidOrderByExp
+        - fieldName: quizId
+          orderByExpression: UuidOrderByExp
+        - fieldName: title
+          orderByExpression: String1OrderByExp
+        - fieldName: updatedAt
+          orderByExpression: TimestampOrderByExp
+      orderableRelationships: []
+  graphql:
+    expressionTypeName: QuizzesOrderByExp
+
+---
+kind: Model
+version: v2
+definition:
+  name: Quizzes
+  objectType: Quizzes
+  source:
+    dataConnectorName: my_connector
+    collection: quizzes
+  filterExpressionType: QuizzesBoolExp
+  aggregateExpression: QuizzesAggExp
+  orderByExpression: QuizzesOrderByExp
+  graphql:
+    selectMany:
+      queryRootField: quizzes
+      subscription:
+        rootField: quizzes
+    selectUniques:
+      - queryRootField: quizzesByQuizId
+        uniqueIdentifier:
+          - quizId
+        subscription:
+          rootField: quizzesByQuizId
+    filterInputTypeName: QuizzesFilterInput
+    aggregate:
+      queryRootField: quizzesAggregate
+      subscription:
+        rootField: quizzesAggregate
+
+---
+kind: ModelPermissions
+version: v1
+definition:
+  modelName: Quizzes
+  permissions:
+    - role: admin
+      select:
+        filter: null
+        allowSubscriptions: true
+
