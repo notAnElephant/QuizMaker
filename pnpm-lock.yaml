@@ -10,13 +10,10 @@ importers:
     dependencies:
       '@apollo/client':
         specifier: ^4.0.9
-        version: 4.0.9(graphql-ws@6.0.6(graphql@16.12.0)(ws@8.18.3))(graphql@16.12.0)(react-dom@19.2.0(react@@vercel+analytics+react))(react@@vercel+analytics+react)(rxjs@7.8.2)
+        version: 4.0.9(graphql-ws@6.0.6(graphql@16.12.0)(ws@8.18.3))(graphql@16.12.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(rxjs@7.8.2)
       '@tailwindcss/vite':
         specifier: ^4.1.17
         version: 4.1.17(vite@7.2.2(@types/node@24.10.1)(jiti@2.6.1)(lightningcss@1.30.2)(yaml@2.8.1))
-      '@vercel/analytics':
-        specifier: ^1.5.0
-        version: 1.5.0(react@@vercel+analytics+react)
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -24,20 +21,20 @@ importers:
         specifier: ^16.9.0
         version: 16.12.0
       react:
-        specifier: link:@vercel/analytics/react
-        version: link:@vercel/analytics/react
+        specifier: 19.2.0
+        version: 19.2.0
       react-confetti-explosion:
         specifier: ^3.0.3
-        version: 3.0.3(react-dom@19.2.0(react@@vercel+analytics+react))(react@@vercel+analytics+react)
+        version: 3.0.3(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       react-dom:
         specifier: ^19.2.0
-        version: 19.2.0(react@@vercel+analytics+react)
+        version: 19.2.0(react@19.2.0)
       react-icons:
         specifier: ^5.5.0
-        version: 5.5.0(react@@vercel+analytics+react)
+        version: 5.5.0(react@19.2.0)
       react-router-dom:
         specifier: ^7.5.3
-        version: 7.9.6(react-dom@19.2.0(react@@vercel+analytics+react))(react@@vercel+analytics+react)
+        version: 7.9.6(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       tailwind-merge:
         specifier: ^3.2.0
         version: 3.2.0
@@ -1098,32 +1095,6 @@ packages:
     resolution: {integrity: sha512-QcGHmlRHWOl93o64ZUMNewCdwKGU6WItOU52H0djgNmn1EOrhVudrDzXz4OycCRSCPwFCDrE2iIt5vmuUdHxuQ==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@vercel/analytics@1.5.0':
-    resolution: {integrity: sha512-MYsBzfPki4gthY5HnYN7jgInhAZ7Ac1cYDoRWFomwGHWEX7odTEzbtg9kf/QSo7XEsEAqlQugA6gJ2WS2DEa3g==}
-    peerDependencies:
-      '@remix-run/react': ^2
-      '@sveltejs/kit': ^1 || ^2
-      next: '>= 13'
-      react: ^18 || ^19 || ^19.0.0-rc
-      svelte: '>= 4'
-      vue: ^3
-      vue-router: ^4
-    peerDependenciesMeta:
-      '@remix-run/react':
-        optional: true
-      '@sveltejs/kit':
-        optional: true
-      next:
-        optional: true
-      react:
-        optional: true
-      svelte:
-        optional: true
-      vue:
-        optional: true
-      vue-router:
-        optional: true
-
   '@vitejs/plugin-react@5.1.1':
     resolution: {integrity: sha512-WQfkSw0QbQ5aJ2CHYw23ZGkqnRwqKHD/KYsMeTkZzPT4Jcf0DcBxBtwMJxnu6E7oxw5+JC6ZAiePgh28uJ1HBA==}
     engines: {node: ^20.19.0 || >=22.12.0}
@@ -2178,6 +2149,10 @@ packages:
       react-dom:
         optional: true
 
+  react@19.2.0:
+    resolution: {integrity: sha512-tmbWg6W31tQLeB5cdIBOicJDJRR2KzXsV7uSK9iNfLWQ5bIZfxuPEHp7M8wiHyHnn0DD1i7w3Zmin0FtkrwoCQ==}
+    engines: {node: '>=0.10.0'}
+
   readable-stream@3.6.2:
     resolution: {integrity: sha512-9u/sniCrY3D5WdsERHzHE4G2YCXqoG5FTHUiCC4SIbr6XcLZBY05ya9EKjYek9O5xOAwjGq+1JdGBAS7Q9ScoA==}
     engines: {node: '>= 6'}
@@ -2556,7 +2531,7 @@ snapshots:
       '@jridgewell/gen-mapping': 0.3.8
       '@jridgewell/trace-mapping': 0.3.25
 
-  '@apollo/client@4.0.9(graphql-ws@6.0.6(graphql@16.12.0)(ws@8.18.3))(graphql@16.12.0)(react-dom@19.2.0(react@@vercel+analytics+react))(react@@vercel+analytics+react)(rxjs@7.8.2)':
+  '@apollo/client@4.0.9(graphql-ws@6.0.6(graphql@16.12.0)(ws@8.18.3))(graphql@16.12.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(rxjs@7.8.2)':
     dependencies:
       '@graphql-typed-document-node/core': 3.2.0(graphql@16.12.0)
       '@wry/caches': 1.0.1
@@ -2569,8 +2544,8 @@ snapshots:
       tslib: 2.8.1
     optionalDependencies:
       graphql-ws: 6.0.6(graphql@16.12.0)(ws@8.18.3)
-      react: link:@vercel/analytics/react
-      react-dom: 19.2.0(react@@vercel+analytics+react)
+      react: 19.2.0
+      react-dom: 19.2.0(react@19.2.0)
 
   '@ardatan/relay-compiler@12.0.3(graphql@16.12.0)':
     dependencies:
@@ -3735,10 +3710,6 @@ snapshots:
       '@typescript-eslint/types': 8.31.0
       eslint-visitor-keys: 4.2.0
 
-  '@vercel/analytics@1.5.0(react@@vercel+analytics+react)':
-    optionalDependencies:
-      react: link:@vercel/analytics/react
-
   '@vitejs/plugin-react@5.1.1(vite@7.2.2(@types/node@24.10.1)(jiti@2.6.1)(lightningcss@1.30.2)(yaml@2.8.1))':
     dependencies:
       '@babel/core': 7.28.5
@@ -4757,35 +4728,37 @@ snapshots:
 
   queue-microtask@1.2.3: {}
 
-  react-confetti-explosion@3.0.3(react-dom@19.2.0(react@@vercel+analytics+react))(react@@vercel+analytics+react):
+  react-confetti-explosion@3.0.3(react-dom@19.2.0(react@19.2.0))(react@19.2.0):
     dependencies:
-      react: link:@vercel/analytics/react
-      react-dom: 19.2.0(react@@vercel+analytics+react)
+      react: 19.2.0
+      react-dom: 19.2.0(react@19.2.0)
 
-  react-dom@19.2.0(react@@vercel+analytics+react):
+  react-dom@19.2.0(react@19.2.0):
     dependencies:
-      react: link:@vercel/analytics/react
+      react: 19.2.0
       scheduler: 0.27.0
 
-  react-icons@5.5.0(react@@vercel+analytics+react):
+  react-icons@5.5.0(react@19.2.0):
     dependencies:
-      react: link:@vercel/analytics/react
+      react: 19.2.0
 
   react-refresh@0.18.0: {}
 
-  react-router-dom@7.9.6(react-dom@19.2.0(react@@vercel+analytics+react))(react@@vercel+analytics+react):
+  react-router-dom@7.9.6(react-dom@19.2.0(react@19.2.0))(react@19.2.0):
     dependencies:
-      react: link:@vercel/analytics/react
-      react-dom: 19.2.0(react@@vercel+analytics+react)
-      react-router: 7.9.6(react-dom@19.2.0(react@@vercel+analytics+react))(react@@vercel+analytics+react)
+      react: 19.2.0
+      react-dom: 19.2.0(react@19.2.0)
+      react-router: 7.9.6(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
 
-  react-router@7.9.6(react-dom@19.2.0(react@@vercel+analytics+react))(react@@vercel+analytics+react):
+  react-router@7.9.6(react-dom@19.2.0(react@19.2.0))(react@19.2.0):
     dependencies:
       cookie: 1.0.2
-      react: link:@vercel/analytics/react
+      react: 19.2.0
       set-cookie-parser: 2.7.1
     optionalDependencies:
-      react-dom: 19.2.0(react@@vercel+analytics+react)
+      react-dom: 19.2.0(react@19.2.0)
+
+  react@19.2.0: {}
 
   readable-stream@3.6.2:
     dependencies:

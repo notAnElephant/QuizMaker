@@ -1,4 +1,3 @@
-import { Analytics } from "@vercel/analytics/next";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
@@ -13,7 +12,6 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <BrowserRouter>
       <QuizProvider>
-        <Analytics />
         <Routes>
           <Route path="/" element={<App />} />
           <Route
