@@ -7,18 +7,30 @@ TODO
 The project is built with:
 
 - React (TypeScript)
-- Hasura
+- Hasura v2 (graphql-engine)
 - Tailwind
 - Vite
 
 ## Hasura
 
-Hasura is used to access the database. We are using [Hasura DDN](https://hasura.io/docs/3.0/quickstart/).
+This project now uses Hasura v2 (graphql-engine) instead of Hasura DDN.
 
-### Start Hasura locally
+### Start Hasura v2 locally
 
-Run `docker-compose up`
+1. Copy/create a `.env` file for the frontend (Vite), for example:
+   - VITE_HASURA_GRAPHQL_ENDPOINT=http://localhost:3280/v1/graphql
+   - VITE_HASURA_ADMIN_SECRET=your-secret (optional)
 
-Open the Hasura console by running `ddn console --local`
+2. Start Postgres and Hasura v2 with Docker Compose:
+   - docker compose up -d
 
-There, you must be able to see the tables and relationships, and even run GraphQL queries.
+   This exposes the Hasura console at http://localhost:3280/ and the GraphQL endpoint at http://localhost:3280/v1/graphql.
+
+3. Optional: secure the Hasura console and endpoint by exporting an admin secret before starting or by setting it in your environment:
+   - export HASURA_GRAPHQL_ADMIN_SECRET=your-secret
+   - Then restart docker compose if already running.
+
+4. Start the frontend (Vite):
+   - pnpm dev (or npm run dev / yarn dev)
+
+5. In the Hasura console, create your tables (e.g., a `questions` table) and track them. The Editor page expects a `questions` table with fields like id, content, type, points, category, source, list. Adjust the query in `src/components/Editor.tsx` if your schema differs.
