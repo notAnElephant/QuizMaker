@@ -13,7 +13,7 @@ The project is built with:
 
 ## Hasura
 
-This project now uses Hasura v2 (graphql-engine) instead of Hasura DDN.
+This project uses Hasura v2 (graphql-engine).
 
 ### Start Hasura v2 locally
 
