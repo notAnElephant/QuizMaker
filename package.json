@@ -15,7 +15,7 @@
     "@vercel/analytics": "^1.5.0",
     "clsx": "^2.1.1",
     "graphql": "^16.9.0",
-    "react": "^19.2.0",
+    "react": "link:@vercel/analytics/react",
     "react-confetti-explosion": "^3.0.3",
     "react-dom": "^19.2.0",
     "react-icons": "^5.5.0",
