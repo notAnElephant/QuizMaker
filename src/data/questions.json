@@ -40,14 +40,7 @@
       {
         "type": "text",
         "content": "Az alábbi hat közterület-jelleg közül melyik az a kettő, amelyik nem létezik Magyarországon?",
-        "list": [
-          "lépcső",
-          "udvar",
-          "puszta",
-          "elágazás",
-          "körtér",
-          "mellékút"
-        ],
+        "list": ["lépcső", "udvar", "puszta", "elágazás", "körtér", "mellékút"],
         "points": 1000
       },
       {
@@ -66,14 +59,7 @@
       {
         "type": "text",
         "content": "Az alábbi hat közterület-jelleg közül melyik az a kettő, amelyik nem létezik Magyarországon?",
-        "list": [
-          "sikátor",
-          "zug",
-          "barlang",
-          "vár",
-          "csapás",
-          "part"
-        ],
+        "list": ["sikátor", "zug", "barlang", "vár", "csapás", "part"],
         "points": 3000
       },
       {
@@ -92,14 +78,7 @@
       {
         "type": "text",
         "content": "Az alábbi hat közterület-jelleg közül melyik az a kettő, amelyik nem létezik Magyarországon?",
-        "list": [
-          "major",
-          "tere",
-          "járda",
-          "lagúna",
-          "liget",
-          "negyed"
-        ],
+        "list": ["major", "tere", "járda", "lagúna", "liget", "negyed"],
         "points": 5000
       }
     ]
@@ -132,33 +111,19 @@
       {
         "type": "text",
         "content": "Melyik település van az alábbiak közül Magyarország területén?",
-        "list": [
-          "Chernelházadamonya",
-          "Magyarkapus",
-          "Bojt",
-          "Göcs"
-        ],
+        "list": ["Chernelházadamonya", "Magyarkapus", "Bojt", "Göcs"],
         "points": 3000
       },
       {
         "type": "text",
         "content": "Melyik település van az alábbiak közül Európa területén?",
-        "list": [
-          "Ribi",
-          "Bré",
-          "Pina",
-          "Tanga"
-        ],
+        "list": ["Ribi", "Bré", "Pina", "Tanga"],
         "points": 4000
       },
       {
         "type": "text",
         "content": "Melyik településnek van az alábbiak közül magyar vonatkozása?",
-        "list": [
-          "Rum",
-          "Söre",
-          "Borod"
-        ],
+        "list": ["Rum", "Söre", "Borod"],
         "points": 5000
       }
     ]

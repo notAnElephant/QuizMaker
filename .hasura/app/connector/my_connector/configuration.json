@@ -54,9 +54,7 @@
           }
         },
         "uniquenessConstraints": {
-          "answers_pkey": [
-            "answer_id"
-          ]
+          "answers_pkey": ["answer_id"]
         },
         "foreignRelations": {
           "answers_play_id_fkey": {
@@ -141,9 +139,7 @@
           }
         },
         "uniquenessConstraints": {
-          "questions_pkey": [
-            "question_id"
-          ]
+          "questions_pkey": ["question_id"]
         },
         "foreignRelations": {
           "questions_quiz_id_fkey": {
@@ -220,9 +216,7 @@
           }
         },
         "uniquenessConstraints": {
-          "quiz_plays_pkey": [
-            "play_id"
-          ]
+          "quiz_plays_pkey": ["play_id"]
         },
         "foreignRelations": {
           "quiz_plays_quiz_id_fkey": {
@@ -308,9 +302,7 @@
           }
         },
         "uniquenessConstraints": {
-          "quizzes_pkey": [
-            "quiz_id"
-          ]
+          "quizzes_pkey": ["quiz_id"]
         },
         "foreignRelations": {
           "quizzes_owner_id_fkey": {
@@ -362,9 +354,7 @@
           }
         },
         "uniquenessConstraints": {
-          "users_pkey": [
-            "user_id"
-          ]
+          "users_pkey": ["user_id"]
         },
         "foreignRelations": {},
         "description": null
@@ -888,9 +878,7 @@
       "timescaledb_information",
       "_timescaledb_debug"
     ],
-    "unqualifiedSchemasForTables": [
-      "public"
-    ],
+    "unqualifiedSchemasForTables": ["public"],
     "unqualifiedSchemasForTypesAndProcedures": [
       "public",
       "pg_catalog",

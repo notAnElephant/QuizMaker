@@ -10,5 +10,5 @@ body {
   margin: 0;
   padding: 0;
   @apply bg-cover bg-center bg-no-repeat;
-  background-image: url('./assets/bg.png');
+  background-image: url("./assets/bg.png");
 }
