@@ -17,20 +17,34 @@ This project uses Hasura v2 (graphql-engine).
 
 ### Start Hasura v2 locally
 
-1. Copy/create a `.env` file for the frontend (Vite), for example:
-   - VITE_HASURA_GRAPHQL_ENDPOINT=http://localhost:3280/v1/graphql
-   - VITE_HASURA_ADMIN_SECRET=your-secret (optional)
+1. Start Postgres and Hasura v2 with Docker Compose:
+   ```bash
+   docker compose up -d
+   ```
 
-2. Start Postgres and Hasura v2 with Docker Compose:
-   - docker compose up -d
+   This exposes the Hasura console at [http://localhost:8080/console](http://localhost:8080/console) and the GraphQL endpoint at `http://localhost:8080/v1/graphql`.
 
-   This exposes the Hasura console at http://localhost:3280/ and the GraphQL endpoint at http://localhost:3280/v1/graphql.
+2. Start the frontend (Vite):
+   ```bash
+   pnpm dev
+   ```
 
-3. Optional: secure the Hasura console and endpoint by exporting an admin secret before starting or by setting it in your environment:
-   - export HASURA_GRAPHQL_ADMIN_SECRET=your-secret
-   - Then restart docker compose if already running.
+## GraphQL Workflow
 
-4. Start the frontend (Vite):
-   - pnpm dev (or npm run dev / yarn dev)
+This project uses **GraphQL Codegen** to generate TypeScript types automatically from the Hasura schema.
 
-5. In the [Hasura console](http://localhost:8080/console/api/api-explorer), create your tables (e.g., a `questions` table) and track them. The Editor page expects a `questions` table with fields like id, content, type, points, category, source, list. Adjust the query in `src/components/Editor.tsx` if your schema differs.
+### How it works
+1. **Introspection:** The codegen connects to the Hasura endpoint and downloads the schema.
+2. **Type Generation:** It generates TypeScript types for all your tables and specific GraphQL operations.
+3. **Usage:** Always import `gql` or specific document nodes (like `GetQuestionsDocument`) from the `./src/gql` directory to get full IntelliSense and type safety.
+
+### Regenerate Types
+Whenever you change the database schema in Hasura or update a `.graphql` file, run:
+```bash
+pnpm graphql-codegen
+```
+This will update the files in `src/gql/` to match the latest server state.
+
+### Tips for Development
+- **Exploring Fields:** Don't browse the generated `graphql.ts` file. Instead, use the **Hasura Console (GraphiQL)** at [http://localhost:8080/console](http://localhost:8080/console). Use the "Explorer" sidebar to discover available fields and test your queries before copy-pasting them into your code.
+- **Typed Data:** Always rely on IDE IntelliSense. Hover over variables in your `.tsx` files to see their types, and use "Go to Definition" (Cmd/Ctrl + Click) to jump to specific type definitions if needed.
