@@ -15,16 +15,26 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
  */
 type Documents = {
     "\n  query GetUsers {\n    users(limit: 1) {\n      user_id\n    }\n  }\n": typeof types.GetUsersDocument,
-    "\n  mutation CreateUser($name: String!) {\n    insert_users_one(object: {display_name: $name}) {\n      user_id\n    }\n  }\n": typeof types.CreateUserDocument,
-    "\n  mutation CreateQuiz($title: String!, $owner_id: uuid!) {\n    insert_quizzes_one(object: {title: $title, owner_id: $owner_id}) {\n      quiz_id\n    }\n  }\n": typeof types.CreateQuizDocument,
-    "\n  mutation CreateQuestion(\n    $text: String!, \n    $type: String!, \n    $points: Int!, \n    $quiz_id: uuid!, \n    $options: [String!]\n  ) {\n    insert_questions_one(object: {\n      question_text: $text, \n      question_type: $type, \n      points: $points, \n      quiz_id: $quiz_id, \n      answer_options: $options\n    }) {\n      question_id\n    }\n  }\n": typeof types.CreateQuestionDocument,
+    "\n  mutation CreateUser($id: uuid!, $name: String!) {\n    insert_users_one(object: {user_id: $id, display_name: $name}) {\n      user_id\n    }\n  }\n": typeof types.CreateUserDocument,
+    "\n  mutation CreateQuiz($id: uuid!, $title: String!, $owner_id: uuid!) {\n    insert_quizzes_one(object: {quiz_id: $id, title: $title, owner_id: $owner_id}) {\n      quiz_id\n    }\n  }\n": typeof types.CreateQuizDocument,
+    "\n  mutation CreateQuestion(\n    $id: uuid!,\n    $text: String!, \n    $type: String!, \n    $points: Int!, \n    $quiz_id: uuid!, \n    $options: [String!]\n  ) {\n    insert_questions_one(object: {\n      question_id: $id,\n      question_text: $text, \n      question_type: $type, \n      points: $points, \n      quiz_id: $quiz_id, \n      answer_options: $options\n    }) {\n      question_id\n    }\n  }\n": typeof types.CreateQuestionDocument,
+    "\n      mutation DeleteQuestion($id: uuid!) {\n        delete_questions_by_pk(question_id: $id) {\n          question_id\n        }\n      }\n    ": typeof types.DeleteQuestionDocument,
+    "\n      query GetAllQuestions {\n        questions {\n          question_id\n          question_text\n        }\n      }\n    ": typeof types.GetAllQuestionsDocument,
+    "\n    mutation NukeQuestions {\n      delete_questions(where: {}) {\n        affected_rows\n      }\n    }\n  ": typeof types.NukeQuestionsDocument,
+    "\n    mutation NukeQuizzes {\n      delete_quizzes(where: {}) {\n        affected_rows\n      }\n    }\n  ": typeof types.NukeQuizzesDocument,
+    "\n    mutation NukeUsers {\n      delete_users(where: {}) {\n        affected_rows\n      }\n    }\n  ": typeof types.NukeUsersDocument,
     "query GetQuestions {\n  questions(order_by: [{points: asc}]) {\n    question_id\n    question_text\n    question_type\n    points\n    answer_options\n    correct_answer\n    quiz_id\n  }\n}": typeof types.GetQuestionsDocument,
 };
 const documents: Documents = {
     "\n  query GetUsers {\n    users(limit: 1) {\n      user_id\n    }\n  }\n": types.GetUsersDocument,
-    "\n  mutation CreateUser($name: String!) {\n    insert_users_one(object: {display_name: $name}) {\n      user_id\n    }\n  }\n": types.CreateUserDocument,
-    "\n  mutation CreateQuiz($title: String!, $owner_id: uuid!) {\n    insert_quizzes_one(object: {title: $title, owner_id: $owner_id}) {\n      quiz_id\n    }\n  }\n": types.CreateQuizDocument,
-    "\n  mutation CreateQuestion(\n    $text: String!, \n    $type: String!, \n    $points: Int!, \n    $quiz_id: uuid!, \n    $options: [String!]\n  ) {\n    insert_questions_one(object: {\n      question_text: $text, \n      question_type: $type, \n      points: $points, \n      quiz_id: $quiz_id, \n      answer_options: $options\n    }) {\n      question_id\n    }\n  }\n": types.CreateQuestionDocument,
+    "\n  mutation CreateUser($id: uuid!, $name: String!) {\n    insert_users_one(object: {user_id: $id, display_name: $name}) {\n      user_id\n    }\n  }\n": types.CreateUserDocument,
+    "\n  mutation CreateQuiz($id: uuid!, $title: String!, $owner_id: uuid!) {\n    insert_quizzes_one(object: {quiz_id: $id, title: $title, owner_id: $owner_id}) {\n      quiz_id\n    }\n  }\n": types.CreateQuizDocument,
+    "\n  mutation CreateQuestion(\n    $id: uuid!,\n    $text: String!, \n    $type: String!, \n    $points: Int!, \n    $quiz_id: uuid!, \n    $options: [String!]\n  ) {\n    insert_questions_one(object: {\n      question_id: $id,\n      question_text: $text, \n      question_type: $type, \n      points: $points, \n      quiz_id: $quiz_id, \n      answer_options: $options\n    }) {\n      question_id\n    }\n  }\n": types.CreateQuestionDocument,
+    "\n      mutation DeleteQuestion($id: uuid!) {\n        delete_questions_by_pk(question_id: $id) {\n          question_id\n        }\n      }\n    ": types.DeleteQuestionDocument,
+    "\n      query GetAllQuestions {\n        questions {\n          question_id\n          question_text\n        }\n      }\n    ": types.GetAllQuestionsDocument,
+    "\n    mutation NukeQuestions {\n      delete_questions(where: {}) {\n        affected_rows\n      }\n    }\n  ": types.NukeQuestionsDocument,
+    "\n    mutation NukeQuizzes {\n      delete_quizzes(where: {}) {\n        affected_rows\n      }\n    }\n  ": types.NukeQuizzesDocument,
+    "\n    mutation NukeUsers {\n      delete_users(where: {}) {\n        affected_rows\n      }\n    }\n  ": types.NukeUsersDocument,
     "query GetQuestions {\n  questions(order_by: [{points: asc}]) {\n    question_id\n    question_text\n    question_type\n    points\n    answer_options\n    correct_answer\n    quiz_id\n  }\n}": types.GetQuestionsDocument,
 };
 
@@ -49,15 +59,35 @@ export function gql(source: "\n  query GetUsers {\n    users(limit: 1) {\n      
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function gql(source: "\n  mutation CreateUser($name: String!) {\n    insert_users_one(object: {display_name: $name}) {\n      user_id\n    }\n  }\n"): (typeof documents)["\n  mutation CreateUser($name: String!) {\n    insert_users_one(object: {display_name: $name}) {\n      user_id\n    }\n  }\n"];
+export function gql(source: "\n  mutation CreateUser($id: uuid!, $name: String!) {\n    insert_users_one(object: {user_id: $id, display_name: $name}) {\n      user_id\n    }\n  }\n"): (typeof documents)["\n  mutation CreateUser($id: uuid!, $name: String!) {\n    insert_users_one(object: {user_id: $id, display_name: $name}) {\n      user_id\n    }\n  }\n"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function gql(source: "\n  mutation CreateQuiz($title: String!, $owner_id: uuid!) {\n    insert_quizzes_one(object: {title: $title, owner_id: $owner_id}) {\n      quiz_id\n    }\n  }\n"): (typeof documents)["\n  mutation CreateQuiz($title: String!, $owner_id: uuid!) {\n    insert_quizzes_one(object: {title: $title, owner_id: $owner_id}) {\n      quiz_id\n    }\n  }\n"];
+export function gql(source: "\n  mutation CreateQuiz($id: uuid!, $title: String!, $owner_id: uuid!) {\n    insert_quizzes_one(object: {quiz_id: $id, title: $title, owner_id: $owner_id}) {\n      quiz_id\n    }\n  }\n"): (typeof documents)["\n  mutation CreateQuiz($id: uuid!, $title: String!, $owner_id: uuid!) {\n    insert_quizzes_one(object: {quiz_id: $id, title: $title, owner_id: $owner_id}) {\n      quiz_id\n    }\n  }\n"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function gql(source: "\n  mutation CreateQuestion(\n    $text: String!, \n    $type: String!, \n    $points: Int!, \n    $quiz_id: uuid!, \n    $options: [String!]\n  ) {\n    insert_questions_one(object: {\n      question_text: $text, \n      question_type: $type, \n      points: $points, \n      quiz_id: $quiz_id, \n      answer_options: $options\n    }) {\n      question_id\n    }\n  }\n"): (typeof documents)["\n  mutation CreateQuestion(\n    $text: String!, \n    $type: String!, \n    $points: Int!, \n    $quiz_id: uuid!, \n    $options: [String!]\n  ) {\n    insert_questions_one(object: {\n      question_text: $text, \n      question_type: $type, \n      points: $points, \n      quiz_id: $quiz_id, \n      answer_options: $options\n    }) {\n      question_id\n    }\n  }\n"];
+export function gql(source: "\n  mutation CreateQuestion(\n    $id: uuid!,\n    $text: String!, \n    $type: String!, \n    $points: Int!, \n    $quiz_id: uuid!, \n    $options: [String!]\n  ) {\n    insert_questions_one(object: {\n      question_id: $id,\n      question_text: $text, \n      question_type: $type, \n      points: $points, \n      quiz_id: $quiz_id, \n      answer_options: $options\n    }) {\n      question_id\n    }\n  }\n"): (typeof documents)["\n  mutation CreateQuestion(\n    $id: uuid!,\n    $text: String!, \n    $type: String!, \n    $points: Int!, \n    $quiz_id: uuid!, \n    $options: [String!]\n  ) {\n    insert_questions_one(object: {\n      question_id: $id,\n      question_text: $text, \n      question_type: $type, \n      points: $points, \n      quiz_id: $quiz_id, \n      answer_options: $options\n    }) {\n      question_id\n    }\n  }\n"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "\n      mutation DeleteQuestion($id: uuid!) {\n        delete_questions_by_pk(question_id: $id) {\n          question_id\n        }\n      }\n    "): (typeof documents)["\n      mutation DeleteQuestion($id: uuid!) {\n        delete_questions_by_pk(question_id: $id) {\n          question_id\n        }\n      }\n    "];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "\n      query GetAllQuestions {\n        questions {\n          question_id\n          question_text\n        }\n      }\n    "): (typeof documents)["\n      query GetAllQuestions {\n        questions {\n          question_id\n          question_text\n        }\n      }\n    "];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "\n    mutation NukeQuestions {\n      delete_questions(where: {}) {\n        affected_rows\n      }\n    }\n  "): (typeof documents)["\n    mutation NukeQuestions {\n      delete_questions(where: {}) {\n        affected_rows\n      }\n    }\n  "];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "\n    mutation NukeQuizzes {\n      delete_quizzes(where: {}) {\n        affected_rows\n      }\n    }\n  "): (typeof documents)["\n    mutation NukeQuizzes {\n      delete_quizzes(where: {}) {\n        affected_rows\n      }\n    }\n  "];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "\n    mutation NukeUsers {\n      delete_users(where: {}) {\n        affected_rows\n      }\n    }\n  "): (typeof documents)["\n    mutation NukeUsers {\n      delete_users(where: {}) {\n        affected_rows\n      }\n    }\n  "];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

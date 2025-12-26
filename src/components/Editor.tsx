@@ -1,7 +1,6 @@
 import { useQuery } from "@apollo/client/react";
 import React from "react";
 import { GetQuestionsDocument } from "../gql/graphql";
-import Seeder from "./Seeder";
 
 const Editor: React.FC = () => {
   const { loading, error, data } = useQuery(GetQuestionsDocument);
@@ -21,8 +20,6 @@ const Editor: React.FC = () => {
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">Questions Editor</h1>
-
-      <Seeder />
 
       {!data?.questions?.length ? (
         <p>No questions found in the database.</p>
