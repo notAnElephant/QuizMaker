@@ -1,25 +1,9 @@
 import { useQuery } from "@apollo/client/react";
 import React from "react";
-import { gql } from "../gql";
-
-const GET_QUESTIONS = gql(`
-  query GetQuestions {
-    questions(order_by: [{ points: asc }]) {
-      question_id
-      question_text
-      question_type
-      points
-      answer_options
-      correct_answer
-      quiz_id
-    }
-  }
-`);
+import { GetQuestionsDocument } from "../gql/graphql";
 
 const Editor: React.FC = () => {
-  const { loading, error, data } = useQuery(GET_QUESTIONS);
-
-  console.log({ data });
+  const { loading, error, data } = useQuery(GetQuestionsDocument);
 
   if (loading) return <p className="p-4">Loading questions...</p>;
 
