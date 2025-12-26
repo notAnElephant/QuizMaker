@@ -6,7 +6,7 @@ import { ApolloClient, HttpLink, InMemoryCache } from "@apollo/client";
 //   VITE_HASURA_ADMIN_SECRET=your-secret   (optional)
 const HASURA_ENDPOINT =
   (import.meta as any)?.env?.VITE_HASURA_GRAPHQL_ENDPOINT ||
-  "http://localhost:3280/v1/graphql";
+  "http://localhost:8080/v1/graphql";
 
 const HASURA_ADMIN_SECRET = (import.meta as any)?.env?.VITE_HASURA_ADMIN_SECRET;
 

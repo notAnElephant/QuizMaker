@@ -1,0 +1,11 @@
+query GetQuestions {
+    questions(order_by: [{ points: asc }]) {
+        question_id
+        question_text
+        question_type
+        points
+        answer_options
+        correct_answer
+        quiz_id
+    }
+}

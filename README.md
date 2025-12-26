@@ -33,4 +33,4 @@ This project uses Hasura v2 (graphql-engine).
 4. Start the frontend (Vite):
    - pnpm dev (or npm run dev / yarn dev)
 
-5. In the Hasura console, create your tables (e.g., a `questions` table) and track them. The Editor page expects a `questions` table with fields like id, content, type, points, category, source, list. Adjust the query in `src/components/Editor.tsx` if your schema differs.
+5. In the [Hasura console](http://localhost:8080/console/api/api-explorer), create your tables (e.g., a `questions` table) and track them. The Editor page expects a `questions` table with fields like id, content, type, points, category, source, list. Adjust the query in `src/components/Editor.tsx` if your schema differs.
