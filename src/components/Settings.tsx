@@ -1,6 +1,6 @@
+import { FaArrowLeft } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { useQuiz } from "../context/QuizContext";
-import { FaArrowLeft } from "react-icons/fa";
 
 export default function Settings() {
   const navigate = useNavigate();
@@ -24,7 +24,7 @@ export default function Settings() {
         </label>
         <p className="text-sm text-gray-600 mt-1">
           Ebben a módban minden kategóriából csak a következő kérdés választható
-          ki, illetve a már kiválasztott kérdések sem kattinthatóak.
+          ki
         </p>
       </div>
 
