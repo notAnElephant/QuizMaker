@@ -29,6 +29,20 @@ This project uses Hasura v2 (graphql-engine).
    pnpm dev
    ```
 
+### Hasura migrations
+
+The repository now tracks Hasura metadata in `hasura/metadata/` and expects SQL migrations under `hasura/migrations/default/`.
+
+Typical workflow:
+
+```bash
+hasura migrate create "describe_change" --database-name default --from-server --project hasura
+pnpm hasura:migrate:apply
+pnpm hasura:metadata:apply
+```
+
+Commit migrations and metadata together. If the Hasura CLI is not installed locally yet, install it before using the migration scripts.
+
 ## GraphQL Workflow
 
 This project uses **GraphQL Codegen** to generate TypeScript types automatically from the Hasura schema.

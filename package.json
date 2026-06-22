@@ -7,7 +7,10 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "hasura:metadata:apply": "hasura metadata apply --project hasura",
+    "hasura:migrate:apply": "hasura migrate apply --database-name default --project hasura",
+    "hasura:migrate:create": "hasura migrate create"
   },
   "dependencies": {
     "@apollo/client": "^4.0.9",
