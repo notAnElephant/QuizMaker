@@ -1,6 +1,6 @@
 import { ApolloClient, HttpLink, InMemoryCache } from "@apollo/client";
 
-// Configure Hasura v2 endpoint via env, fallback to local default.
+// Configure the browser client from Vite-exposed env vars only.
 // For Vite, define these in a .env file as:
 //   VITE_HASURA_GRAPHQL_ENDPOINT=http://localhost:3280/v1/graphql
 //   VITE_HASURA_ADMIN_SECRET=your-secret   (optional)

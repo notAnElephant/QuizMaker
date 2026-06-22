@@ -29,7 +29,12 @@ This project uses Hasura v2 (graphql-engine).
    pnpm dev
    ```
 
-Before starting Docker for the first time, create a local `.env` file from `.env.example` and set `HASURA_GRAPHQL_ADMIN_SECRET`. For local frontend access, set `VITE_HASURA_ADMIN_SECRET` to the same value.
+Before starting Docker for the first time, create a local `.env` file from `.env.example`.
+
+- Backend / Docker Compose variables: `POSTGRES_PASSWORD`, `HASURA_APP_DATABASE_URL`, `HASURA_GRAPHQL_ADMIN_SECRET`
+- Frontend / Vite variables: `VITE_HASURA_GRAPHQL_ENDPOINT`, `VITE_HASURA_ADMIN_SECRET`
+
+Keep backend-only values out of `VITE_*` variables. For local frontend access to a protected Hasura instance, set `VITE_HASURA_ADMIN_SECRET` to the same value as `HASURA_GRAPHQL_ADMIN_SECRET`.
 
 ### Hasura migrations
 
