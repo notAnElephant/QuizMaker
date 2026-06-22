@@ -6,7 +6,7 @@ import UserSwitcher from "./components/UserSwitcher";
 import { useQuiz } from "./context/QuizContext";
 import { useCurrentUser } from "./context/useCurrentUser";
 import { useNavigate } from "react-router-dom";
-import { FaCog, FaEdit, FaFolderOpen, FaPlus, FaSave, FaUsers } from "react-icons/fa";
+import { FaCog, FaEdit, FaFolderOpen, FaPlus, FaSave, FaUser, FaUsers } from "react-icons/fa";
 import TeamBar from "./components/TeamBar.tsx";
 import { buildStoredQuestionText } from "./utility/quizPersistence";
 
@@ -143,6 +143,14 @@ function App() {
           aria-label="Teams"
         >
           <FaUsers size={20} />
+        </button>
+        <button
+          onClick={() => navigate("/profile")}
+          className="bg-gray-800 text-white p-3 rounded-full shadow-lg hover:bg-gray-700"
+          aria-label="Profile"
+          title="Profil"
+        >
+          <FaUser size={20} />
         </button>
         <button
           onClick={() => navigate("/settings")}

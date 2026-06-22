@@ -7,6 +7,7 @@ import "./index.css";
 import { client } from "./client.ts";
 import Editor from "./components/Editor.tsx";
 import NewQuiz from "./components/NewQuiz.tsx";
+import Profile from "./components/Profile.tsx";
 import QuestionView from "./components/QuestionView";
 import SavedQuizzes from "./components/SavedQuizzes.tsx";
 import Settings from "./components/Settings.tsx";
@@ -28,6 +29,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
               />
               <Route path="/settings" element={<Settings />} />
               <Route path="/teams" element={<Teams />} />
+              <Route path="/profile" element={<Profile />} />
               <Route path="/quizzes" element={<SavedQuizzes />} />
               <Route path="/quizzes/new" element={<NewQuiz />} />
               <Route path="/editor" element={<Editor />} />
