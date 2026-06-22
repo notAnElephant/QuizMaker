@@ -29,7 +29,7 @@ This project uses Hasura v2 (graphql-engine).
    pnpm dev
    ```
 
-Before starting Docker for the first time, create a local `.env` file from `.env.example` and fill in any non-default database values you need for Hasura.
+Before starting Docker for the first time, create a local `.env` file from `.env.example` and set `HASURA_GRAPHQL_ADMIN_SECRET`. For local frontend access, set `VITE_HASURA_ADMIN_SECRET` to the same value.
 
 ### Hasura migrations
 
