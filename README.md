@@ -45,7 +45,7 @@ Use a separate production environment configuration instead of reusing local `.e
 
 Set `HASURA_APP_DATABASE_URL` only in production or shared environments where Hasura should point at a remote Postgres instance such as Neon.
 
-### Hasura migrations
+### Hasura migrations and local seed
 
 The repository now tracks Hasura metadata in `hasura/metadata/` and expects SQL migrations under `hasura/migrations/default/`.
 
@@ -57,7 +57,21 @@ pnpm hasura:migrate:apply
 pnpm hasura:metadata:apply
 ```
 
-Commit migrations and metadata together. If the Hasura CLI is not installed locally yet, install it before using the migration scripts.
+To rebuild the local database from the committed schema and seed snapshot:
+
+```bash
+pnpm db:reset:local
+```
+
+This resets the local `public` schema, reapplies Hasura migrations and metadata, then loads `db/seeds/local.sql`, which mirrors the current quiz data snapshot copied from Neon. Use:
+
+```bash
+pnpm db:seed:local
+```
+
+if the schema already exists and you only want to reload the local data set.
+
+Commit migrations, metadata, and seed changes together when the data model changes. If the Hasura CLI is not installed locally yet, install it before using the migration scripts.
 
 ## GraphQL Workflow
 

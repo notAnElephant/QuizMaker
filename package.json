@@ -8,6 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
+    "db:seed:local": "sh -aec 'set -a; . ./.env; set +a; db_pw=\"${POSTGRES_PASSWORD:-postgrespassword}\"; PGPASSWORD=\"$db_pw\" psql -vON_ERROR_STOP=1 -f db/seeds/local.sql \"postgresql://postgres@localhost:55432/postgres\"'",
+    "db:reset:local": "sh -aec 'set -a; . ./.env; set +a; db_pw=\"${POSTGRES_PASSWORD:-postgrespassword}\"; PGPASSWORD=\"$db_pw\" psql -vON_ERROR_STOP=1 \"postgresql://postgres@localhost:55432/postgres\" <<\"SQL\"\nDROP SCHEMA IF EXISTS public CASCADE;\nCREATE SCHEMA public;\nGRANT ALL ON SCHEMA public TO postgres;\nGRANT ALL ON SCHEMA public TO public;\nSQL\nPGPASSWORD=\"$db_pw\" psql -vON_ERROR_STOP=1 -f hasura/migrations/default/1782155930310_init_schema/up.sql \"postgresql://postgres@localhost:55432/postgres\"\npnpm hasura:metadata:apply\npnpm db:seed:local'",
     "hasura:metadata:apply": "sh -ac 'set -a; . ./.env; set +a; hasura metadata apply --project hasura --admin-secret \"$HASURA_GRAPHQL_ADMIN_SECRET\"'",
     "hasura:migrate:apply": "sh -ac 'set -a; . ./.env; set +a; hasura migrate apply --database-name default --project hasura --admin-secret \"$HASURA_GRAPHQL_ADMIN_SECRET\"'",
     "hasura:migrate:create": "sh -ac 'set -a; . ./.env; set +a; hasura migrate create'"
