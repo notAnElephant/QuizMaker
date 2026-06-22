@@ -20,4 +20,4 @@ There is currently no test runner configured. Until tests are added, treat `pnpm
 Prefer Conventional Commits: `feat:`, `fix:`, `chore:`. Recent history contains a few `wip` commits; do not use that pattern for final commits. Keep messages imperative and specific, for example `fix: handle empty questions response`. PRs should include a short summary, note schema or env changes, link related issues, and add screenshots for UI changes.
 
 ## Security & Configuration Tips
-Do not commit real secrets. Keep backend-only values such as `HASURA_GRAPHQL_ADMIN_SECRET` and `HASURA_APP_DATABASE_URL` in local `.env`, and keep browser-exposed values under `VITE_*` such as `VITE_HASURA_GRAPHQL_ENDPOINT`. If GraphQL schema changes, update Hasura metadata first, then regenerate types.
+Do not commit real secrets. Local development uses Docker Postgres by default, so keep local `.env` minimal and reserve `HASURA_APP_DATABASE_URL` for production or shared environments. Keep browser-exposed values under `VITE_*` such as `VITE_HASURA_GRAPHQL_ENDPOINT`. If GraphQL schema changes, update Hasura metadata first, then regenerate types.

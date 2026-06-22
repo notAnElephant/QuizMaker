@@ -3,6 +3,8 @@ services:
     image: postgres:15
     platform: linux/arm64
     restart: always
+    ports:
+      - "55432:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
     environment:
@@ -15,8 +17,9 @@ services:
     environment:
       ## postgres database to store Hasura metadata
       HASURA_GRAPHQL_METADATA_DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD:-postgrespassword}@postgres:5432/postgres
-      ## Optional Hasura application data source URL loaded from local backend env.
-      PG_DATABASE_URL: ${HASURA_APP_DATABASE_URL:-}
+      ## Local development uses the bundled Postgres instance by default.
+      ## Override HASURA_APP_DATABASE_URL only for production or shared environments.
+      PG_DATABASE_URL: ${HASURA_APP_DATABASE_URL:-postgres://postgres:${POSTGRES_PASSWORD:-postgrespassword}@postgres:5432/postgres}
       ## enable the console served by server
       HASURA_GRAPHQL_ENABLE_CONSOLE: "true" # set to "false" to disable console
       ## enable debugging mode. It is recommended to disable this in production

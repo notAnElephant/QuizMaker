@@ -1,1 +1,21 @@
-[]
+- name: default
+  kind: postgres
+  configuration:
+    connection_info:
+      database_url:
+        from_env: PG_DATABASE_URL
+      isolation_level: read-committed
+      use_prepared_statements: true
+  tables:
+    - table:
+        schema: public
+        name: questions
+    - table:
+        schema: public
+        name: quiz_plays
+    - table:
+        schema: public
+        name: quizzes
+    - table:
+        schema: public
+        name: users

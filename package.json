@@ -8,9 +8,9 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "hasura:metadata:apply": "hasura metadata apply --project hasura",
-    "hasura:migrate:apply": "hasura migrate apply --database-name default --project hasura",
-    "hasura:migrate:create": "hasura migrate create"
+    "hasura:metadata:apply": "sh -ac 'set -a; . ./.env; set +a; hasura metadata apply --project hasura --admin-secret \"$HASURA_GRAPHQL_ADMIN_SECRET\"'",
+    "hasura:migrate:apply": "sh -ac 'set -a; . ./.env; set +a; hasura migrate apply --database-name default --project hasura --admin-secret \"$HASURA_GRAPHQL_ADMIN_SECRET\"'",
+    "hasura:migrate:create": "sh -ac 'set -a; . ./.env; set +a; hasura migrate create'"
   },
   "dependencies": {
     "@apollo/client": "^4.0.9",

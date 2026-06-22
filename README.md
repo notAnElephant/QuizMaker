@@ -31,10 +31,19 @@ This project uses Hasura v2 (graphql-engine).
 
 Before starting Docker for the first time, create a local `.env` file from `.env.example`.
 
-- Backend / Docker Compose variables: `POSTGRES_PASSWORD`, `HASURA_APP_DATABASE_URL`, `HASURA_GRAPHQL_ADMIN_SECRET`
+- Local backend / Docker Compose variables: `POSTGRES_PASSWORD`, `HASURA_GRAPHQL_ADMIN_SECRET`
 - Frontend / Vite variables: `VITE_HASURA_GRAPHQL_ENDPOINT`, `VITE_HASURA_ADMIN_SECRET`
 
-Keep backend-only values out of `VITE_*` variables. For local frontend access to a protected Hasura instance, set `VITE_HASURA_ADMIN_SECRET` to the same value as `HASURA_GRAPHQL_ADMIN_SECRET`.
+Local development uses the Docker Postgres service for both Hasura metadata and app data by default. Keep backend-only values out of `VITE_*` variables. For local frontend access to a protected Hasura instance, set `VITE_HASURA_ADMIN_SECRET` to the same value as `HASURA_GRAPHQL_ADMIN_SECRET`.
+
+### Production environment
+
+Use a separate production environment configuration instead of reusing local `.env`.
+
+- Local development: `.env`
+- Production example values: `.env.production.example`
+
+Set `HASURA_APP_DATABASE_URL` only in production or shared environments where Hasura should point at a remote Postgres instance such as Neon.
 
 ### Hasura migrations
 
