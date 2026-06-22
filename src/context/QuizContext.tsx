@@ -17,6 +17,14 @@ type RawCategory = {
   questions: RawQuestion[];
 };
 
+type QuestionUpdate = {
+  content?: string;
+  list?: string[];
+  points?: number;
+  source?: string;
+  type?: "text" | "image" | "video" | "audio";
+};
+
 const initialData: Category[] = (rawData as RawCategory[]).map((cat) => ({
   category: cat.category,
   questions: cat.questions.map(
@@ -43,6 +51,11 @@ const QuizContext = createContext<{
   renameQuiz: (title: string) => void;
   loadQuiz: (title: string, nextCategories: Category[]) => void;
   markUsed: (catIndex: number, qIndex: number, value: boolean) => void;
+  updateQuestion: (
+    catIndex: number,
+    qIndex: number,
+    updates: QuestionUpdate,
+  ) => void;
   updateQuestionPoints: (
     catIndex: number,
     qIndex: number,
@@ -85,10 +98,10 @@ export function QuizProvider({ children }: { children: ReactNode }) {
     setCategories(copy);
   };
 
-  const updateQuestionPoints = (
+  const updateQuestion = (
     catIndex: number,
     qIndex: number,
-    nextPoints: number,
+    updates: QuestionUpdate,
   ) => {
     setCategories((prevCategories) =>
       prevCategories.map((category, currentCatIndex) => {
@@ -98,21 +111,31 @@ export function QuizProvider({ children }: { children: ReactNode }) {
 
         return {
           ...category,
-          questions: category.questions.map((question, currentQuestionIndex) =>
-            currentQuestionIndex === qIndex
-              ? new Question(
-                  question.type,
-                  question.content,
-                  question.source,
-                  nextPoints,
-                  question.isUsed,
-                  question.list,
-                )
-              : question,
-          ),
+          questions: category.questions.map((question, currentQuestionIndex) => {
+            if (currentQuestionIndex !== qIndex) {
+              return question;
+            }
+
+            return new Question(
+              updates.type ?? question.type,
+              updates.content ?? question.content,
+              updates.source ?? question.source,
+              updates.points ?? question.points,
+              question.isUsed,
+              updates.list ?? question.list,
+            );
+          }),
         };
       }),
     );
+  };
+
+  const updateQuestionPoints = (
+    catIndex: number,
+    qIndex: number,
+    nextPoints: number,
+  ) => {
+    updateQuestion(catIndex, qIndex, { points: nextPoints });
   };
 
   const loadQuiz = (title: string, nextCategories: Category[]) => {
@@ -181,6 +204,7 @@ export function QuizProvider({ children }: { children: ReactNode }) {
         loadQuiz,
         markUsed,
         renameQuiz,
+        updateQuestion,
         updateQuestionPoints,
         settings,
         setSettings,

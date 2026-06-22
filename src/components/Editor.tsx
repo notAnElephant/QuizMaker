@@ -9,6 +9,7 @@ export default function Editor() {
     categories,
     currentQuizTitle,
     renameQuiz,
+    updateQuestion,
     updateQuestionPoints,
   } = useQuiz();
 
@@ -62,10 +63,76 @@ export default function Editor() {
                   >
                     <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                       <div className="flex-1">
-                        <p className="font-medium">{question.content}</p>
-                        <p className="mt-1 text-sm text-gray-600">
-                          Típus: {question.type}
-                        </p>
+                        <label className="flex flex-col gap-1 text-sm font-medium">
+                          Kérdés szövege
+                          <textarea
+                            value={question.content}
+                            onChange={(event) =>
+                              updateQuestion(catIndex, qIndex, {
+                                content: event.target.value,
+                              })
+                            }
+                            rows={3}
+                            className="rounded-lg border border-gray-300 px-3 py-2"
+                          />
+                        </label>
+
+                        <div className="mt-3 grid gap-3 md:grid-cols-2">
+                          <label className="flex flex-col gap-1 text-sm font-medium">
+                            Típus
+                            <select
+                              value={question.type}
+                              onChange={(event) =>
+                                updateQuestion(catIndex, qIndex, {
+                                  type: event.target.value as
+                                    | "text"
+                                    | "image"
+                                    | "video"
+                                    | "audio",
+                                })
+                              }
+                              className="rounded-lg border border-gray-300 px-3 py-2"
+                            >
+                              <option value="text">Szöveg</option>
+                              <option value="image">Kép</option>
+                              <option value="video">Videó</option>
+                              <option value="audio">Hang</option>
+                            </select>
+                          </label>
+
+                          <label className="flex flex-col gap-1 text-sm font-medium">
+                            Forrás
+                            <input
+                              type="text"
+                              value={question.source ?? ""}
+                              onChange={(event) =>
+                                updateQuestion(catIndex, qIndex, {
+                                  source: event.target.value || undefined,
+                                })
+                              }
+                              className="rounded-lg border border-gray-300 px-3 py-2"
+                              placeholder="/assets/example.jpg"
+                            />
+                          </label>
+                        </div>
+
+                        <label className="mt-3 flex flex-col gap-1 text-sm font-medium">
+                          Opciók
+                          <textarea
+                            value={question.list?.join(", ") ?? ""}
+                            onChange={(event) =>
+                              updateQuestion(catIndex, qIndex, {
+                                list: event.target.value
+                                  .split(",")
+                                  .map((item) => item.trim())
+                                  .filter(Boolean),
+                              })
+                            }
+                            rows={2}
+                            className="rounded-lg border border-gray-300 px-3 py-2"
+                            placeholder="Első opció, Második opció"
+                          />
+                        </label>
                       </div>
 
                       <label className="flex min-w-32 flex-col gap-1 text-sm font-medium">
