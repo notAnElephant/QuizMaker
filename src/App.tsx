@@ -2,7 +2,9 @@ import { gql } from "@apollo/client";
 import "./index.css";
 import { useMutation } from "@apollo/client/react";
 import { Board } from "./components/Board";
+import UserSwitcher from "./components/UserSwitcher";
 import { useQuiz } from "./context/QuizContext";
+import { useCurrentUser } from "./context/useCurrentUser";
 import { useNavigate } from "react-router-dom";
 import { FaCog, FaEdit, FaFolderOpen, FaPlus, FaSave, FaUsers } from "react-icons/fa";
 import TeamBar from "./components/TeamBar.tsx";
@@ -13,10 +15,16 @@ const SAVE_QUIZ_MUTATION = gql`
     $quizId: uuid!
     $title: String!
     $description: String
+    $ownerId: uuid!
     $questions: [questions_insert_input!]!
   ) {
     insert_quizzes_one(
-      object: { quiz_id: $quizId, title: $title, description: $description }
+      object: {
+        quiz_id: $quizId
+        title: $title
+        description: $description
+        owner_id: $ownerId
+      }
     ) {
       quiz_id
       title
@@ -29,10 +37,16 @@ const SAVE_QUIZ_MUTATION = gql`
 
 function App() {
   const { categories, currentQuizTitle, markUsed } = useQuiz();
+  const { currentUser, isLoading: isLoadingCurrentUser } = useCurrentUser();
   const navigate = useNavigate();
   const [saveQuiz, { loading: isSaving }] = useMutation(SAVE_QUIZ_MUTATION);
 
   const handleSaveQuiz = async () => {
+    if (!currentUser) {
+      window.alert("Nincs kiválasztott felhasználó a mentéshez.");
+      return;
+    }
+
     const defaultTitle = currentQuizTitle || `Mentett kvíz ${new Date().toLocaleString("hu-HU")}`;
     const title = window.prompt("Kvíz címe", defaultTitle)?.trim();
 
@@ -59,6 +73,7 @@ function App() {
           quizId,
           title,
           description: `${categories.length} kategória, ${questions.length} kérdés`,
+          ownerId: currentUser.user_id,
           questions,
         },
       });
@@ -74,6 +89,9 @@ function App() {
   return (
     <div className="min-h-screen flex items-center flex-col justify-between text-black">
       <div className="w-full h-full max-w-screen-lg px-4 flex flex-col items-center text-center">
+        <div className="mt-8 flex w-full justify-end">
+          <UserSwitcher />
+        </div>
         <h1 className="text-6xl font-bold mb-8 mt-16 font-display">
           {currentQuizTitle}
         </h1>
@@ -88,7 +106,7 @@ function App() {
       <div className="absolute bottom-4 left-4 flex-1 flex items-start gap-2 flex-col">
         <button
           onClick={handleSaveQuiz}
-          disabled={isSaving}
+          disabled={isSaving || isLoadingCurrentUser || !currentUser}
           className="bg-emerald-700 text-white p-3 rounded-full shadow-lg hover:bg-emerald-600 disabled:cursor-wait disabled:bg-emerald-400"
           aria-label="Save quiz"
           title="Kvíz mentése"

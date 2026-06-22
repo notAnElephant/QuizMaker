@@ -3,10 +3,12 @@ BEGIN;
 TRUNCATE TABLE public.answers, public.quiz_plays, public.questions, public.quizzes, public.users CASCADE;
 
 INSERT INTO public.users (user_id, created_at, display_name, email) VALUES
-  ('8d4ee02c-88d9-4608-9030-20726f7d702f', '2025-12-26 20:48:49.51972', 'Admin', NULL);
+  ('8d4ee02c-88d9-4608-9030-20726f7d702f', '2025-12-26 20:48:49.51972', 'Admin', 'admin@quizmaker.local'),
+  ('2f781826-cd02-4a89-b17f-596d4ce4e421', '2025-12-27 09:12:31.11972', 'Szerkesztő', 'editor@quizmaker.local');
 
 INSERT INTO public.quizzes (quiz_id, title, description, owner_id, shared_user_ids, created_at, updated_at) VALUES
-  ('47559e6f-f126-4124-84d7-9d71d9467f6d', 'Vágó Pesta', 'Imported sample board quiz', '8d4ee02c-88d9-4608-9030-20726f7d702f', NULL, '2025-12-26 20:48:49.706971', '2025-12-26 20:48:49.706971');
+  ('47559e6f-f126-4124-84d7-9d71d9467f6d', 'Vágó Pesta', 'Imported sample board quiz', '8d4ee02c-88d9-4608-9030-20726f7d702f', NULL, '2025-12-26 20:48:49.706971', '2025-12-26 20:48:49.706971'),
+  ('6c246cef-3e6e-431c-92ec-8ff4c2f7f1ad', 'Saját teszt kvíz', 'Második minta a felhasználóváltás ellenőrzéséhez', '2f781826-cd02-4a89-b17f-596d4ce4e421', NULL, '2025-12-27 09:13:12.706971', '2025-12-27 09:13:12.706971');
 
 INSERT INTO public.questions (question_id, quiz_id, question_text, question_type, answer_options, correct_answer, points, category_name) VALUES
   ('e60a0756-d789-48b1-bb48-10bc36e766b4', '47559e6f-f126-4124-84d7-9d71d9467f6d', 'Melyik település látható a képen? [SOURCE: /assets/ai1.jpg]', 'image', '{}', NULL, 1000, 'Éjáj'),
@@ -28,6 +30,7 @@ INSERT INTO public.questions (question_id, quiz_id, question_text, question_type
   ('e182927a-5c42-43cd-8494-f7e21511576d', '47559e6f-f126-4124-84d7-9d71d9467f6d', 'Mennyi idő végiggyalogolni a Földön a két legtávolabbi pont közt megtehető legrövidebb utat a Google Maps szerint?', 'text', '{}', NULL, 2000, 'Nemmkelidearabzám'),
   ('228266bb-11e6-4a65-a582-7e92da169250', '47559e6f-f126-4124-84d7-9d71d9467f6d', 'Hány olyan tó van, ami egy olyan szigeten van, ami egy olyan tavon van, ami egy olyan szigeten van, ami egy tavon van?', 'text', '{}', NULL, 3000, 'Nemmkelidearabzám'),
   ('fb2ed521-5b10-46de-b4d1-481175ac55fa', '47559e6f-f126-4124-84d7-9d71d9467f6d', 'Hány nyelvet beszélnek abban az országban, ahol a világon a legtöbbet beszélik?', 'text', '{}', NULL, 4000, 'Nemmkelidearabzám'),
-  ('5b010908-d2f6-47d6-bf30-cdbc1934d06d', '47559e6f-f126-4124-84d7-9d71d9467f6d', 'Hány szóból áll Bangkok neve?', 'text', '{}', NULL, 5000, 'Nemmkelidearabzám');
+  ('5b010908-d2f6-47d6-bf30-cdbc1934d06d', '47559e6f-f126-4124-84d7-9d71d9467f6d', 'Hány szóból áll Bangkok neve?', 'text', '{}', NULL, 5000, 'Nemmkelidearabzám'),
+  ('6b470172-4f5e-420a-a3f8-86ae5484d8f5', '6c246cef-3e6e-431c-92ec-8ff4c2f7f1ad', 'Melyik város a magyar főváros?', 'text', '{Budapest,Szeged,Debrecen,Pécs}', NULL, 1000, 'Gyors kör');
 
 COMMIT;

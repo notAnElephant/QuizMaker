@@ -4,17 +4,30 @@ import { FaArrowLeft, FaFolderOpen, FaTrash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { useQuiz } from "../context/QuizContext";
 import { Category } from "../context/types";
+import { useCurrentUser } from "../context/useCurrentUser";
 import { buildCategoriesFromPersistedQuestions } from "../utility/quizPersistence";
+import UserSwitcher from "./UserSwitcher";
 
 const GET_SAVED_QUIZZES_QUERY = gql`
-  query GetSavedQuizzes {
-    quizzes(order_by: [{ updated_at: desc }]) {
+  query GetSavedQuizzes($ownerId: uuid!) {
+    quizzes(
+      where: { owner_id: { _eq: $ownerId } }
+      order_by: [{ updated_at: desc }]
+    ) {
       quiz_id
       title
       description
       updated_at
     }
-    questions(order_by: [{ category_name: asc }, { points: asc }]) {
+  }
+`;
+
+const GET_SAVED_QUIZ_QUESTIONS_QUERY = gql`
+  query GetSavedQuizQuestions($quizIds: [uuid!]!) {
+    questions(
+      where: { quiz_id: { _in: $quizIds } }
+      order_by: [{ category_name: asc }, { points: asc }]
+    ) {
       question_id
       quiz_id
       question_text
@@ -27,8 +40,10 @@ const GET_SAVED_QUIZZES_QUERY = gql`
 `;
 
 const DELETE_QUIZ_MUTATION = gql`
-  mutation DeleteQuiz($quizId: uuid!) {
-    delete_quizzes(where: { quiz_id: { _eq: $quizId } }) {
+  mutation DeleteQuiz($quizId: uuid!, $ownerId: uuid!) {
+    delete_quizzes(
+      where: { quiz_id: { _eq: $quizId }, owner_id: { _eq: $ownerId } }
+    ) {
       affected_rows
     }
   }
@@ -52,46 +67,86 @@ type SavedQuiz = {
 };
 
 type SavedQuizzesQueryResult = {
-  questions: SavedQuizQuestion[];
   quizzes: SavedQuiz[];
+};
+
+type SavedQuizQuestionsQueryResult = {
+  questions: SavedQuizQuestion[];
 };
 
 export default function SavedQuizzes() {
   const navigate = useNavigate();
   const { loadQuiz } = useQuiz();
-  const { data, loading, error, refetch } =
-    useQuery<SavedQuizzesQueryResult>(GET_SAVED_QUIZZES_QUERY);
+  const { currentUser, isLoading: isLoadingCurrentUser } = useCurrentUser();
+  const {
+    data,
+    loading,
+    error,
+    refetch: refetchQuizzes,
+  } = useQuery<SavedQuizzesQueryResult>(GET_SAVED_QUIZZES_QUERY, {
+    skip: !currentUser,
+    variables: currentUser ? { ownerId: currentUser.user_id } : undefined,
+  });
+  const quizzes = data?.quizzes ?? [];
+  const quizIds = quizzes.map((quiz) => quiz.quiz_id);
+  const {
+    data: questionsData,
+    loading: isLoadingQuestions,
+    error: questionsError,
+  } = useQuery<SavedQuizQuestionsQueryResult>(GET_SAVED_QUIZ_QUESTIONS_QUERY, {
+    skip: !quizIds.length,
+    variables: { quizIds },
+  });
   const [deleteQuiz, { loading: isDeleting }] =
     useMutation(DELETE_QUIZ_MUTATION);
 
-  if (loading) {
+  if (isLoadingCurrentUser || loading || isLoadingQuestions) {
     return <div className="p-8 text-center text-white">Kvízek betöltése...</div>;
   }
 
-  if (error) {
+  if (!currentUser) {
     return (
       <div className="p-8 text-center text-red-100">
-        <h1 className="text-2xl font-bold">Nem sikerült betölteni a kvízeket</h1>
-        <p className="mt-2 text-sm">{error.message}</p>
+        <h1 className="text-2xl font-bold">Nincs kiválasztott felhasználó</h1>
       </div>
     );
   }
 
-  const quizzes = data?.quizzes ?? [];
-  const questions = data?.questions ?? [];
+  if (error || questionsError) {
+    return (
+      <div className="p-8 text-center text-red-100">
+        <h1 className="text-2xl font-bold">Nem sikerült betölteni a kvízeket</h1>
+        <p className="mt-2 text-sm">{error?.message ?? questionsError?.message}</p>
+      </div>
+    );
+  }
+
+  const questions = questionsData?.questions ?? [];
 
   return (
     <div className="min-h-screen p-8 text-black">
       <div className="mx-auto flex w-full max-w-4xl flex-col gap-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-4xl font-display text-white">Mentett kvízek</h1>
-          <button
-            onClick={() => navigate("/")}
-            className="rounded-full bg-gray-800 p-3 text-white shadow-lg hover:bg-gray-700"
-            aria-label="Back"
-          >
-            <FaArrowLeft size={18} />
-          </button>
+          <div className="flex flex-col gap-3">
+            <h1 className="text-4xl font-display text-white">Mentett kvízek</h1>
+            <p className="text-sm text-white/80">
+              Csak a(z){" "}
+              {currentUser.display_name ||
+                currentUser.email ||
+                "aktív felhasználó"}{" "}
+              saját kvízei látszanak.
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <UserSwitcher />
+            <button
+              onClick={() => navigate("/")}
+              className="rounded-full bg-gray-800 p-3 text-white shadow-lg hover:bg-gray-700"
+              aria-label="Back"
+            >
+              <FaArrowLeft size={18} />
+            </button>
+          </div>
         </div>
 
         {!quizzes.length ? (
@@ -148,9 +203,12 @@ export default function SavedQuizzes() {
 
                         try {
                           await deleteQuiz({
-                            variables: { quizId: quiz.quiz_id },
+                            variables: {
+                              ownerId: currentUser.user_id,
+                              quizId: quiz.quiz_id,
+                            },
                           });
-                          await refetch();
+                          await refetchQuizzes();
                         } catch (mutationError) {
                           const message =
                             mutationError instanceof Error
