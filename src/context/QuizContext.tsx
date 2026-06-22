@@ -33,6 +33,11 @@ const defaultSettings: Settings = {
 
 const QuizContext = createContext<{
   categories: Category[];
+  createQuiz: (
+    title: string,
+    categoryNames: string[],
+    questionsPerCategory: number,
+  ) => void;
   currentQuizTitle: string;
   loadQuiz: (title: string, nextCategories: Category[]) => void;
   markUsed: (catIndex: number, qIndex: number, value: boolean) => void;
@@ -113,10 +118,30 @@ export function QuizProvider({ children }: { children: ReactNode }) {
     setCategories(nextCategories);
   };
 
+  const createQuiz = (
+    title: string,
+    categoryNames: string[],
+    questionsPerCategory: number,
+  ) => {
+    const normalizedQuestionCount = Math.max(1, questionsPerCategory);
+    const nextCategories: Category[] = categoryNames.map((categoryName) => ({
+      category: categoryName,
+      questions: Array.from({ length: normalizedQuestionCount }, (_, index) => {
+        const points = (index + 1) * 1000;
+
+        return new Question("text", `Új kérdés ${index + 1}`, undefined, points);
+      }),
+    }));
+
+    setCurrentQuizTitle(title);
+    setCategories(nextCategories);
+  };
+
   return (
     <QuizContext.Provider
       value={{
         categories,
+        createQuiz,
         currentQuizTitle,
         loadQuiz,
         markUsed,
