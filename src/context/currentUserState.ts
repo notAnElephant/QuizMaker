@@ -7,9 +7,13 @@ type CurrentUser = {
 };
 
 export type CurrentUserContextValue = {
+  authMode: "firebase" | "local";
   currentUser: CurrentUser | null;
   error?: Error;
+  isAuthenticated: boolean;
   isLoading: boolean;
+  signInWithGoogle: () => Promise<void>;
+  signOutCurrentUser: () => Promise<void>;
   setCurrentUserId: (userId: string) => void;
   users: CurrentUser[];
 };

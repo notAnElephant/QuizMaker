@@ -1,8 +1,17 @@
-import { FaUser } from "react-icons/fa";
+import { FaGoogle, FaSignOutAlt, FaUser } from "react-icons/fa";
 import { useCurrentUser } from "../context/useCurrentUser";
 
 export default function UserSwitcher() {
-  const { currentUser, isLoading, setCurrentUserId, users } = useCurrentUser();
+  const {
+    authMode,
+    currentUser,
+    isAuthenticated,
+    isLoading,
+    setCurrentUserId,
+    signInWithGoogle,
+    signOutCurrentUser,
+    users,
+  } = useCurrentUser();
 
   return (
     <div className="flex items-center gap-3 rounded-2xl bg-white/92 px-4 py-3 shadow">
@@ -13,6 +22,31 @@ export default function UserSwitcher() {
         </span>
         {isLoading ? (
           <span className="text-sm text-gray-600">Betöltés...</span>
+        ) : authMode === "firebase" ? (
+          <div className="flex items-center gap-2">
+            {isAuthenticated && currentUser ? (
+              <>
+                <span className="text-sm font-medium text-black">
+                  {currentUser.display_name || currentUser.email || "Bejelentkezve"}
+                </span>
+                <button
+                  onClick={() => void signOutCurrentUser()}
+                  className="inline-flex items-center gap-2 rounded-lg bg-gray-900 px-3 py-2 text-sm font-medium text-white hover:bg-gray-800"
+                >
+                  <FaSignOutAlt size={12} />
+                  Kilépés
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={() => void signInWithGoogle()}
+                className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700"
+              >
+                <FaGoogle size={12} />
+                Google login
+              </button>
+            )}
+          </div>
         ) : (
           <select
             value={currentUser?.user_id ?? ""}
