@@ -4,8 +4,9 @@ import { useMutation } from "@apollo/client/react";
 import { Board } from "./components/Board";
 import { useQuiz } from "./context/QuizContext";
 import { useNavigate } from "react-router-dom";
-import { FaCog, FaSave, FaUsers } from "react-icons/fa";
+import { FaCog, FaFolderOpen, FaSave, FaUsers } from "react-icons/fa";
 import TeamBar from "./components/TeamBar.tsx";
+import { buildStoredQuestionText } from "./utility/quizPersistence";
 
 const SAVE_QUIZ_MUTATION = gql`
   mutation SaveQuiz(
@@ -26,16 +27,13 @@ const SAVE_QUIZ_MUTATION = gql`
   }
 `;
 
-const buildStoredQuestionText = (content: string, source?: string) =>
-  source ? `${content} [SOURCE: ${source}]` : content;
-
 function App() {
-  const { categories, markUsed } = useQuiz();
+  const { categories, currentQuizTitle, markUsed } = useQuiz();
   const navigate = useNavigate();
   const [saveQuiz, { loading: isSaving }] = useMutation(SAVE_QUIZ_MUTATION);
 
   const handleSaveQuiz = async () => {
-    const defaultTitle = `Mentett kvíz ${new Date().toLocaleString("hu-HU")}`;
+    const defaultTitle = currentQuizTitle || `Mentett kvíz ${new Date().toLocaleString("hu-HU")}`;
     const title = window.prompt("Kvíz címe", defaultTitle)?.trim();
 
     if (!title) {
@@ -77,7 +75,7 @@ function App() {
     <div className="min-h-screen flex items-center flex-col justify-between text-black">
       <div className="w-full h-full max-w-screen-lg px-4 flex flex-col items-center text-center">
         <h1 className="text-6xl font-bold mb-8 mt-16 font-display">
-          Vágó Pesta
+          {currentQuizTitle}
         </h1>
         <Board
           data={categories}
@@ -96,6 +94,14 @@ function App() {
           title="Kvíz mentése"
         >
           <FaSave size={20} />
+        </button>
+        <button
+          onClick={() => navigate("/quizzes")}
+          className="bg-blue-700 text-white p-3 rounded-full shadow-lg hover:bg-blue-600"
+          aria-label="Load quiz"
+          title="Mentett kvíz betöltése"
+        >
+          <FaFolderOpen size={20} />
         </button>
         <button
           onClick={() => navigate("/teams")}

@@ -1,29 +1,26 @@
 import { createContext, useContext, useState, ReactNode } from "react";
 import rawData from "../data/questions.json";
 import { Question } from "../models/Question";
+import { Category, Settings, Team } from "./types";
 
-export type Team = {
-  name: string;
-  members: string[];
-  color: string;
-  points: number;
+type RawQuestion = {
+  content: string;
+  isUsed?: boolean;
+  list?: string[];
+  points?: number;
+  source?: string;
+  type: "text" | "image" | "video" | "audio";
 };
 
-export type Category = {
+type RawCategory = {
   category: string;
-  questions: Question[];
+  questions: RawQuestion[];
 };
 
-export type Settings = {
-  classicMode: boolean;
-  timerEnabled: boolean;
-  timerDuration: number;
-};
-
-const initialData: Category[] = rawData.map((cat) => ({
+const initialData: Category[] = (rawData as RawCategory[]).map((cat) => ({
   category: cat.category,
   questions: cat.questions.map(
-    (q: any) =>
+    (q) =>
       new Question(q.type, q.content, q.source, q.points, q.isUsed, q.list),
   ),
 }));
@@ -36,6 +33,8 @@ const defaultSettings: Settings = {
 
 const QuizContext = createContext<{
   categories: Category[];
+  currentQuizTitle: string;
+  loadQuiz: (title: string, nextCategories: Category[]) => void;
   markUsed: (catIndex: number, qIndex: number, value: boolean) => void;
   settings: Settings;
   setSettings: React.Dispatch<React.SetStateAction<Settings>>;
@@ -51,6 +50,7 @@ export const useQuiz = () => {
 
 export function QuizProvider({ children }: { children: ReactNode }) {
   const [categories, setCategories] = useState(initialData);
+  const [currentQuizTitle, setCurrentQuizTitle] = useState("Vágó Pesta");
   const [settings, setSettings] = useState<Settings>(defaultSettings);
   const [teams, setTeams] = useState<Team[]>([
     {
@@ -73,9 +73,23 @@ export function QuizProvider({ children }: { children: ReactNode }) {
     setCategories(copy);
   };
 
+  const loadQuiz = (title: string, nextCategories: Category[]) => {
+    setCurrentQuizTitle(title);
+    setCategories(nextCategories);
+  };
+
   return (
     <QuizContext.Provider
-      value={{ categories, markUsed, settings, setSettings, teams, setTeams }}
+      value={{
+        categories,
+        currentQuizTitle,
+        loadQuiz,
+        markUsed,
+        settings,
+        setSettings,
+        teams,
+        setTeams,
+      }}
     >
       {children}
     </QuizContext.Provider>
