@@ -32,6 +32,7 @@ const defaultSettings: Settings = {
 };
 
 const QuizContext = createContext<{
+  addQuestionToCategory: (catIndex: number) => void;
   categories: Category[];
   createQuiz: (
     title: string,
@@ -39,6 +40,7 @@ const QuizContext = createContext<{
     questionsPerCategory: number,
   ) => void;
   currentQuizTitle: string;
+  renameQuiz: (title: string) => void;
   loadQuiz: (title: string, nextCategories: Category[]) => void;
   markUsed: (catIndex: number, qIndex: number, value: boolean) => void;
   updateQuestionPoints: (
@@ -118,6 +120,38 @@ export function QuizProvider({ children }: { children: ReactNode }) {
     setCategories(nextCategories);
   };
 
+  const renameQuiz = (title: string) => {
+    setCurrentQuizTitle(title);
+  };
+
+  const addQuestionToCategory = (catIndex: number) => {
+    setCategories((prevCategories) =>
+      prevCategories.map((category, currentCatIndex) => {
+        if (currentCatIndex !== catIndex) {
+          return category;
+        }
+
+        const lastQuestion = category.questions[category.questions.length - 1];
+        const nextPoints = lastQuestion
+          ? Math.max(1000, lastQuestion.points + 1000)
+          : 1000;
+
+        return {
+          ...category,
+          questions: [
+            ...category.questions,
+            new Question(
+              "text",
+              `Új kérdés ${category.questions.length + 1}`,
+              undefined,
+              nextPoints,
+            ),
+          ],
+        };
+      }),
+    );
+  };
+
   const createQuiz = (
     title: string,
     categoryNames: string[],
@@ -140,11 +174,13 @@ export function QuizProvider({ children }: { children: ReactNode }) {
   return (
     <QuizContext.Provider
       value={{
+        addQuestionToCategory,
         categories,
         createQuiz,
         currentQuizTitle,
         loadQuiz,
         markUsed,
+        renameQuiz,
         updateQuestionPoints,
         settings,
         setSettings,
