@@ -1,6 +1,12 @@
-import { FaArrowLeft, FaPlus } from "react-icons/fa";
+import { DragEvent, useState } from "react";
+import { FaArrowLeft, FaGripVertical, FaPlus } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { useQuiz } from "../context/QuizContext";
+
+type DraggedQuestion = {
+  sourceCatIndex: number;
+  sourceQuestionIndex: number;
+};
 
 export default function Editor() {
   const navigate = useNavigate();
@@ -8,10 +14,60 @@ export default function Editor() {
     addQuestionToCategory,
     categories,
     currentQuizTitle,
+    moveQuestion,
     renameQuiz,
     updateQuestion,
     updateQuestionPoints,
   } = useQuiz();
+  const [draggedQuestion, setDraggedQuestion] = useState<DraggedQuestion | null>(
+    null,
+  );
+  const [activeDropTarget, setActiveDropTarget] = useState<string | null>(null);
+
+  const handleDrop = (targetCatIndex: number, targetQuestionIndex: number) => {
+    if (!draggedQuestion) {
+      return;
+    }
+
+    moveQuestion(
+      draggedQuestion.sourceCatIndex,
+      draggedQuestion.sourceQuestionIndex,
+      targetCatIndex,
+      targetQuestionIndex,
+    );
+    setDraggedQuestion(null);
+    setActiveDropTarget(null);
+  };
+
+  const renderDropZone = (catIndex: number, qIndex: number) => {
+    const dropTargetId = `${catIndex}-${qIndex}`;
+    const isActive = activeDropTarget === dropTargetId;
+
+    return (
+      <button
+        key={`drop-zone-${dropTargetId}`}
+        type="button"
+        onDragOver={(event) => {
+          event.preventDefault();
+          event.dataTransfer.dropEffect = "move";
+          setActiveDropTarget(dropTargetId);
+        }}
+        onDragLeave={() => {
+          if (activeDropTarget === dropTargetId) {
+            setActiveDropTarget(null);
+          }
+        }}
+        onDrop={(event) => {
+          event.preventDefault();
+          handleDrop(catIndex, qIndex);
+        }}
+        className={`h-3 w-full rounded-full transition ${
+          isActive ? "bg-emerald-500/70" : "bg-transparent"
+        }`}
+        aria-label="Kérdés ide húzása"
+      />
+    );
+  };
 
   return (
     <div className="min-h-screen p-8 text-black">
@@ -57,105 +113,125 @@ export default function Editor() {
               </div>
               <div className="mt-4 flex flex-col gap-3">
                 {category.questions.map((question, qIndex) => (
-                  <div
-                    key={`${category.category}-${qIndex}`}
-                    className="rounded-xl border border-gray-200 bg-white p-4"
-                  >
-                    <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                      <div className="flex-1">
-                        <label className="flex flex-col gap-1 text-sm font-medium">
-                          Kérdés szövege
-                          <textarea
-                            value={question.content}
-                            onChange={(event) =>
-                              updateQuestion(catIndex, qIndex, {
-                                content: event.target.value,
-                              })
-                            }
-                            rows={3}
-                            className="rounded-lg border border-gray-300 px-3 py-2"
-                          />
-                        </label>
+                  <div key={`${category.category}-${qIndex}-${question.content}`}>
+                    {renderDropZone(catIndex, qIndex)}
+                    <div
+                      draggable
+                      onDragStart={(event: DragEvent<HTMLDivElement>) => {
+                        event.dataTransfer.effectAllowed = "move";
+                        setDraggedQuestion({
+                          sourceCatIndex: catIndex,
+                          sourceQuestionIndex: qIndex,
+                        });
+                      }}
+                      onDragEnd={() => {
+                        setDraggedQuestion(null);
+                        setActiveDropTarget(null);
+                      }}
+                      className="rounded-xl border border-gray-200 bg-white p-4"
+                    >
+                      <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                        <div className="flex-1">
+                          <div className="mb-3 flex items-center gap-2 text-sm font-medium text-gray-500">
+                            <FaGripVertical />
+                            Húzd át másik kategóriába vagy másik helyre
+                          </div>
 
-                        <div className="mt-3 grid gap-3 md:grid-cols-2">
                           <label className="flex flex-col gap-1 text-sm font-medium">
-                            Típus
-                            <select
-                              value={question.type}
+                            Kérdés szövege
+                            <textarea
+                              value={question.content}
                               onChange={(event) =>
                                 updateQuestion(catIndex, qIndex, {
-                                  type: event.target.value as
-                                    | "text"
-                                    | "image"
-                                    | "video"
-                                    | "audio",
+                                  content: event.target.value,
                                 })
                               }
+                              rows={3}
                               className="rounded-lg border border-gray-300 px-3 py-2"
-                            >
-                              <option value="text">Szöveg</option>
-                              <option value="image">Kép</option>
-                              <option value="video">Videó</option>
-                              <option value="audio">Hang</option>
-                            </select>
+                            />
                           </label>
 
-                          <label className="flex flex-col gap-1 text-sm font-medium">
-                            Forrás
-                            <input
-                              type="text"
-                              value={question.source ?? ""}
+                          <div className="mt-3 grid gap-3 md:grid-cols-2">
+                            <label className="flex flex-col gap-1 text-sm font-medium">
+                              Típus
+                              <select
+                                value={question.type}
+                                onChange={(event) =>
+                                  updateQuestion(catIndex, qIndex, {
+                                    type: event.target.value as
+                                      | "text"
+                                      | "image"
+                                      | "video"
+                                      | "audio",
+                                  })
+                                }
+                                className="rounded-lg border border-gray-300 px-3 py-2"
+                              >
+                                <option value="text">Szöveg</option>
+                                <option value="image">Kép</option>
+                                <option value="video">Videó</option>
+                                <option value="audio">Hang</option>
+                              </select>
+                            </label>
+
+                            <label className="flex flex-col gap-1 text-sm font-medium">
+                              Forrás
+                              <input
+                                type="text"
+                                value={question.source ?? ""}
+                                onChange={(event) =>
+                                  updateQuestion(catIndex, qIndex, {
+                                    source: event.target.value || undefined,
+                                  })
+                                }
+                                className="rounded-lg border border-gray-300 px-3 py-2"
+                                placeholder="/assets/example.jpg"
+                              />
+                            </label>
+                          </div>
+
+                          <label className="mt-3 flex flex-col gap-1 text-sm font-medium">
+                            Opciók
+                            <textarea
+                              value={question.list?.join(", ") ?? ""}
                               onChange={(event) =>
                                 updateQuestion(catIndex, qIndex, {
-                                  source: event.target.value || undefined,
+                                  list: event.target.value
+                                    .split(",")
+                                    .map((item) => item.trim())
+                                    .filter(Boolean),
                                 })
                               }
+                              rows={2}
                               className="rounded-lg border border-gray-300 px-3 py-2"
-                              placeholder="/assets/example.jpg"
+                              placeholder="Első opció, Második opció"
                             />
                           </label>
                         </div>
 
-                        <label className="mt-3 flex flex-col gap-1 text-sm font-medium">
-                          Opciók
-                          <textarea
-                            value={question.list?.join(", ") ?? ""}
-                            onChange={(event) =>
-                              updateQuestion(catIndex, qIndex, {
-                                list: event.target.value
-                                  .split(",")
-                                  .map((item) => item.trim())
-                                  .filter(Boolean),
-                              })
-                            }
-                            rows={2}
+                        <label className="flex min-w-32 flex-col gap-1 text-sm font-medium">
+                          Pontszám
+                          <input
+                            type="number"
+                            min={0}
+                            step={100}
+                            value={question.points}
+                            onChange={(event) => {
+                              const parsedValue = Number(event.target.value);
+                              if (!Number.isFinite(parsedValue)) {
+                                return;
+                              }
+
+                              updateQuestionPoints(catIndex, qIndex, parsedValue);
+                            }}
                             className="rounded-lg border border-gray-300 px-3 py-2"
-                            placeholder="Első opció, Második opció"
                           />
                         </label>
                       </div>
-
-                      <label className="flex min-w-32 flex-col gap-1 text-sm font-medium">
-                        Pontszám
-                        <input
-                          type="number"
-                          min={0}
-                          step={100}
-                          value={question.points}
-                          onChange={(event) => {
-                            const parsedValue = Number(event.target.value);
-                            if (!Number.isFinite(parsedValue)) {
-                              return;
-                            }
-
-                            updateQuestionPoints(catIndex, qIndex, parsedValue);
-                          }}
-                          className="rounded-lg border border-gray-300 px-3 py-2"
-                        />
-                      </label>
                     </div>
                   </div>
                 ))}
+                {renderDropZone(catIndex, category.questions.length)}
               </div>
             </section>
           ))}
@@ -163,7 +239,8 @@ export default function Editor() {
 
         <div className="rounded-2xl bg-white/90 p-4 text-sm text-gray-700 shadow">
           A pontszám módosításai azonnal érvényesülnek a táblán is. Ha meg akarod
-          őrizni őket, utána mentsd el újra a kvízt.
+          őrizni őket, utána mentsd el újra a kvízt. A kérdéseket most már át is
+          húzhatod kategóriák között.
         </div>
       </div>
     </div>

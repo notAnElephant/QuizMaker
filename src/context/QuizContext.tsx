@@ -51,6 +51,12 @@ const QuizContext = createContext<{
   renameQuiz: (title: string) => void;
   loadQuiz: (title: string, nextCategories: Category[]) => void;
   markUsed: (catIndex: number, qIndex: number, value: boolean) => void;
+  moveQuestion: (
+    sourceCatIndex: number,
+    sourceQuestionIndex: number,
+    targetCatIndex: number,
+    targetQuestionIndex: number,
+  ) => void;
   updateQuestion: (
     catIndex: number,
     qIndex: number,
@@ -147,6 +153,61 @@ export function QuizProvider({ children }: { children: ReactNode }) {
     setCurrentQuizTitle(title);
   };
 
+  const moveQuestion = (
+    sourceCatIndex: number,
+    sourceQuestionIndex: number,
+    targetCatIndex: number,
+    targetQuestionIndex: number,
+  ) => {
+    setCategories((prevCategories) => {
+      if (
+        !prevCategories[sourceCatIndex]?.questions[sourceQuestionIndex] ||
+        !prevCategories[targetCatIndex]
+      ) {
+        return prevCategories;
+      }
+
+      if (
+        sourceCatIndex === targetCatIndex &&
+        (targetQuestionIndex === sourceQuestionIndex ||
+          targetQuestionIndex === sourceQuestionIndex + 1)
+      ) {
+        return prevCategories;
+      }
+
+      const nextCategories = prevCategories.map((category) => ({
+        ...category,
+        questions: [...category.questions],
+      }));
+
+      const [movedQuestion] = nextCategories[sourceCatIndex].questions.splice(
+        sourceQuestionIndex,
+        1,
+      );
+
+      const safeTargetIndex = Math.max(
+        0,
+        Math.min(
+          targetQuestionIndex,
+          nextCategories[targetCatIndex].questions.length,
+        ),
+      );
+      const adjustedTargetIndex =
+        sourceCatIndex === targetCatIndex &&
+        safeTargetIndex > sourceQuestionIndex
+          ? safeTargetIndex - 1
+          : safeTargetIndex;
+
+      nextCategories[targetCatIndex].questions.splice(
+        adjustedTargetIndex,
+        0,
+        movedQuestion,
+      );
+
+      return nextCategories;
+    });
+  };
+
   const addQuestionToCategory = (catIndex: number) => {
     setCategories((prevCategories) =>
       prevCategories.map((category, currentCatIndex) => {
@@ -203,6 +264,7 @@ export function QuizProvider({ children }: { children: ReactNode }) {
         currentQuizTitle,
         loadQuiz,
         markUsed,
+        moveQuestion,
         renameQuiz,
         updateQuestion,
         updateQuestionPoints,
