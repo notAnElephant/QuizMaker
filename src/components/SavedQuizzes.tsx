@@ -1,6 +1,6 @@
 import { gql } from "@apollo/client";
-import { useQuery } from "@apollo/client/react";
-import { FaArrowLeft, FaFolderOpen } from "react-icons/fa";
+import { useMutation, useQuery } from "@apollo/client/react";
+import { FaArrowLeft, FaFolderOpen, FaTrash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { useQuiz } from "../context/QuizContext";
 import { Category } from "../context/types";
@@ -22,6 +22,14 @@ const GET_SAVED_QUIZZES_QUERY = gql`
       points
       answer_options
       category_name
+    }
+  }
+`;
+
+const DELETE_QUIZ_MUTATION = gql`
+  mutation DeleteQuiz($quizId: uuid!) {
+    delete_quizzes(where: { quiz_id: { _eq: $quizId } }) {
+      affected_rows
     }
   }
 `;
@@ -51,8 +59,10 @@ type SavedQuizzesQueryResult = {
 export default function SavedQuizzes() {
   const navigate = useNavigate();
   const { loadQuiz } = useQuiz();
-  const { data, loading, error } =
+  const { data, loading, error, refetch } =
     useQuery<SavedQuizzesQueryResult>(GET_SAVED_QUIZZES_QUERY);
+  const [deleteQuiz, { loading: isDeleting }] =
+    useMutation(DELETE_QUIZ_MUTATION);
 
   if (loading) {
     return <div className="p-8 text-center text-white">Kvízek betöltése...</div>;
@@ -125,6 +135,35 @@ export default function SavedQuizzes() {
                     >
                       <FaFolderOpen size={16} />
                       Betöltés
+                    </button>
+                    <button
+                      onClick={async () => {
+                        const shouldDelete = window.confirm(
+                          `Biztosan törlöd ezt a kvízt?\n\n${quiz.title}`,
+                        );
+
+                        if (!shouldDelete) {
+                          return;
+                        }
+
+                        try {
+                          await deleteQuiz({
+                            variables: { quizId: quiz.quiz_id },
+                          });
+                          await refetch();
+                        } catch (mutationError) {
+                          const message =
+                            mutationError instanceof Error
+                              ? mutationError.message
+                              : "Ismeretlen törlési hiba.";
+                          window.alert(`A törlés nem sikerült: ${message}`);
+                        }
+                      }}
+                      disabled={isDeleting}
+                      className="inline-flex items-center justify-center gap-2 rounded-xl bg-red-600 px-4 py-3 text-white hover:bg-red-700 disabled:cursor-wait disabled:bg-red-400"
+                    >
+                      <FaTrash size={16} />
+                      Törlés
                     </button>
                   </div>
                 </div>
