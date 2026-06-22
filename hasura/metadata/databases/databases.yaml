@@ -9,6 +9,9 @@
   tables:
     - table:
         schema: public
+        name: answers
+    - table:
+        schema: public
         name: questions
     - table:
         schema: public
