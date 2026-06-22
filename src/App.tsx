@@ -6,7 +6,16 @@ import UserSwitcher from "./components/UserSwitcher";
 import { useQuiz } from "./context/QuizContext";
 import { useCurrentUser } from "./context/useCurrentUser";
 import { useNavigate } from "react-router-dom";
-import { FaCog, FaEdit, FaFolderOpen, FaPlus, FaSave, FaUser, FaUsers } from "react-icons/fa";
+import {
+  FaCog,
+  FaEdit,
+  FaFolderOpen,
+  FaPlus,
+  FaSave,
+  FaTrophy,
+  FaUser,
+  FaUsers,
+} from "react-icons/fa";
 import TeamBar from "./components/TeamBar.tsx";
 import { buildStoredQuestionText } from "./utility/quizPersistence";
 
@@ -35,11 +44,32 @@ const SAVE_QUIZ_MUTATION = gql`
   }
 `;
 
+const SAVE_QUIZ_PLAYS_MUTATION = gql`
+  mutation SaveQuizPlays($plays: [quiz_plays_insert_input!]!) {
+    insert_quiz_plays(objects: $plays) {
+      affected_rows
+    }
+  }
+`;
+
 function App() {
-  const { categories, currentQuizTitle, markUsed } = useQuiz();
+  const {
+    categories,
+    currentQuizId,
+    currentQuizTitle,
+    markUsed,
+    setCurrentQuizId,
+    teams,
+  } = useQuiz();
   const { currentUser, isLoading: isLoadingCurrentUser } = useCurrentUser();
   const navigate = useNavigate();
   const [saveQuiz, { loading: isSaving }] = useMutation(SAVE_QUIZ_MUTATION);
+  const [saveQuizPlays, { loading: isSavingPlays }] = useMutation(
+    SAVE_QUIZ_PLAYS_MUTATION,
+  );
+  const allQuestionsUsed = categories.every((category) =>
+    category.questions.every((question) => question.isUsed),
+  );
 
   const handleSaveQuiz = async () => {
     if (!currentUser) {
@@ -78,11 +108,50 @@ function App() {
         },
       });
 
+      setCurrentQuizId(quizId);
       window.alert(`A(z) "${title}" kvíz el lett mentve.`);
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Ismeretlen mentési hiba.";
       window.alert(`A mentés nem sikerült: ${message}`);
+    }
+  };
+
+  const handleSaveCompletedPlay = async () => {
+    if (!currentUser) {
+      window.alert("Nincs kiválasztott felhasználó a játék mentéséhez.");
+      return;
+    }
+
+    if (!currentQuizId) {
+      window.alert("A játék mentése előtt mentsd el a kvízt.");
+      return;
+    }
+
+    if (!allQuestionsUsed) {
+      window.alert("A lejátszás csak akkor menthető, ha minden kérdés fel lett fedve.");
+      return;
+    }
+
+    try {
+      await saveQuizPlays({
+        variables: {
+          plays: teams.map((team) => ({
+            play_id: crypto.randomUUID(),
+            quiz_id: currentQuizId,
+            score: team.points,
+            team_name: team.name,
+            team_score: team.points,
+            user_id: currentUser.user_id,
+          })),
+        },
+      });
+
+      window.alert("A lejátszás eredményei el lettek mentve az adatbázisba.");
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Ismeretlen mentési hiba.";
+      window.alert(`A lejátszás mentése nem sikerült: ${message}`);
     }
   };
 
@@ -112,6 +181,20 @@ function App() {
           title="Kvíz mentése"
         >
           <FaSave size={20} />
+        </button>
+        <button
+          onClick={handleSaveCompletedPlay}
+          disabled={
+            isSavingPlays ||
+            isLoadingCurrentUser ||
+            !currentUser ||
+            !allQuestionsUsed
+          }
+          className="bg-yellow-600 text-white p-3 rounded-full shadow-lg hover:bg-yellow-500 disabled:cursor-not-allowed disabled:bg-yellow-300"
+          aria-label="Save game results"
+          title="Lejátszás mentése"
+        >
+          <FaTrophy size={20} />
         </button>
         <button
           onClick={() => navigate("/quizzes")}

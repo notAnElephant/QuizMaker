@@ -47,9 +47,14 @@ const QuizContext = createContext<{
     categoryNames: string[],
     questionsPerCategory: number,
   ) => void;
+  currentQuizId: string | null;
   currentQuizTitle: string;
   renameQuiz: (title: string) => void;
-  loadQuiz: (title: string, nextCategories: Category[]) => void;
+  loadQuiz: (
+    quizId: string,
+    title: string,
+    nextCategories: Category[],
+  ) => void;
   markUsed: (catIndex: number, qIndex: number, value: boolean) => void;
   moveQuestion: (
     sourceCatIndex: number,
@@ -57,6 +62,7 @@ const QuizContext = createContext<{
     targetCatIndex: number,
     targetQuestionIndex: number,
   ) => void;
+  setCurrentQuizId: (quizId: string | null) => void;
   updateQuestion: (
     catIndex: number,
     qIndex: number,
@@ -81,6 +87,9 @@ export const useQuiz = () => {
 
 export function QuizProvider({ children }: { children: ReactNode }) {
   const [categories, setCategories] = useState(initialData);
+  const [currentQuizId, setCurrentQuizId] = useState<string | null>(
+    "47559e6f-f126-4124-84d7-9d71d9467f6d",
+  );
   const [currentQuizTitle, setCurrentQuizTitle] = useState("Vágó Pesta");
   const [settings, setSettings] = useState<Settings>(defaultSettings);
   const [teams, setTeams] = useState<Team[]>([
@@ -144,7 +153,12 @@ export function QuizProvider({ children }: { children: ReactNode }) {
     updateQuestion(catIndex, qIndex, { points: nextPoints });
   };
 
-  const loadQuiz = (title: string, nextCategories: Category[]) => {
+  const loadQuiz = (
+    quizId: string,
+    title: string,
+    nextCategories: Category[],
+  ) => {
+    setCurrentQuizId(quizId);
     setCurrentQuizTitle(title);
     setCategories(nextCategories);
   };
@@ -251,6 +265,7 @@ export function QuizProvider({ children }: { children: ReactNode }) {
       }),
     }));
 
+    setCurrentQuizId(null);
     setCurrentQuizTitle(title);
     setCategories(nextCategories);
   };
@@ -261,11 +276,13 @@ export function QuizProvider({ children }: { children: ReactNode }) {
         addQuestionToCategory,
         categories,
         createQuiz,
+        currentQuizId,
         currentQuizTitle,
         loadQuiz,
         markUsed,
         moveQuestion,
         renameQuiz,
+        setCurrentQuizId,
         updateQuestion,
         updateQuestionPoints,
         settings,
