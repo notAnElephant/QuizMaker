@@ -6,7 +6,7 @@ services:
     volumes:
       - db_data:/var/lib/postgresql/data
     environment:
-      POSTGRES_PASSWORD: postgrespassword
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgrespassword}
   graphql-engine:
     image: hasura/graphql-engine:v2.48.6
     ports:
@@ -14,10 +14,9 @@ services:
     restart: always
     environment:
       ## postgres database to store Hasura metadata
-      HASURA_GRAPHQL_METADATA_DATABASE_URL: postgres://postgres:postgrespassword@postgres:5432/postgres
-      #      todo this should come from vite env vars, probably
-      ## this env var can be used to add the above postgres database to Hasura as a data source. this can be removed/updated based on your needs
-      PG_DATABASE_URL: "postgresql://neondb_owner:npg_KaUyAhr15Jne@ep-icy-mouse-a2n1ek5f-pooler.eu-central-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
+      HASURA_GRAPHQL_METADATA_DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD:-postgrespassword}@postgres:5432/postgres
+      ## Optional application data source URL loaded from the local .env file.
+      PG_DATABASE_URL: ${POSTGRES_DB_ENDPOINT:-}
       ## enable the console served by server
       HASURA_GRAPHQL_ENABLE_CONSOLE: "true" # set to "false" to disable console
       ## enable debugging mode. It is recommended to disable this in production

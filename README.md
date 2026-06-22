@@ -29,6 +29,8 @@ This project uses Hasura v2 (graphql-engine).
    pnpm dev
    ```
 
+Before starting Docker for the first time, create a local `.env` file from `.env.example` and fill in any non-default database values you need for Hasura.
+
 ### Hasura migrations
 
 The repository now tracks Hasura metadata in `hasura/metadata/` and expects SQL migrations under `hasura/migrations/default/`.
