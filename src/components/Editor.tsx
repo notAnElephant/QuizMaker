@@ -1,64 +1,83 @@
-import { useQuery } from "@apollo/client/react";
-import React from "react";
-import { GetQuestionsDocument } from "../gql/graphql";
+import { FaArrowLeft } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+import { useQuiz } from "../context/QuizContext";
 
-const Editor: React.FC = () => {
-  const { loading, error, data } = useQuery(GetQuestionsDocument);
-
-  if (loading) return <p className="p-4">Loading questions...</p>;
-
-  if (error)
-    return (
-      <div className="p-4 text-red-500">
-        <h1 className="text-xl font-bold">GraphQL Error</h1>
-        <pre className="mt-2 p-2 bg-gray-100 rounded text-xs">
-          {JSON.stringify(error, null, 2)}
-        </pre>
-      </div>
-    );
+export default function Editor() {
+  const navigate = useNavigate();
+  const { categories, currentQuizTitle, updateQuestionPoints } = useQuiz();
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Questions Editor</h1>
+    <div className="min-h-screen p-8 text-black">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-4xl font-display text-white">Pontszám editor</h1>
+            <p className="mt-2 text-sm text-white/85">
+              Aktuális kvíz: <strong>{currentQuizTitle}</strong>
+            </p>
+          </div>
 
-      {!data?.questions?.length ? (
-        <p>No questions found in the database.</p>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="min-w-full border border-gray-300">
-            <thead className="bg-gray-100 text-left">
-              <tr>
-                <th className="border p-2">ID</th>
-                <th className="border p-2">Points</th>
-                <th className="border p-2">Type</th>
-                <th className="border p-2">Content</th>
-                <th className="border p-2">Correct Answer</th>
-                <th className="border p-2">Options</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.questions.map((q) => (
-                <tr key={q.question_id} className="border-b hover:bg-gray-50">
-                  <td className="border p-2 text-xs font-mono">
-                    {q.question_id}
-                  </td>
-                  <td className="border p-2">{q.points}</td>
-                  <td className="border p-2">{q.question_type}</td>
-                  <td className="border p-2">{q.question_text}</td>
-                  <td className="border p-2">{q.correct_answer}</td>
-                  <td className="border p-2 text-sm">
-                    {Array.isArray(q.answer_options)
-                      ? q.answer_options.join(", ")
-                      : JSON.stringify(q.answer_options)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <button
+            onClick={() => navigate("/")}
+            className="rounded-full bg-gray-800 p-3 text-white shadow-lg hover:bg-gray-700"
+            aria-label="Back"
+          >
+            <FaArrowLeft size={18} />
+          </button>
         </div>
-      )}
+
+        <div className="grid gap-6 lg:grid-cols-2">
+          {categories.map((category, catIndex) => (
+            <section
+              key={category.category}
+              className="rounded-2xl bg-white/92 p-5 shadow"
+            >
+              <h2 className="text-2xl font-bold">{category.category}</h2>
+              <div className="mt-4 flex flex-col gap-3">
+                {category.questions.map((question, qIndex) => (
+                  <div
+                    key={`${category.category}-${qIndex}`}
+                    className="rounded-xl border border-gray-200 bg-white p-4"
+                  >
+                    <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                      <div className="flex-1">
+                        <p className="font-medium">{question.content}</p>
+                        <p className="mt-1 text-sm text-gray-600">
+                          Típus: {question.type}
+                        </p>
+                      </div>
+
+                      <label className="flex min-w-32 flex-col gap-1 text-sm font-medium">
+                        Pontszám
+                        <input
+                          type="number"
+                          min={0}
+                          step={100}
+                          value={question.points}
+                          onChange={(event) => {
+                            const parsedValue = Number(event.target.value);
+                            if (!Number.isFinite(parsedValue)) {
+                              return;
+                            }
+
+                            updateQuestionPoints(catIndex, qIndex, parsedValue);
+                          }}
+                          className="rounded-lg border border-gray-300 px-3 py-2"
+                        />
+                      </label>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          ))}
+        </div>
+
+        <div className="rounded-2xl bg-white/90 p-4 text-sm text-gray-700 shadow">
+          A pontszám módosításai azonnal érvényesülnek a táblán is. Ha meg akarod
+          őrizni őket, utána mentsd el újra a kvízt.
+        </div>
+      </div>
     </div>
   );
-};
-
-export default Editor;
+}

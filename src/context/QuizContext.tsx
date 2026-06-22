@@ -36,6 +36,11 @@ const QuizContext = createContext<{
   currentQuizTitle: string;
   loadQuiz: (title: string, nextCategories: Category[]) => void;
   markUsed: (catIndex: number, qIndex: number, value: boolean) => void;
+  updateQuestionPoints: (
+    catIndex: number,
+    qIndex: number,
+    nextPoints: number,
+  ) => void;
   settings: Settings;
   setSettings: React.Dispatch<React.SetStateAction<Settings>>;
   teams: Team[];
@@ -73,6 +78,36 @@ export function QuizProvider({ children }: { children: ReactNode }) {
     setCategories(copy);
   };
 
+  const updateQuestionPoints = (
+    catIndex: number,
+    qIndex: number,
+    nextPoints: number,
+  ) => {
+    setCategories((prevCategories) =>
+      prevCategories.map((category, currentCatIndex) => {
+        if (currentCatIndex !== catIndex) {
+          return category;
+        }
+
+        return {
+          ...category,
+          questions: category.questions.map((question, currentQuestionIndex) =>
+            currentQuestionIndex === qIndex
+              ? new Question(
+                  question.type,
+                  question.content,
+                  question.source,
+                  nextPoints,
+                  question.isUsed,
+                  question.list,
+                )
+              : question,
+          ),
+        };
+      }),
+    );
+  };
+
   const loadQuiz = (title: string, nextCategories: Category[]) => {
     setCurrentQuizTitle(title);
     setCategories(nextCategories);
@@ -85,6 +120,7 @@ export function QuizProvider({ children }: { children: ReactNode }) {
         currentQuizTitle,
         loadQuiz,
         markUsed,
+        updateQuestionPoints,
         settings,
         setSettings,
         teams,

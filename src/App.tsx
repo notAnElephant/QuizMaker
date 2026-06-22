@@ -4,7 +4,7 @@ import { useMutation } from "@apollo/client/react";
 import { Board } from "./components/Board";
 import { useQuiz } from "./context/QuizContext";
 import { useNavigate } from "react-router-dom";
-import { FaCog, FaFolderOpen, FaSave, FaUsers } from "react-icons/fa";
+import { FaCog, FaEdit, FaFolderOpen, FaSave, FaUsers } from "react-icons/fa";
 import TeamBar from "./components/TeamBar.tsx";
 import { buildStoredQuestionText } from "./utility/quizPersistence";
 
@@ -102,6 +102,14 @@ function App() {
           title="Mentett kvíz betöltése"
         >
           <FaFolderOpen size={20} />
+        </button>
+        <button
+          onClick={() => navigate("/editor")}
+          className="bg-amber-600 text-white p-3 rounded-full shadow-lg hover:bg-amber-500"
+          aria-label="Edit quiz"
+          title="Pontszámok szerkesztése"
+        >
+          <FaEdit size={20} />
         </button>
         <button
           onClick={() => navigate("/teams")}
