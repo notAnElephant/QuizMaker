@@ -3,6 +3,7 @@ import { useQuery } from "@apollo/client/react";
 import {
   onAuthStateChanged,
   signInWithPopup,
+  signInWithRedirect,
   signOut,
   User as FirebaseUser,
 } from "firebase/auth";
@@ -10,6 +11,7 @@ import { ReactNode, useEffect, useMemo, useState } from "react";
 import { client } from "../client";
 import {
   firebaseAuth,
+  isFirebaseAuthEmulatorMode,
   googleAuthProvider,
   isFirebaseAuthEnabled,
 } from "../firebase";
@@ -165,6 +167,11 @@ export function CurrentUserProvider({ children }: { children: ReactNode }) {
       signInWithGoogle: async () => {
         if (!firebaseAuth || !googleAuthProvider) {
           throw new Error("A Google bejelentkezés nincs konfigurálva.");
+        }
+
+        if (isFirebaseAuthEmulatorMode) {
+          await signInWithRedirect(firebaseAuth, googleAuthProvider);
+          return;
         }
 
         await signInWithPopup(firebaseAuth, googleAuthProvider);

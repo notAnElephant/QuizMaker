@@ -33,11 +33,20 @@ Before starting Docker for the first time, create a local `.env` file from `.env
 
 - Local backend / Docker Compose variables: `POSTGRES_PASSWORD`, `HASURA_GRAPHQL_ADMIN_SECRET`
 - Frontend / Vite variables: `VITE_HASURA_GRAPHQL_ENDPOINT`
-- Optional Google login / Firebase variables: `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_APP_ID`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_MESSAGING_SENDER_ID`, `VITE_FIREBASE_PROJECT_ID`, `VITE_FIREBASE_STORAGE_BUCKET`, `VITE_FIREBASE_MEASUREMENT_ID`
+- Optional Google login / Firebase variables: `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_APP_ID`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_MESSAGING_SENDER_ID`, `VITE_FIREBASE_PROJECT_ID`, `VITE_FIREBASE_STORAGE_BUCKET`, `VITE_FIREBASE_MEASUREMENT_ID`, `VITE_FIREBASE_AUTH_EMULATOR_URL`
 
 Local development uses the Docker Postgres service for both Hasura metadata and app data by default. The Vite dev server proxies `/v1/graphql` to local Hasura and injects the admin secret server-side, so keep backend-only values out of `VITE_*` variables.
 
 Google login is optional. If the Firebase `VITE_FIREBASE_*` values are present, the app uses Google sign-in and creates or updates the matching `users` row in Hasura on login. If they are absent, the app falls back to the local seeded user switcher for self-hosted development.
+
+For local end-to-end auth testing without a real Firebase project, you can run the Firebase Auth Emulator with a demo project ID and set:
+
+```bash
+VITE_FIREBASE_PROJECT_ID=demo-quizmaker
+VITE_FIREBASE_AUTH_EMULATOR_URL=http://127.0.0.1:9099
+```
+
+The app will then render the Google login button and use the emulator-hosted popup flow locally.
 
 ### Production environment
 
