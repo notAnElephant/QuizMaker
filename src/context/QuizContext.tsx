@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import rawData from "../data/questions.json";
 import { Question } from "../models/Question";
 import { Category, Settings, Team } from "./types";
@@ -34,9 +34,24 @@ const initialData: Category[] = (rawData as RawCategory[]).map((cat) => ({
 }));
 
 const defaultSettings: Settings = {
+  backgroundImage: undefined,
+  backgroundMode: "preset",
+  backgroundPreset: "default",
   classicMode: false,
   timerEnabled: false,
   timerDuration: 30,
+};
+const SETTINGS_STORAGE_KEY = "quizmaker.settings";
+
+const backgroundPresets: Record<Settings["backgroundPreset"], string> = {
+  default:
+    'linear-gradient(135deg, rgba(12, 18, 31, 0.8), rgba(26, 54, 93, 0.6)), url("./assets/bg.png")',
+  forest:
+    "linear-gradient(135deg, #0f3d2e 0%, #174f3b 35%, #2f6f4f 100%)",
+  ocean:
+    "linear-gradient(135deg, #0b2545 0%, #134074 40%, #3f88c5 100%)",
+  sunset:
+    "linear-gradient(135deg, #4a1942 0%, #893168 40%, #ff784f 100%)",
 };
 
 const QuizContext = createContext<{
@@ -91,7 +106,25 @@ export function QuizProvider({ children }: { children: ReactNode }) {
     "47559e6f-f126-4124-84d7-9d71d9467f6d",
   );
   const [currentQuizTitle, setCurrentQuizTitle] = useState("Vágó Pesta");
-  const [settings, setSettings] = useState<Settings>(defaultSettings);
+  const [settings, setSettings] = useState<Settings>(() => {
+    if (typeof window === "undefined") {
+      return defaultSettings;
+    }
+
+    try {
+      const storedSettings = window.localStorage.getItem(SETTINGS_STORAGE_KEY);
+      if (!storedSettings) {
+        return defaultSettings;
+      }
+
+      return {
+        ...defaultSettings,
+        ...JSON.parse(storedSettings),
+      } satisfies Settings;
+    } catch {
+      return defaultSettings;
+    }
+  });
   const [teams, setTeams] = useState<Team[]>([
     {
       name: "Team 1",
@@ -269,6 +302,25 @@ export function QuizProvider({ children }: { children: ReactNode }) {
     setCurrentQuizTitle(title);
     setCategories(nextCategories);
   };
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    window.localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(settings));
+
+    const backgroundImage =
+      settings.backgroundMode === "image" && settings.backgroundImage
+        ? `linear-gradient(rgba(12, 18, 31, 0.35), rgba(12, 18, 31, 0.35)), url("${settings.backgroundImage}")`
+        : backgroundPresets[settings.backgroundPreset];
+
+    document.body.style.backgroundImage = backgroundImage;
+    document.body.style.backgroundSize = "cover";
+    document.body.style.backgroundPosition = "center";
+    document.body.style.backgroundRepeat = "no-repeat";
+    document.body.style.backgroundAttachment = "fixed";
+  }, [settings]);
 
   return (
     <QuizContext.Provider

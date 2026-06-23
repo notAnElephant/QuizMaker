@@ -13,6 +13,9 @@ export type Category = {
 };
 
 export type Settings = {
+  backgroundImage?: string;
+  backgroundMode: "preset" | "image";
+  backgroundPreset: "default" | "sunset" | "forest" | "ocean";
   classicMode: boolean;
   timerEnabled: boolean;
   timerDuration: number;
