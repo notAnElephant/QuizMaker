@@ -1,22 +1,13 @@
 import { gql } from "@apollo/client";
 import "./index.css";
 import { useMutation } from "@apollo/client/react";
+import { FaCog, FaEdit, FaFolderOpen, FaPlus, FaSave, FaTrophy, FaUser, FaUsers } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 import { Board } from "./components/Board";
+import TeamBar from "./components/TeamBar.tsx";
 import UserSwitcher from "./components/UserSwitcher";
 import { useQuiz } from "./context/QuizContext";
 import { useCurrentUser } from "./context/useCurrentUser";
-import { useNavigate } from "react-router-dom";
-import {
-  FaCog,
-  FaEdit,
-  FaFolderOpen,
-  FaPlus,
-  FaSave,
-  FaTrophy,
-  FaUser,
-  FaUsers,
-} from "react-icons/fa";
-import TeamBar from "./components/TeamBar.tsx";
 import { buildStoredQuestionText } from "./utility/quizPersistence";
 
 const SAVE_QUIZ_MUTATION = gql`
@@ -52,6 +43,23 @@ const SAVE_QUIZ_PLAYS_MUTATION = gql`
   }
 `;
 
+function SidebarAction({
+  children,
+  label,
+}: {
+  children: React.ReactNode;
+  label: string;
+}) {
+  return (
+    <div className="group relative flex items-center">
+      {children}
+      <div className="pointer-events-none absolute left-full ml-3 whitespace-nowrap rounded-lg bg-black/85 px-3 py-2 text-sm font-medium text-white opacity-0 shadow-lg transition group-hover:opacity-100 group-focus-within:opacity-100">
+        {label}
+      </div>
+    </div>
+  );
+}
+
 function App() {
   const {
     categories,
@@ -77,7 +85,8 @@ function App() {
       return;
     }
 
-    const defaultTitle = currentQuizTitle || `Mentett kvíz ${new Date().toLocaleString("hu-HU")}`;
+    const defaultTitle =
+      currentQuizTitle || `Mentett kvíz ${new Date().toLocaleString("hu-HU")}`;
     const title = window.prompt("Kvíz címe", defaultTitle)?.trim();
 
     if (!title) {
@@ -90,7 +99,10 @@ function App() {
         question_id: crypto.randomUUID(),
         quiz_id: quizId,
         category_name: category.category,
-        question_text: buildStoredQuestionText(question.content, question.source),
+        question_text: buildStoredQuestionText(
+          question.content,
+          question.source,
+        ),
         question_type: question.type,
         points: question.points,
         answer_options: question.list?.length ? question.list : [],
@@ -129,7 +141,9 @@ function App() {
     }
 
     if (!allQuestionsUsed) {
-      window.alert("A lejátszás csak akkor menthető, ha minden kérdés fel lett fedve.");
+      window.alert(
+        "A lejátszás csak akkor menthető, ha minden kérdés fel lett fedve.",
+      );
       return;
     }
 
@@ -157,7 +171,7 @@ function App() {
 
   return (
     <div className="min-h-screen flex items-center flex-col justify-between text-black">
-      <div className="w-full h-full max-w-screen-lg px-4 flex flex-col items-center text-center">
+      <div className="w-full h-full max-w-5xl px-4 flex flex-col items-center text-center">
         <div className="mt-8 flex w-full justify-end">
           <UserSwitcher />
         </div>
@@ -173,75 +187,93 @@ function App() {
         />
       </div>
       <div className="absolute bottom-4 left-4 flex-1 flex items-start gap-2 flex-col">
-        <button
-          onClick={handleSaveQuiz}
-          disabled={isSaving || isLoadingCurrentUser || !currentUser}
-          className="bg-emerald-700 text-white p-3 rounded-full shadow-lg hover:bg-emerald-600 disabled:cursor-wait disabled:bg-emerald-400"
-          aria-label="Save quiz"
-          title="Kvíz mentése"
-        >
-          <FaSave size={20} />
-        </button>
-        <button
-          onClick={handleSaveCompletedPlay}
-          disabled={
-            isSavingPlays ||
-            isLoadingCurrentUser ||
-            !currentUser ||
-            !allQuestionsUsed
-          }
-          className="bg-yellow-600 text-white p-3 rounded-full shadow-lg hover:bg-yellow-500 disabled:cursor-not-allowed disabled:bg-yellow-300"
-          aria-label="Save game results"
-          title="Lejátszás mentése"
-        >
-          <FaTrophy size={20} />
-        </button>
-        <button
-          onClick={() => navigate("/quizzes")}
-          className="bg-blue-700 text-white p-3 rounded-full shadow-lg hover:bg-blue-600"
-          aria-label="Load quiz"
-          title="Mentett kvíz betöltése"
-        >
-          <FaFolderOpen size={20} />
-        </button>
-        <button
-          onClick={() => navigate("/quizzes/new")}
-          className="bg-fuchsia-700 text-white p-3 rounded-full shadow-lg hover:bg-fuchsia-600"
-          aria-label="New quiz"
-          title="Új kvíz létrehozása"
-        >
-          <FaPlus size={20} />
-        </button>
-        <button
-          onClick={() => navigate("/editor")}
-          className="bg-amber-600 text-white p-3 rounded-full shadow-lg hover:bg-amber-500"
-          aria-label="Edit quiz"
-          title="Pontszámok szerkesztése"
-        >
-          <FaEdit size={20} />
-        </button>
-        <button
-          onClick={() => navigate("/teams")}
-          className="bg-gray-800 text-white p-3 rounded-full shadow-lg hover:bg-gray-700"
-          aria-label="Teams"
-        >
-          <FaUsers size={20} />
-        </button>
-        <button
-          onClick={() => navigate("/profile")}
-          className="bg-gray-800 text-white p-3 rounded-full shadow-lg hover:bg-gray-700"
-          aria-label="Profile"
-          title="Profil"
-        >
-          <FaUser size={20} />
-        </button>
-        <button
-          onClick={() => navigate("/settings")}
-          className="bg-gray-800 text-white p-3 rounded-full shadow-lg hover:bg-gray-700"
-          aria-label="Settings"
-        >
-          <FaCog size={20} />
-        </button>
+        <SidebarAction label="Kvíz mentése">
+          <button
+            onClick={handleSaveQuiz}
+            disabled={isSaving || isLoadingCurrentUser || !currentUser}
+            className="bg-emerald-700 text-white p-3 rounded-full shadow-lg hover:bg-emerald-600 disabled:cursor-wait disabled:bg-emerald-400"
+            aria-label="Save quiz"
+            title="Kvíz mentése"
+          >
+            <FaSave size={20} />
+          </button>
+        </SidebarAction>
+        <SidebarAction label="Lejátszás mentése">
+          <button
+            onClick={handleSaveCompletedPlay}
+            disabled={
+              isSavingPlays ||
+              isLoadingCurrentUser ||
+              !currentUser ||
+              !allQuestionsUsed
+            }
+            className="bg-yellow-600 text-white p-3 rounded-full shadow-lg hover:bg-yellow-500 disabled:cursor-not-allowed disabled:bg-yellow-300"
+            aria-label="Save game results"
+            title="Lejátszás mentése"
+          >
+            <FaTrophy size={20} />
+          </button>
+        </SidebarAction>
+        <SidebarAction label="Mentett kvíz betöltése">
+          <button
+            onClick={() => navigate("/quizzes")}
+            className="bg-blue-700 text-white p-3 rounded-full shadow-lg hover:bg-blue-600"
+            aria-label="Load quiz"
+            title="Mentett kvíz betöltése"
+          >
+            <FaFolderOpen size={20} />
+          </button>
+        </SidebarAction>
+        <SidebarAction label="Új kvíz létrehozása">
+          <button
+            onClick={() => navigate("/quizzes/new")}
+            className="bg-fuchsia-700 text-white p-3 rounded-full shadow-lg hover:bg-fuchsia-600"
+            aria-label="New quiz"
+            title="Új kvíz létrehozása"
+          >
+            <FaPlus size={20} />
+          </button>
+        </SidebarAction>
+        <SidebarAction label="Pontszámok szerkesztése">
+          <button
+            onClick={() => navigate("/editor")}
+            className="bg-amber-600 text-white p-3 rounded-full shadow-lg hover:bg-amber-500"
+            aria-label="Edit quiz"
+            title="Pontszámok szerkesztése"
+          >
+            <FaEdit size={20} />
+          </button>
+        </SidebarAction>
+        <SidebarAction label="Csapatok">
+          <button
+            onClick={() => navigate("/teams")}
+            className="bg-gray-800 text-white p-3 rounded-full shadow-lg hover:bg-gray-700"
+            aria-label="Teams"
+            title="Csapatok"
+          >
+            <FaUsers size={20} />
+          </button>
+        </SidebarAction>
+        <SidebarAction label="Profil">
+          <button
+            onClick={() => navigate("/profile")}
+            className="bg-gray-800 text-white p-3 rounded-full shadow-lg hover:bg-gray-700"
+            aria-label="Profile"
+            title="Profil"
+          >
+            <FaUser size={20} />
+          </button>
+        </SidebarAction>
+        <SidebarAction label="Beállítások">
+          <button
+            onClick={() => navigate("/settings")}
+            className="bg-gray-800 text-white p-3 rounded-full shadow-lg hover:bg-gray-700"
+            aria-label="Settings"
+            title="Beállítások"
+          >
+            <FaCog size={20} />
+          </button>
+        </SidebarAction>
       </div>
       <TeamBar mode={"board"} />
     </div>
