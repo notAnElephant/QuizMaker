@@ -725,6 +725,7 @@ export type Query_RootUsers_By_PkArgs = {
 export type Questions = {
   __typename?: 'questions';
   answer_options?: Maybe<Array<Scalars['String']['output']>>;
+  category_name: Scalars['String']['output'];
   correct_answer?: Maybe<Scalars['String']['output']>;
   points?: Maybe<Scalars['Int']['output']>;
   question_id: Scalars['uuid']['output'];
@@ -775,6 +776,7 @@ export type Questions_Bool_Exp = {
   _not?: InputMaybe<Questions_Bool_Exp>;
   _or?: InputMaybe<Array<Questions_Bool_Exp>>;
   answer_options?: InputMaybe<String_Array_Comparison_Exp>;
+  category_name?: InputMaybe<String_Comparison_Exp>;
   correct_answer?: InputMaybe<String_Comparison_Exp>;
   points?: InputMaybe<Int_Comparison_Exp>;
   question_id?: InputMaybe<Uuid_Comparison_Exp>;
@@ -797,6 +799,7 @@ export type Questions_Inc_Input = {
 /** input type for inserting data into table "questions" */
 export type Questions_Insert_Input = {
   answer_options?: InputMaybe<Array<Scalars['String']['input']>>;
+  category_name?: InputMaybe<Scalars['String']['input']>;
   correct_answer?: InputMaybe<Scalars['String']['input']>;
   points?: InputMaybe<Scalars['Int']['input']>;
   question_id?: InputMaybe<Scalars['uuid']['input']>;
@@ -809,6 +812,7 @@ export type Questions_Insert_Input = {
 export type Questions_Max_Fields = {
   __typename?: 'questions_max_fields';
   answer_options?: Maybe<Array<Scalars['String']['output']>>;
+  category_name?: Maybe<Scalars['String']['output']>;
   correct_answer?: Maybe<Scalars['String']['output']>;
   points?: Maybe<Scalars['Int']['output']>;
   question_id?: Maybe<Scalars['uuid']['output']>;
@@ -821,6 +825,7 @@ export type Questions_Max_Fields = {
 export type Questions_Min_Fields = {
   __typename?: 'questions_min_fields';
   answer_options?: Maybe<Array<Scalars['String']['output']>>;
+  category_name?: Maybe<Scalars['String']['output']>;
   correct_answer?: Maybe<Scalars['String']['output']>;
   points?: Maybe<Scalars['Int']['output']>;
   question_id?: Maybe<Scalars['uuid']['output']>;
@@ -848,6 +853,7 @@ export type Questions_On_Conflict = {
 /** Ordering options when selecting data from "questions". */
 export type Questions_Order_By = {
   answer_options?: InputMaybe<Order_By>;
+  category_name?: InputMaybe<Order_By>;
   correct_answer?: InputMaybe<Order_By>;
   points?: InputMaybe<Order_By>;
   question_id?: InputMaybe<Order_By>;
@@ -866,6 +872,8 @@ export enum Questions_Select_Column {
   /** column name */
   AnswerOptions = 'answer_options',
   /** column name */
+  CategoryName = 'category_name',
+  /** column name */
   CorrectAnswer = 'correct_answer',
   /** column name */
   Points = 'points',
@@ -882,6 +890,7 @@ export enum Questions_Select_Column {
 /** input type for updating data in table "questions" */
 export type Questions_Set_Input = {
   answer_options?: InputMaybe<Array<Scalars['String']['input']>>;
+  category_name?: InputMaybe<Scalars['String']['input']>;
   correct_answer?: InputMaybe<Scalars['String']['input']>;
   points?: InputMaybe<Scalars['Int']['input']>;
   question_id?: InputMaybe<Scalars['uuid']['input']>;
@@ -919,6 +928,7 @@ export type Questions_Stream_Cursor_Input = {
 /** Initial value of the column from where the streaming should start */
 export type Questions_Stream_Cursor_Value_Input = {
   answer_options?: InputMaybe<Array<Scalars['String']['input']>>;
+  category_name?: InputMaybe<Scalars['String']['input']>;
   correct_answer?: InputMaybe<Scalars['String']['input']>;
   points?: InputMaybe<Scalars['Int']['input']>;
   question_id?: InputMaybe<Scalars['uuid']['input']>;
@@ -937,6 +947,8 @@ export type Questions_Sum_Fields = {
 export enum Questions_Update_Column {
   /** column name */
   AnswerOptions = 'answer_options',
+  /** column name */
+  CategoryName = 'category_name',
   /** column name */
   CorrectAnswer = 'correct_answer',
   /** column name */
@@ -985,6 +997,7 @@ export type Quiz_Plays = {
   play_time: Scalars['timestamp']['output'];
   quiz_id?: Maybe<Scalars['uuid']['output']>;
   score?: Maybe<Scalars['Int']['output']>;
+  session_id: Scalars['uuid']['output'];
   team_name?: Maybe<Scalars['String']['output']>;
   team_score?: Maybe<Scalars['Int']['output']>;
   user_id?: Maybe<Scalars['uuid']['output']>;
@@ -1036,6 +1049,7 @@ export type Quiz_Plays_Bool_Exp = {
   play_time?: InputMaybe<Timestamp_Comparison_Exp>;
   quiz_id?: InputMaybe<Uuid_Comparison_Exp>;
   score?: InputMaybe<Int_Comparison_Exp>;
+  session_id?: InputMaybe<Uuid_Comparison_Exp>;
   team_name?: InputMaybe<String_Comparison_Exp>;
   team_score?: InputMaybe<Int_Comparison_Exp>;
   user_id?: InputMaybe<Uuid_Comparison_Exp>;
@@ -1059,6 +1073,7 @@ export type Quiz_Plays_Insert_Input = {
   play_time?: InputMaybe<Scalars['timestamp']['input']>;
   quiz_id?: InputMaybe<Scalars['uuid']['input']>;
   score?: InputMaybe<Scalars['Int']['input']>;
+  session_id?: InputMaybe<Scalars['uuid']['input']>;
   team_name?: InputMaybe<Scalars['String']['input']>;
   team_score?: InputMaybe<Scalars['Int']['input']>;
   user_id?: InputMaybe<Scalars['uuid']['input']>;
@@ -1071,6 +1086,7 @@ export type Quiz_Plays_Max_Fields = {
   play_time?: Maybe<Scalars['timestamp']['output']>;
   quiz_id?: Maybe<Scalars['uuid']['output']>;
   score?: Maybe<Scalars['Int']['output']>;
+  session_id?: Maybe<Scalars['uuid']['output']>;
   team_name?: Maybe<Scalars['String']['output']>;
   team_score?: Maybe<Scalars['Int']['output']>;
   user_id?: Maybe<Scalars['uuid']['output']>;
@@ -1083,6 +1099,7 @@ export type Quiz_Plays_Min_Fields = {
   play_time?: Maybe<Scalars['timestamp']['output']>;
   quiz_id?: Maybe<Scalars['uuid']['output']>;
   score?: Maybe<Scalars['Int']['output']>;
+  session_id?: Maybe<Scalars['uuid']['output']>;
   team_name?: Maybe<Scalars['String']['output']>;
   team_score?: Maybe<Scalars['Int']['output']>;
   user_id?: Maybe<Scalars['uuid']['output']>;
@@ -1110,6 +1127,7 @@ export type Quiz_Plays_Order_By = {
   play_time?: InputMaybe<Order_By>;
   quiz_id?: InputMaybe<Order_By>;
   score?: InputMaybe<Order_By>;
+  session_id?: InputMaybe<Order_By>;
   team_name?: InputMaybe<Order_By>;
   team_score?: InputMaybe<Order_By>;
   user_id?: InputMaybe<Order_By>;
@@ -1131,6 +1149,8 @@ export enum Quiz_Plays_Select_Column {
   /** column name */
   Score = 'score',
   /** column name */
+  SessionId = 'session_id',
+  /** column name */
   TeamName = 'team_name',
   /** column name */
   TeamScore = 'team_score',
@@ -1144,6 +1164,7 @@ export type Quiz_Plays_Set_Input = {
   play_time?: InputMaybe<Scalars['timestamp']['input']>;
   quiz_id?: InputMaybe<Scalars['uuid']['input']>;
   score?: InputMaybe<Scalars['Int']['input']>;
+  session_id?: InputMaybe<Scalars['uuid']['input']>;
   team_name?: InputMaybe<Scalars['String']['input']>;
   team_score?: InputMaybe<Scalars['Int']['input']>;
   user_id?: InputMaybe<Scalars['uuid']['input']>;
@@ -1184,6 +1205,7 @@ export type Quiz_Plays_Stream_Cursor_Value_Input = {
   play_time?: InputMaybe<Scalars['timestamp']['input']>;
   quiz_id?: InputMaybe<Scalars['uuid']['input']>;
   score?: InputMaybe<Scalars['Int']['input']>;
+  session_id?: InputMaybe<Scalars['uuid']['input']>;
   team_name?: InputMaybe<Scalars['String']['input']>;
   team_score?: InputMaybe<Scalars['Int']['input']>;
   user_id?: InputMaybe<Scalars['uuid']['input']>;
@@ -1206,6 +1228,8 @@ export enum Quiz_Plays_Update_Column {
   QuizId = 'quiz_id',
   /** column name */
   Score = 'score',
+  /** column name */
+  SessionId = 'session_id',
   /** column name */
   TeamName = 'team_name',
   /** column name */
@@ -1833,66 +1857,78 @@ export type Uuid_Comparison_Exp = {
   _nin?: InputMaybe<Array<Scalars['uuid']['input']>>;
 };
 
-export type GetUsersQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type GetUsersQuery = { __typename?: 'query_root', users: Array<{ __typename?: 'users', user_id: any }> };
-
-export type CreateUserMutationVariables = Exact<{
-  id: Scalars['uuid']['input'];
-  name: Scalars['String']['input'];
-}>;
-
-
-export type CreateUserMutation = { __typename?: 'mutation_root', insert_users_one?: { __typename?: 'users', user_id: any } | null };
-
 export type CreateQuizMutationVariables = Exact<{
-  id: Scalars['uuid']['input'];
+  quizId: Scalars['uuid']['input'];
   title: Scalars['String']['input'];
-  owner_id: Scalars['uuid']['input'];
+  description?: InputMaybe<Scalars['String']['input']>;
+  ownerId: Scalars['uuid']['input'];
+  questions: Array<Questions_Insert_Input> | Questions_Insert_Input;
 }>;
 
 
-export type CreateQuizMutation = { __typename?: 'mutation_root', insert_quizzes_one?: { __typename?: 'quizzes', quiz_id: any } | null };
+export type CreateQuizMutation = { __typename?: 'mutation_root', insert_quizzes_one?: { __typename?: 'quizzes', quiz_id: any } | null, insert_questions?: { __typename?: 'questions_mutation_response', affected_rows: number } | null };
 
-export type CreateQuestionMutationVariables = Exact<{
-  id: Scalars['uuid']['input'];
-  text: Scalars['String']['input'];
-  type: Scalars['String']['input'];
-  points: Scalars['Int']['input'];
-  quiz_id: Scalars['uuid']['input'];
-  options?: InputMaybe<Array<Scalars['String']['input']> | Scalars['String']['input']>;
+export type UpdateQuizMutationVariables = Exact<{
+  quizId: Scalars['uuid']['input'];
+  title: Scalars['String']['input'];
+  description?: InputMaybe<Scalars['String']['input']>;
+  ownerId: Scalars['uuid']['input'];
+  questions: Array<Questions_Insert_Input> | Questions_Insert_Input;
+  updatedAt: Scalars['timestamp']['input'];
 }>;
 
 
-export type CreateQuestionMutation = { __typename?: 'mutation_root', insert_questions_one?: { __typename?: 'questions', question_id: any } | null };
+export type UpdateQuizMutation = { __typename?: 'mutation_root', update_quizzes?: { __typename?: 'quizzes_mutation_response', affected_rows: number } | null, delete_questions?: { __typename?: 'questions_mutation_response', affected_rows: number } | null, insert_questions?: { __typename?: 'questions_mutation_response', affected_rows: number } | null };
 
-export type DeleteQuestionMutationVariables = Exact<{
-  id: Scalars['uuid']['input'];
+export type SaveQuizPlaysMutationVariables = Exact<{
+  plays: Array<Quiz_Plays_Insert_Input> | Quiz_Plays_Insert_Input;
 }>;
 
 
-export type DeleteQuestionMutation = { __typename?: 'mutation_root', delete_questions_by_pk?: { __typename?: 'questions', question_id: any } | null };
+export type SaveQuizPlaysMutation = { __typename?: 'mutation_root', insert_quiz_plays?: { __typename?: 'quiz_plays_mutation_response', affected_rows: number } | null };
 
-export type GetAllQuestionsQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type GetAllQuestionsQuery = { __typename?: 'query_root', questions: Array<{ __typename?: 'questions', question_id: any, question_text: string }> };
-
-export type NukeQuestionsMutationVariables = Exact<{ [key: string]: never; }>;
+export type GetProfileQuizzesQueryVariables = Exact<{
+  ownerId: Scalars['uuid']['input'];
+}>;
 
 
-export type NukeQuestionsMutation = { __typename?: 'mutation_root', delete_questions?: { __typename?: 'questions_mutation_response', affected_rows: number } | null };
+export type GetProfileQuizzesQuery = { __typename?: 'query_root', quizzes: Array<{ __typename?: 'quizzes', quiz_id: any, title: string, description?: string | null, updated_at: any }> };
 
-export type NukeQuizzesMutationVariables = Exact<{ [key: string]: never; }>;
-
-
-export type NukeQuizzesMutation = { __typename?: 'mutation_root', delete_quizzes?: { __typename?: 'quizzes_mutation_response', affected_rows: number } | null };
-
-export type NukeUsersMutationVariables = Exact<{ [key: string]: never; }>;
+export type GetSavedQuizzesQueryVariables = Exact<{
+  ownerId: Scalars['uuid']['input'];
+}>;
 
 
-export type NukeUsersMutation = { __typename?: 'mutation_root', delete_users?: { __typename?: 'users_mutation_response', affected_rows: number } | null };
+export type GetSavedQuizzesQuery = { __typename?: 'query_root', quizzes: Array<{ __typename?: 'quizzes', quiz_id: any, title: string, description?: string | null, updated_at: any }> };
+
+export type GetSavedQuizQuestionsQueryVariables = Exact<{
+  quizIds: Array<Scalars['uuid']['input']> | Scalars['uuid']['input'];
+}>;
+
+
+export type GetSavedQuizQuestionsQuery = { __typename?: 'query_root', questions: Array<{ __typename?: 'questions', question_id: any, quiz_id?: any | null, question_text: string, question_type: string, points?: number | null, answer_options?: Array<string> | null, category_name: string }> };
+
+export type DeleteQuizMutationVariables = Exact<{
+  quizId: Scalars['uuid']['input'];
+  ownerId: Scalars['uuid']['input'];
+}>;
+
+
+export type DeleteQuizMutation = { __typename?: 'mutation_root', delete_quizzes?: { __typename?: 'quizzes_mutation_response', affected_rows: number } | null };
+
+export type GetCurrentUsersQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetCurrentUsersQuery = { __typename?: 'query_root', users: Array<{ __typename?: 'users', user_id: any, display_name?: string | null, email?: string | null }> };
+
+export type UpsertCurrentUserMutationVariables = Exact<{
+  userId: Scalars['uuid']['input'];
+  displayName?: InputMaybe<Scalars['String']['input']>;
+  email?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type UpsertCurrentUserMutation = { __typename?: 'mutation_root', insert_users_one?: { __typename?: 'users', user_id: any, display_name?: string | null, email?: string | null } | null };
 
 export type GetQuestionsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1900,13 +1936,13 @@ export type GetQuestionsQueryVariables = Exact<{ [key: string]: never; }>;
 export type GetQuestionsQuery = { __typename?: 'query_root', questions: Array<{ __typename?: 'questions', question_id: any, question_text: string, question_type: string, points?: number | null, answer_options?: Array<string> | null, correct_answer?: string | null, quiz_id?: any | null }> };
 
 
-export const GetUsersDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetUsers"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"users"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"IntValue","value":"1"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"user_id"}}]}}]}}]} as unknown as DocumentNode<GetUsersQuery, GetUsersQueryVariables>;
-export const CreateUserDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateUser"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"uuid"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"name"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"insert_users_one"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"object"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"user_id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}},{"kind":"ObjectField","name":{"kind":"Name","value":"display_name"},"value":{"kind":"Variable","name":{"kind":"Name","value":"name"}}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"user_id"}}]}}]}}]} as unknown as DocumentNode<CreateUserMutation, CreateUserMutationVariables>;
-export const CreateQuizDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateQuiz"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"uuid"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"title"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"owner_id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"uuid"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"insert_quizzes_one"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"object"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"quiz_id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}},{"kind":"ObjectField","name":{"kind":"Name","value":"title"},"value":{"kind":"Variable","name":{"kind":"Name","value":"title"}}},{"kind":"ObjectField","name":{"kind":"Name","value":"owner_id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"owner_id"}}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"quiz_id"}}]}}]}}]} as unknown as DocumentNode<CreateQuizMutation, CreateQuizMutationVariables>;
-export const CreateQuestionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateQuestion"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"uuid"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"text"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"type"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"points"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"quiz_id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"uuid"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"options"}},"type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"insert_questions_one"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"object"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"question_id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}},{"kind":"ObjectField","name":{"kind":"Name","value":"question_text"},"value":{"kind":"Variable","name":{"kind":"Name","value":"text"}}},{"kind":"ObjectField","name":{"kind":"Name","value":"question_type"},"value":{"kind":"Variable","name":{"kind":"Name","value":"type"}}},{"kind":"ObjectField","name":{"kind":"Name","value":"points"},"value":{"kind":"Variable","name":{"kind":"Name","value":"points"}}},{"kind":"ObjectField","name":{"kind":"Name","value":"quiz_id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"quiz_id"}}},{"kind":"ObjectField","name":{"kind":"Name","value":"answer_options"},"value":{"kind":"Variable","name":{"kind":"Name","value":"options"}}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"question_id"}}]}}]}}]} as unknown as DocumentNode<CreateQuestionMutation, CreateQuestionMutationVariables>;
-export const DeleteQuestionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeleteQuestion"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"uuid"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"delete_questions_by_pk"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"question_id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"question_id"}}]}}]}}]} as unknown as DocumentNode<DeleteQuestionMutation, DeleteQuestionMutationVariables>;
-export const GetAllQuestionsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetAllQuestions"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"questions"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"question_id"}},{"kind":"Field","name":{"kind":"Name","value":"question_text"}}]}}]}}]} as unknown as DocumentNode<GetAllQuestionsQuery, GetAllQuestionsQueryVariables>;
-export const NukeQuestionsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"NukeQuestions"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"delete_questions"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"ObjectValue","fields":[]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"affected_rows"}}]}}]}}]} as unknown as DocumentNode<NukeQuestionsMutation, NukeQuestionsMutationVariables>;
-export const NukeQuizzesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"NukeQuizzes"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"delete_quizzes"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"ObjectValue","fields":[]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"affected_rows"}}]}}]}}]} as unknown as DocumentNode<NukeQuizzesMutation, NukeQuizzesMutationVariables>;
-export const NukeUsersDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"NukeUsers"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"delete_users"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"ObjectValue","fields":[]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"affected_rows"}}]}}]}}]} as unknown as DocumentNode<NukeUsersMutation, NukeUsersMutationVariables>;
+export const CreateQuizDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateQuiz"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"quizId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"uuid"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"title"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"description"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"ownerId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"uuid"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"questions"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"questions_insert_input"}}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"insert_quizzes_one"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"object"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"quiz_id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"quizId"}}},{"kind":"ObjectField","name":{"kind":"Name","value":"title"},"value":{"kind":"Variable","name":{"kind":"Name","value":"title"}}},{"kind":"ObjectField","name":{"kind":"Name","value":"description"},"value":{"kind":"Variable","name":{"kind":"Name","value":"description"}}},{"kind":"ObjectField","name":{"kind":"Name","value":"owner_id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"ownerId"}}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"quiz_id"}}]}},{"kind":"Field","name":{"kind":"Name","value":"insert_questions"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"objects"},"value":{"kind":"Variable","name":{"kind":"Name","value":"questions"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"affected_rows"}}]}}]}}]} as unknown as DocumentNode<CreateQuizMutation, CreateQuizMutationVariables>;
+export const UpdateQuizDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateQuiz"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"quizId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"uuid"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"title"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"description"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"ownerId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"uuid"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"questions"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"questions_insert_input"}}}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"updatedAt"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"timestamp"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"update_quizzes"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"quiz_id"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"_eq"},"value":{"kind":"Variable","name":{"kind":"Name","value":"quizId"}}}]}},{"kind":"ObjectField","name":{"kind":"Name","value":"owner_id"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"_eq"},"value":{"kind":"Variable","name":{"kind":"Name","value":"ownerId"}}}]}}]}},{"kind":"Argument","name":{"kind":"Name","value":"_set"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"title"},"value":{"kind":"Variable","name":{"kind":"Name","value":"title"}}},{"kind":"ObjectField","name":{"kind":"Name","value":"description"},"value":{"kind":"Variable","name":{"kind":"Name","value":"description"}}},{"kind":"ObjectField","name":{"kind":"Name","value":"updated_at"},"value":{"kind":"Variable","name":{"kind":"Name","value":"updatedAt"}}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"affected_rows"}}]}},{"kind":"Field","name":{"kind":"Name","value":"delete_questions"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"quiz_id"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"_eq"},"value":{"kind":"Variable","name":{"kind":"Name","value":"quizId"}}}]}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"affected_rows"}}]}},{"kind":"Field","name":{"kind":"Name","value":"insert_questions"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"objects"},"value":{"kind":"Variable","name":{"kind":"Name","value":"questions"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"affected_rows"}}]}}]}}]} as unknown as DocumentNode<UpdateQuizMutation, UpdateQuizMutationVariables>;
+export const SaveQuizPlaysDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"SaveQuizPlays"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"plays"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"quiz_plays_insert_input"}}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"insert_quiz_plays"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"objects"},"value":{"kind":"Variable","name":{"kind":"Name","value":"plays"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"affected_rows"}}]}}]}}]} as unknown as DocumentNode<SaveQuizPlaysMutation, SaveQuizPlaysMutationVariables>;
+export const GetProfileQuizzesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetProfileQuizzes"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"ownerId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"uuid"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"quizzes"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"owner_id"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"_eq"},"value":{"kind":"Variable","name":{"kind":"Name","value":"ownerId"}}}]}}]}},{"kind":"Argument","name":{"kind":"Name","value":"order_by"},"value":{"kind":"ListValue","values":[{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"updated_at"},"value":{"kind":"EnumValue","value":"desc"}}]}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"quiz_id"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"updated_at"}}]}}]}}]} as unknown as DocumentNode<GetProfileQuizzesQuery, GetProfileQuizzesQueryVariables>;
+export const GetSavedQuizzesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetSavedQuizzes"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"ownerId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"uuid"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"quizzes"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"owner_id"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"_eq"},"value":{"kind":"Variable","name":{"kind":"Name","value":"ownerId"}}}]}}]}},{"kind":"Argument","name":{"kind":"Name","value":"order_by"},"value":{"kind":"ListValue","values":[{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"updated_at"},"value":{"kind":"EnumValue","value":"desc"}}]}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"quiz_id"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"updated_at"}}]}}]}}]} as unknown as DocumentNode<GetSavedQuizzesQuery, GetSavedQuizzesQueryVariables>;
+export const GetSavedQuizQuestionsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetSavedQuizQuestions"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"quizIds"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"uuid"}}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"questions"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"quiz_id"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"_in"},"value":{"kind":"Variable","name":{"kind":"Name","value":"quizIds"}}}]}}]}},{"kind":"Argument","name":{"kind":"Name","value":"order_by"},"value":{"kind":"ListValue","values":[{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"category_name"},"value":{"kind":"EnumValue","value":"asc"}}]},{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"points"},"value":{"kind":"EnumValue","value":"asc"}}]}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"question_id"}},{"kind":"Field","name":{"kind":"Name","value":"quiz_id"}},{"kind":"Field","name":{"kind":"Name","value":"question_text"}},{"kind":"Field","name":{"kind":"Name","value":"question_type"}},{"kind":"Field","name":{"kind":"Name","value":"points"}},{"kind":"Field","name":{"kind":"Name","value":"answer_options"}},{"kind":"Field","name":{"kind":"Name","value":"category_name"}}]}}]}}]} as unknown as DocumentNode<GetSavedQuizQuestionsQuery, GetSavedQuizQuestionsQueryVariables>;
+export const DeleteQuizDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeleteQuiz"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"quizId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"uuid"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"ownerId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"uuid"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"delete_quizzes"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"quiz_id"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"_eq"},"value":{"kind":"Variable","name":{"kind":"Name","value":"quizId"}}}]}},{"kind":"ObjectField","name":{"kind":"Name","value":"owner_id"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"_eq"},"value":{"kind":"Variable","name":{"kind":"Name","value":"ownerId"}}}]}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"affected_rows"}}]}}]}}]} as unknown as DocumentNode<DeleteQuizMutation, DeleteQuizMutationVariables>;
+export const GetCurrentUsersDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetCurrentUsers"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"users"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"order_by"},"value":{"kind":"ListValue","values":[{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"display_name"},"value":{"kind":"EnumValue","value":"asc"}}]},{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"created_at"},"value":{"kind":"EnumValue","value":"asc"}}]}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"user_id"}},{"kind":"Field","name":{"kind":"Name","value":"display_name"}},{"kind":"Field","name":{"kind":"Name","value":"email"}}]}}]}}]} as unknown as DocumentNode<GetCurrentUsersQuery, GetCurrentUsersQueryVariables>;
+export const UpsertCurrentUserDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpsertCurrentUser"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"userId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"uuid"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"displayName"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"email"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"insert_users_one"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"object"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"user_id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"userId"}}},{"kind":"ObjectField","name":{"kind":"Name","value":"display_name"},"value":{"kind":"Variable","name":{"kind":"Name","value":"displayName"}}},{"kind":"ObjectField","name":{"kind":"Name","value":"email"},"value":{"kind":"Variable","name":{"kind":"Name","value":"email"}}}]}},{"kind":"Argument","name":{"kind":"Name","value":"on_conflict"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"constraint"},"value":{"kind":"EnumValue","value":"users_pkey"}},{"kind":"ObjectField","name":{"kind":"Name","value":"update_columns"},"value":{"kind":"ListValue","values":[{"kind":"EnumValue","value":"display_name"},{"kind":"EnumValue","value":"email"}]}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"user_id"}},{"kind":"Field","name":{"kind":"Name","value":"display_name"}},{"kind":"Field","name":{"kind":"Name","value":"email"}}]}}]}}]} as unknown as DocumentNode<UpsertCurrentUserMutation, UpsertCurrentUserMutationVariables>;
 export const GetQuestionsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetQuestions"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"questions"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"order_by"},"value":{"kind":"ListValue","values":[{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"points"},"value":{"kind":"EnumValue","value":"asc"}}]}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"question_id"}},{"kind":"Field","name":{"kind":"Name","value":"question_text"}},{"kind":"Field","name":{"kind":"Name","value":"question_type"}},{"kind":"Field","name":{"kind":"Name","value":"points"}},{"kind":"Field","name":{"kind":"Name","value":"answer_options"}},{"kind":"Field","name":{"kind":"Name","value":"correct_answer"}},{"kind":"Field","name":{"kind":"Name","value":"quiz_id"}}]}}]}}]} as unknown as DocumentNode<GetQuestionsQuery, GetQuestionsQueryVariables>;

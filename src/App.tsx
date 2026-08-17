@@ -1,8 +1,18 @@
 import { gql } from "@apollo/client";
-import "./index.css";
 import { useMutation } from "@apollo/client/react";
-import { FaCog, FaEdit, FaFolderOpen, FaPlus, FaSave, FaTrophy, FaUser, FaUsers } from "react-icons/fa";
+import { useCallback, useEffect, useRef } from "react";
+import {
+  FaCog,
+  FaEdit,
+  FaFolderOpen,
+  FaPlus,
+  FaSave,
+  FaTrophy,
+  FaUser,
+  FaUsers,
+} from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import "./index.css";
 import { Board } from "./components/Board";
 import TeamBar from "./components/TeamBar.tsx";
 import UserSwitcher from "./components/UserSwitcher";
@@ -10,8 +20,8 @@ import { useQuiz } from "./context/QuizContext";
 import { useCurrentUser } from "./context/useCurrentUser";
 import { buildStoredQuestionText } from "./utility/quizPersistence";
 
-const SAVE_QUIZ_MUTATION = gql`
-  mutation SaveQuiz(
+const CREATE_QUIZ_MUTATION = gql`
+  mutation CreateQuiz(
     $quizId: uuid!
     $title: String!
     $description: String
@@ -27,7 +37,30 @@ const SAVE_QUIZ_MUTATION = gql`
       }
     ) {
       quiz_id
-      title
+    }
+    insert_questions(objects: $questions) {
+      affected_rows
+    }
+  }
+`;
+
+const UPDATE_QUIZ_MUTATION = gql`
+  mutation UpdateQuiz(
+    $quizId: uuid!
+    $title: String!
+    $description: String
+    $ownerId: uuid!
+    $questions: [questions_insert_input!]!
+    $updatedAt: timestamp!
+  ) {
+    update_quizzes(
+      where: { quiz_id: { _eq: $quizId }, owner_id: { _eq: $ownerId } }
+      _set: { title: $title, description: $description, updated_at: $updatedAt }
+    ) {
+      affected_rows
+    }
+    delete_questions(where: { quiz_id: { _eq: $quizId } }) {
+      affected_rows
     }
     insert_questions(objects: $questions) {
       affected_rows
@@ -66,62 +99,106 @@ function App() {
     currentQuizId,
     currentQuizTitle,
     markUsed,
+    playReadyToSave,
+    playSaveStatus,
+    playSessionId,
+    renameQuiz,
     setCurrentQuizId,
+    setPlaySaveStatus,
     teams,
   } = useQuiz();
   const { currentUser, isLoading: isLoadingCurrentUser } = useCurrentUser();
   const navigate = useNavigate();
-  const [saveQuiz, { loading: isSaving }] = useMutation(SAVE_QUIZ_MUTATION);
+  const [createQuiz, { loading: isCreatingQuiz }] =
+    useMutation(CREATE_QUIZ_MUTATION);
+  const [updateQuiz, { loading: isUpdatingQuiz }] =
+    useMutation(UPDATE_QUIZ_MUTATION);
   const [saveQuizPlays, { loading: isSavingPlays }] = useMutation(
     SAVE_QUIZ_PLAYS_MUTATION,
   );
+  const playSaveStartedForSession = useRef<string | null>(null);
   const allQuestionsUsed = categories.every((category) =>
     category.questions.every((question) => question.isUsed),
   );
+  const isSaving = isCreatingQuiz || isUpdatingQuiz;
 
-  const handleSaveQuiz = async () => {
-    if (!currentUser) {
-      window.alert("Nincs kiválasztott felhasználó a mentéshez.");
-      return;
-    }
+  const persistQuiz = useCallback(
+    async (askForTitle: boolean) => {
+      if (!currentUser) {
+        throw new Error("Nincs kiválasztott felhasználó a mentéshez.");
+      }
 
-    const defaultTitle =
-      currentQuizTitle || `Mentett kvíz ${new Date().toLocaleString("hu-HU")}`;
-    const title = window.prompt("Kvíz címe", defaultTitle)?.trim();
+      const defaultTitle =
+        currentQuizTitle ||
+        `Mentett kvíz ${new Date().toLocaleString("hu-HU")}`;
+      const title = askForTitle
+        ? window.prompt("Kvíz címe", defaultTitle)?.trim()
+        : defaultTitle.trim();
 
-    if (!title) {
-      return;
-    }
+      if (!title) {
+        return null;
+      }
 
-    const quizId = crypto.randomUUID();
-    const questions = categories.flatMap((category) =>
-      category.questions.map((question) => ({
-        question_id: crypto.randomUUID(),
-        quiz_id: quizId,
-        category_name: category.category,
-        question_text: buildStoredQuestionText(
-          question.content,
-          question.source,
-        ),
-        question_type: question.type,
-        points: question.points,
-        answer_options: question.list?.length ? question.list : [],
-      })),
-    );
+      const quizId = currentQuizId ?? crypto.randomUUID();
+      const questions = categories.flatMap((category) =>
+        category.questions.map((question) => ({
+          question_id: crypto.randomUUID(),
+          quiz_id: quizId,
+          category_name: category.category,
+          question_text: buildStoredQuestionText(
+            question.content,
+            question.source,
+          ),
+          question_type: question.type,
+          points: question.points,
+          answer_options: question.list?.length ? question.list : [],
+        })),
+      );
+      const variables = {
+        quizId,
+        title,
+        description: `${categories.length} kategória, ${questions.length} kérdés`,
+        ownerId: currentUser.user_id,
+        questions,
+      };
 
-    try {
-      await saveQuiz({
-        variables: {
-          quizId,
-          title,
-          description: `${categories.length} kategória, ${questions.length} kérdés`,
-          ownerId: currentUser.user_id,
-          questions,
-        },
-      });
+      if (currentQuizId) {
+        await updateQuiz({
+          variables: {
+            ...variables,
+            updatedAt: new Date().toISOString(),
+          },
+        });
+      } else {
+        await createQuiz({ variables });
+      }
 
       setCurrentQuizId(quizId);
-      window.alert(`A(z) "${title}" kvíz el lett mentve.`);
+      renameQuiz(title);
+      return { quizId, title, wasUpdate: Boolean(currentQuizId) };
+    },
+    [
+      categories,
+      createQuiz,
+      currentQuizId,
+      currentQuizTitle,
+      currentUser,
+      renameQuiz,
+      setCurrentQuizId,
+      updateQuiz,
+    ],
+  );
+
+  const handleSaveQuiz = async () => {
+    try {
+      const result = await persistQuiz(true);
+      if (!result) {
+        return;
+      }
+
+      window.alert(
+        `A(z) "${result.title}" kvíz ${result.wasUpdate ? "frissítve" : "elmentve"}.`,
+      );
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Ismeretlen mentési hiba.";
@@ -129,45 +206,91 @@ function App() {
     }
   };
 
-  const handleSaveCompletedPlay = async () => {
-    if (!currentUser) {
-      window.alert("Nincs kiválasztott felhasználó a játék mentéséhez.");
+  const handleSaveCompletedPlay = useCallback(async () => {
+    if (
+      !currentUser ||
+      !allQuestionsUsed ||
+      playSaveStartedForSession.current === playSessionId
+    ) {
       return;
     }
 
-    if (!currentQuizId) {
-      window.alert("A játék mentése előtt mentsd el a kvízt.");
-      return;
-    }
-
-    if (!allQuestionsUsed) {
-      window.alert(
-        "A lejátszás csak akkor menthető, ha minden kérdés fel lett fedve.",
-      );
-      return;
-    }
+    playSaveStartedForSession.current = playSessionId;
+    setPlaySaveStatus("saving");
 
     try {
-      await saveQuizPlays({
-        variables: {
-          plays: teams.map((team) => ({
+      const persistedQuiz = currentQuizId
+        ? { quizId: currentQuizId }
+        : await persistQuiz(false);
+
+      if (!persistedQuiz) {
+        throw new Error("A kvízt nem sikerült elmenteni a lejátszás előtt.");
+      }
+
+      const playedAt = new Date().toISOString();
+      const plays = teams.length
+        ? teams.map((team) => ({
             play_id: crypto.randomUUID(),
-            quiz_id: currentQuizId,
+            session_id: playSessionId,
+            quiz_id: persistedQuiz.quizId,
+            play_time: playedAt,
             score: team.points,
             team_name: team.name,
             team_score: team.points,
             user_id: currentUser.user_id,
-          })),
-        },
-      });
+          }))
+        : [
+            {
+              play_id: crypto.randomUUID(),
+              session_id: playSessionId,
+              quiz_id: persistedQuiz.quizId,
+              play_time: playedAt,
+              score: 0,
+              team_name: null,
+              team_score: 0,
+              user_id: currentUser.user_id,
+            },
+          ];
 
-      window.alert("A lejátszás eredményei el lettek mentve az adatbázisba.");
+      await saveQuizPlays({ variables: { plays } });
+      setPlaySaveStatus("saved");
     } catch (error) {
+      playSaveStartedForSession.current = null;
+      setPlaySaveStatus("error");
       const message =
         error instanceof Error ? error.message : "Ismeretlen mentési hiba.";
       window.alert(`A lejátszás mentése nem sikerült: ${message}`);
     }
-  };
+  }, [
+    allQuestionsUsed,
+    currentQuizId,
+    currentUser,
+    persistQuiz,
+    playSessionId,
+    saveQuizPlays,
+    setPlaySaveStatus,
+    teams,
+  ]);
+
+  useEffect(() => {
+    if (playReadyToSave && allQuestionsUsed && playSaveStatus === "idle") {
+      void handleSaveCompletedPlay();
+    }
+  }, [
+    allQuestionsUsed,
+    handleSaveCompletedPlay,
+    playReadyToSave,
+    playSaveStatus,
+  ]);
+
+  const playSaveLabel =
+    playSaveStatus === "saved"
+      ? "Lejátszás automatikusan elmentve"
+      : playSaveStatus === "saving"
+        ? "Lejátszás mentése..."
+        : playSaveStatus === "error"
+          ? "Mentés újrapróbálása"
+          : "A lejátszás automatikusan mentésre kerül";
 
   return (
     <div className="min-h-screen flex items-center flex-col justify-between text-black">
@@ -198,18 +321,20 @@ function App() {
             <FaSave size={20} />
           </button>
         </SidebarAction>
-        <SidebarAction label="Lejátszás mentése">
+        <SidebarAction label={playSaveLabel}>
           <button
-            onClick={handleSaveCompletedPlay}
+            onClick={() => void handleSaveCompletedPlay()}
             disabled={
               isSavingPlays ||
               isLoadingCurrentUser ||
               !currentUser ||
-              !allQuestionsUsed
+              !allQuestionsUsed ||
+              playSaveStatus === "saving" ||
+              playSaveStatus === "saved"
             }
             className="bg-yellow-600 text-white p-3 rounded-full shadow-lg hover:bg-yellow-500 disabled:cursor-not-allowed disabled:bg-yellow-300"
             aria-label="Save game results"
-            title="Lejátszás mentése"
+            title={playSaveLabel}
           >
             <FaTrophy size={20} />
           </button>
@@ -275,7 +400,7 @@ function App() {
           </button>
         </SidebarAction>
       </div>
-      <TeamBar mode={"board"} />
+      <TeamBar mode="board" />
     </div>
   );
 }

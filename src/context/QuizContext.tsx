@@ -1,4 +1,11 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+  ReactNode,
+} from "react";
 import rawData from "../data/questions.json";
 import { Question } from "../models/Question";
 import { Category, Settings, Team } from "./types";
@@ -46,12 +53,9 @@ const SETTINGS_STORAGE_KEY = "quizmaker.settings";
 const backgroundPresets: Record<Settings["backgroundPreset"], string> = {
   default:
     'linear-gradient(135deg, rgba(12, 18, 31, 0.8), rgba(26, 54, 93, 0.6)), url("./assets/bg.png")',
-  forest:
-    "linear-gradient(135deg, #0f3d2e 0%, #174f3b 35%, #2f6f4f 100%)",
-  ocean:
-    "linear-gradient(135deg, #0b2545 0%, #134074 40%, #3f88c5 100%)",
-  sunset:
-    "linear-gradient(135deg, #4a1942 0%, #893168 40%, #ff784f 100%)",
+  forest: "linear-gradient(135deg, #0f3d2e 0%, #174f3b 35%, #2f6f4f 100%)",
+  ocean: "linear-gradient(135deg, #0b2545 0%, #134074 40%, #3f88c5 100%)",
+  sunset: "linear-gradient(135deg, #4a1942 0%, #893168 40%, #ff784f 100%)",
 };
 
 const QuizContext = createContext<{
@@ -65,18 +69,21 @@ const QuizContext = createContext<{
   currentQuizId: string | null;
   currentQuizTitle: string;
   renameQuiz: (title: string) => void;
-  loadQuiz: (
-    quizId: string,
-    title: string,
-    nextCategories: Category[],
-  ) => void;
+  loadQuiz: (quizId: string, title: string, nextCategories: Category[]) => void;
   markUsed: (catIndex: number, qIndex: number, value: boolean) => void;
+  markPlayReadyToSave: () => void;
   moveQuestion: (
     sourceCatIndex: number,
     sourceQuestionIndex: number,
     targetCatIndex: number,
     targetQuestionIndex: number,
   ) => void;
+  playSessionId: string;
+  playReadyToSave: boolean;
+  playSaveStatus: "idle" | "saving" | "saved" | "error";
+  setPlaySaveStatus: React.Dispatch<
+    React.SetStateAction<"idle" | "saving" | "saved" | "error">
+  >;
   setCurrentQuizId: (quizId: string | null) => void;
   updateQuestion: (
     catIndex: number,
@@ -106,6 +113,11 @@ export function QuizProvider({ children }: { children: ReactNode }) {
     "47559e6f-f126-4124-84d7-9d71d9467f6d",
   );
   const [currentQuizTitle, setCurrentQuizTitle] = useState("Vágó Pesta");
+  const [playSessionId, setPlaySessionId] = useState(() => crypto.randomUUID());
+  const [playReadyToSave, setPlayReadyToSave] = useState(false);
+  const [playSaveStatus, setPlaySaveStatus] = useState<
+    "idle" | "saving" | "saved" | "error"
+  >("idle");
   const [settings, setSettings] = useState<Settings>(() => {
     if (typeof window === "undefined") {
       return defaultSettings;
@@ -139,11 +151,34 @@ export function QuizProvider({ children }: { children: ReactNode }) {
       points: 0,
     },
   ]);
+  const markPlayReadyToSave = useCallback(() => {
+    setPlayReadyToSave(true);
+  }, []);
 
   const markUsed = (catIndex: number, qIndex: number, value: boolean) => {
-    const copy = [...categories];
-    copy[catIndex].questions[qIndex].isUsed = value;
-    setCategories(copy);
+    setCategories((prevCategories) =>
+      prevCategories.map((category, currentCatIndex) => {
+        if (currentCatIndex !== catIndex) {
+          return category;
+        }
+
+        return {
+          ...category,
+          questions: category.questions.map((question, currentQuestionIndex) =>
+            currentQuestionIndex === qIndex
+              ? new Question(
+                  question.type,
+                  question.content,
+                  question.source,
+                  question.points,
+                  value,
+                  question.list,
+                )
+              : question,
+          ),
+        };
+      }),
+    );
   };
 
   const updateQuestion = (
@@ -159,20 +194,22 @@ export function QuizProvider({ children }: { children: ReactNode }) {
 
         return {
           ...category,
-          questions: category.questions.map((question, currentQuestionIndex) => {
-            if (currentQuestionIndex !== qIndex) {
-              return question;
-            }
+          questions: category.questions.map(
+            (question, currentQuestionIndex) => {
+              if (currentQuestionIndex !== qIndex) {
+                return question;
+              }
 
-            return new Question(
-              updates.type ?? question.type,
-              updates.content ?? question.content,
-              updates.source ?? question.source,
-              updates.points ?? question.points,
-              question.isUsed,
-              updates.list ?? question.list,
-            );
-          }),
+              return new Question(
+                updates.type ?? question.type,
+                updates.content ?? question.content,
+                updates.source ?? question.source,
+                updates.points ?? question.points,
+                question.isUsed,
+                updates.list ?? question.list,
+              );
+            },
+          ),
         };
       }),
     );
@@ -194,6 +231,9 @@ export function QuizProvider({ children }: { children: ReactNode }) {
     setCurrentQuizId(quizId);
     setCurrentQuizTitle(title);
     setCategories(nextCategories);
+    setPlaySessionId(crypto.randomUUID());
+    setPlayReadyToSave(false);
+    setPlaySaveStatus("idle");
   };
 
   const renameQuiz = (title: string) => {
@@ -294,13 +334,21 @@ export function QuizProvider({ children }: { children: ReactNode }) {
       questions: Array.from({ length: normalizedQuestionCount }, (_, index) => {
         const points = (index + 1) * 1000;
 
-        return new Question("text", `Új kérdés ${index + 1}`, undefined, points);
+        return new Question(
+          "text",
+          `Új kérdés ${index + 1}`,
+          undefined,
+          points,
+        );
       }),
     }));
 
     setCurrentQuizId(null);
     setCurrentQuizTitle(title);
     setCategories(nextCategories);
+    setPlaySessionId(crypto.randomUUID());
+    setPlayReadyToSave(false);
+    setPlaySaveStatus("idle");
   };
 
   useEffect(() => {
@@ -332,8 +380,13 @@ export function QuizProvider({ children }: { children: ReactNode }) {
         currentQuizTitle,
         loadQuiz,
         markUsed,
+        markPlayReadyToSave,
         moveQuestion,
+        playReadyToSave,
+        playSessionId,
+        playSaveStatus,
         renameQuiz,
+        setPlaySaveStatus,
         setCurrentQuizId,
         updateQuestion,
         updateQuestionPoints,

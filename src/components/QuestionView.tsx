@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQuiz } from "../context/QuizContext";
 import { FaArrowLeft } from "react-icons/fa";
@@ -5,12 +6,20 @@ import TeamBar from "./TeamBar.tsx";
 
 export default function QuestionView() {
   const { catIndex, qIndex } = useParams();
-  const { categories } = useQuiz();
+  const { categories, markPlayReadyToSave } = useQuiz();
   const navigate = useNavigate();
 
   const question = categories[+catIndex! - 1].questions[+qIndex! - 1];
 
-  console.log(question);
+  const allQuestionsUsed = categories.every((category) =>
+    category.questions.every((currentQuestion) => currentQuestion.isUsed),
+  );
+
+  useEffect(() => {
+    if (allQuestionsUsed) {
+      markPlayReadyToSave();
+    }
+  }, [allQuestionsUsed, markPlayReadyToSave]);
 
   return (
     <div className="min-h-screen flex flex-col justify-between items-center text-black p-8">

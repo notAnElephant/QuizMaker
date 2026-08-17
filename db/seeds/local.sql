@@ -33,4 +33,8 @@ INSERT INTO public.questions (question_id, quiz_id, question_text, question_type
   ('5b010908-d2f6-47d6-bf30-cdbc1934d06d', '47559e6f-f126-4124-84d7-9d71d9467f6d', 'Hány szóból áll Bangkok neve?', 'text', '{}', NULL, 5000, 'Nemmkelidearabzám'),
   ('6b470172-4f5e-420a-a3f8-86ae5484d8f5', '6c246cef-3e6e-431c-92ec-8ff4c2f7f1ad', 'Melyik város a magyar főváros?', 'text', '{Budapest,Szeged,Debrecen,Pécs}', NULL, 1000, 'Gyors kör');
 
+INSERT INTO public.quiz_plays (play_id, session_id, quiz_id, user_id, play_time, score, team_name, team_score) VALUES
+  ('dcf876e0-9ce2-4d1e-a1df-f226c6aef101', '7fe8f336-d58b-4802-844b-cc3b7415fa99', '47559e6f-f126-4124-84d7-9d71d9467f6d', '8d4ee02c-88d9-4608-9030-20726f7d702f', '2025-12-26 21:15:00', 7000, 'Team 1', 7000),
+  ('d7475c88-841a-4095-8e77-3985fbed80c1', '7fe8f336-d58b-4802-844b-cc3b7415fa99', '47559e6f-f126-4124-84d7-9d71d9467f6d', '8d4ee02c-88d9-4608-9030-20726f7d702f', '2025-12-26 21:15:00', 5000, 'Team 2', 5000);
+
 COMMIT;
