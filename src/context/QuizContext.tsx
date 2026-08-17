@@ -7,6 +7,7 @@ import {
   ReactNode,
 } from "react";
 import rawData from "../data/questions.json";
+import defaultBackgroundUrl from "../assets/bg.png";
 import { Question } from "../models/Question";
 import { Category, Settings, Team } from "./types";
 
@@ -51,8 +52,7 @@ const defaultSettings: Settings = {
 const SETTINGS_STORAGE_KEY = "quizmaker.settings";
 
 const backgroundPresets: Record<Settings["backgroundPreset"], string> = {
-  default:
-    'linear-gradient(135deg, rgba(12, 18, 31, 0.8), rgba(26, 54, 93, 0.6)), url("./assets/bg.png")',
+  default: `url("${defaultBackgroundUrl}")`,
   forest: "linear-gradient(135deg, #0f3d2e 0%, #174f3b 35%, #2f6f4f 100%)",
   ocean: "linear-gradient(135deg, #0b2545 0%, #134074 40%, #3f88c5 100%)",
   sunset: "linear-gradient(135deg, #4a1942 0%, #893168 40%, #ff784f 100%)",
@@ -360,7 +360,7 @@ export function QuizProvider({ children }: { children: ReactNode }) {
 
     const backgroundImage =
       settings.backgroundMode === "image" && settings.backgroundImage
-        ? `linear-gradient(rgba(12, 18, 31, 0.35), rgba(12, 18, 31, 0.35)), url("${settings.backgroundImage}")`
+        ? `url("${settings.backgroundImage}")`
         : backgroundPresets[settings.backgroundPreset];
 
     document.body.style.backgroundImage = backgroundImage;

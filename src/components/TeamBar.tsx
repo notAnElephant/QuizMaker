@@ -41,11 +41,11 @@ export default function TeamBar({ mode, questionPoints = 0 }: TeamBarProps) {
   };
 
   return (
-    <div className="w-full px-16 py-4 flex gap-4 justify-center flex-wrap">
+    <div className="flex w-full flex-wrap justify-center gap-4 px-14 py-4 sm:px-16">
       {teams.map((team, i) => (
         <div
           key={i}
-          className="relative px-4 py-2 rounded-xl shadow flex items-center gap-3 w-70"
+          className="relative flex w-full max-w-70 items-center gap-3 rounded-xl px-4 py-2 shadow sm:w-70"
           style={{ backgroundColor: team.color, color: "#fff" }}
         >
           {confetti[i] && (

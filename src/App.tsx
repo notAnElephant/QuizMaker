@@ -3,11 +3,13 @@ import { useMutation } from "@apollo/client/react";
 import { useCallback, useEffect, useRef } from "react";
 import {
   FaCog,
+  FaCheck,
   FaEdit,
   FaFolderOpen,
   FaPlus,
+  FaRedo,
   FaSave,
-  FaTrophy,
+  FaSpinner,
   FaUser,
   FaUsers,
 } from "react-icons/fa";
@@ -283,22 +285,13 @@ function App() {
     playSaveStatus,
   ]);
 
-  const playSaveLabel =
-    playSaveStatus === "saved"
-      ? "Lejátszás automatikusan elmentve"
-      : playSaveStatus === "saving"
-        ? "Lejátszás mentése..."
-        : playSaveStatus === "error"
-          ? "Mentés újrapróbálása"
-          : "A lejátszás automatikusan mentésre kerül";
-
   return (
     <div className="min-h-screen flex items-center flex-col justify-between text-black">
-      <div className="w-full h-full max-w-5xl px-4 flex flex-col items-center text-center">
+      <div className="flex h-full w-full max-w-5xl flex-col items-center px-2 pl-14 text-center sm:px-4 sm:pl-4">
         <div className="mt-8 flex w-full justify-end">
           <UserSwitcher />
         </div>
-        <h1 className="text-6xl font-bold mb-8 mt-16 font-display">
+        <h1 className="mb-6 mt-10 text-4xl font-bold font-display sm:mb-8 sm:mt-16 sm:text-6xl">
           {currentQuizTitle}
         </h1>
         <Board
@@ -309,7 +302,7 @@ function App() {
           }
         />
       </div>
-      <div className="absolute bottom-4 left-4 flex-1 flex items-start gap-2 flex-col">
+      <div className="fixed bottom-4 left-4 z-30 flex flex-1 flex-col items-start gap-2">
         <SidebarAction label="Kvíz mentése">
           <button
             onClick={handleSaveQuiz}
@@ -321,24 +314,30 @@ function App() {
             <FaSave size={20} />
           </button>
         </SidebarAction>
-        <SidebarAction label={playSaveLabel}>
-          <button
-            onClick={() => void handleSaveCompletedPlay()}
-            disabled={
-              isSavingPlays ||
-              isLoadingCurrentUser ||
-              !currentUser ||
-              !allQuestionsUsed ||
-              playSaveStatus === "saving" ||
-              playSaveStatus === "saved"
-            }
-            className="bg-yellow-600 text-white p-3 rounded-full shadow-lg hover:bg-yellow-500 disabled:cursor-not-allowed disabled:bg-yellow-300"
-            aria-label="Save game results"
-            title={playSaveLabel}
-          >
-            <FaTrophy size={20} />
-          </button>
-        </SidebarAction>
+        {playSaveStatus !== "idle" ? (
+          <div aria-live="polite">
+            {playSaveStatus === "saving" ? (
+              <div className="inline-flex items-center gap-2 rounded-full bg-yellow-100 px-3 py-2 text-sm font-medium text-yellow-900 shadow">
+                <FaSpinner className="animate-spin" aria-hidden="true" />
+                Lejátszás mentése...
+              </div>
+            ) : playSaveStatus === "saved" ? (
+              <div className="inline-flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-2 text-sm font-medium text-emerald-900 shadow">
+                <FaCheck aria-hidden="true" />
+                Lejátszás elmentve
+              </div>
+            ) : (
+              <button
+                onClick={() => void handleSaveCompletedPlay()}
+                disabled={isSavingPlays || isLoadingCurrentUser || !currentUser}
+                className="inline-flex items-center gap-2 rounded-full bg-red-700 px-3 py-2 text-sm font-medium text-white shadow hover:bg-red-600 disabled:cursor-wait disabled:bg-red-400"
+              >
+                <FaRedo aria-hidden="true" />
+                Mentés újrapróbálása
+              </button>
+            )}
+          </div>
+        ) : null}
         <SidebarAction label="Mentett kvíz betöltése">
           <button
             onClick={() => navigate("/quizzes")}

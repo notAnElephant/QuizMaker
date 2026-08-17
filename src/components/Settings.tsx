@@ -1,13 +1,13 @@
 import { FaArrowLeft } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import defaultBackgroundUrl from "../assets/bg.png";
 import { useQuiz } from "../context/QuizContext";
 
 const backgroundOptions = [
   {
     id: "default",
     label: "Alap",
-    preview:
-      'linear-gradient(135deg, rgba(12, 18, 31, 0.8), rgba(26, 54, 93, 0.6)), url("./assets/bg.png")',
+    preview: `url("${defaultBackgroundUrl}")`,
   },
   {
     id: "sunset",
