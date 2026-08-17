@@ -12,10 +12,14 @@ export type Category = {
   questions: Question[];
 };
 
-export type Settings = {
+export type QuizAppearance = {
   backgroundImage?: string;
   backgroundMode: "preset" | "image";
   backgroundPreset: "default" | "sunset" | "forest" | "ocean";
+  textColor: string;
+};
+
+export type Settings = {
   classicMode: boolean;
   timerEnabled: boolean;
   timerDuration: number;

@@ -8,6 +8,7 @@ export class Question {
     public points: number = 1000,
     public isUsed: boolean = false,
     public list?: string[], // optional list of choices
+    public correctAnswer?: string,
   ) {}
 
   markUsed() {

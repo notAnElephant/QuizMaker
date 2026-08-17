@@ -3,9 +3,10 @@ import { useMutation, useQuery } from "@apollo/client/react";
 import { FaArrowLeft, FaFolderOpen, FaTrash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { useQuiz } from "../context/QuizContext";
-import { Category } from "../context/types";
+import { Category, QuizAppearance } from "../context/types";
 import { useCurrentUser } from "../context/useCurrentUser";
 import { buildCategoriesFromPersistedQuestions } from "../utility/quizPersistence";
+import { defaultQuizAppearance } from "../utility/quizAppearance";
 import UserSwitcher from "./UserSwitcher";
 
 const GET_SAVED_QUIZZES_QUERY = gql`
@@ -17,6 +18,10 @@ const GET_SAVED_QUIZZES_QUERY = gql`
       quiz_id
       title
       description
+      background_mode
+      background_preset
+      background_image
+      text_color
       updated_at
     }
   }
@@ -34,6 +39,7 @@ const GET_SAVED_QUIZ_QUESTIONS_QUERY = gql`
       question_type
       points
       answer_options
+      correct_answer
       category_name
     }
   }
@@ -52,6 +58,7 @@ const DELETE_QUIZ_MUTATION = gql`
 type SavedQuizQuestion = {
   answer_options?: string[] | null;
   category_name: string;
+  correct_answer?: string | null;
   points?: number | null;
   question_id: string;
   question_text: string;
@@ -60,9 +67,13 @@ type SavedQuizQuestion = {
 };
 
 type SavedQuiz = {
+  background_image?: string | null;
+  background_mode?: QuizAppearance["backgroundMode"] | null;
+  background_preset?: QuizAppearance["backgroundPreset"] | null;
   description?: string | null;
   quiz_id: string;
   title: string;
+  text_color?: string | null;
   updated_at: string;
 };
 
@@ -101,7 +112,9 @@ export default function SavedQuizzes() {
     useMutation(DELETE_QUIZ_MUTATION);
 
   if (isLoadingCurrentUser || loading || isLoadingQuestions) {
-    return <div className="p-8 text-center text-white">Kvízek betöltése...</div>;
+    return (
+      <div className="p-8 text-center text-white">Kvízek betöltése...</div>
+    );
   }
 
   if (!currentUser) {
@@ -115,8 +128,12 @@ export default function SavedQuizzes() {
   if (error || questionsError) {
     return (
       <div className="p-8 text-center text-red-100">
-        <h1 className="text-2xl font-bold">Nem sikerült betölteni a kvízeket</h1>
-        <p className="mt-2 text-sm">{error?.message ?? questionsError?.message}</p>
+        <h1 className="text-2xl font-bold">
+          Nem sikerült betölteni a kvízeket
+        </h1>
+        <p className="mt-2 text-sm">
+          {error?.message ?? questionsError?.message}
+        </p>
       </div>
     );
   }
@@ -183,8 +200,25 @@ export default function SavedQuizzes() {
 
                     <button
                       onClick={() => {
-                        loadQuiz(quiz.quiz_id, quiz.title, categories);
-                        navigate("/");
+                        loadQuiz(
+                          quiz.quiz_id,
+                          quiz.title,
+                          quiz.description ?? "",
+                          categories,
+                          {
+                            backgroundImage: quiz.background_image ?? undefined,
+                            backgroundMode:
+                              quiz.background_mode ??
+                              defaultQuizAppearance.backgroundMode,
+                            backgroundPreset:
+                              quiz.background_preset ??
+                              defaultQuizAppearance.backgroundPreset,
+                            textColor:
+                              quiz.text_color ??
+                              defaultQuizAppearance.textColor,
+                          },
+                        );
+                        navigate("/editor");
                       }}
                       className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3 text-white hover:bg-blue-700"
                     >

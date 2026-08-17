@@ -1,74 +1,13 @@
 import { gql } from "@apollo/client";
 import { useMutation } from "@apollo/client/react";
 import { useCallback, useEffect, useRef } from "react";
-import {
-  FaCog,
-  FaCheck,
-  FaEdit,
-  FaFolderOpen,
-  FaPlus,
-  FaRedo,
-  FaSave,
-  FaSpinner,
-  FaUser,
-  FaUsers,
-} from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
+import { FaCheck, FaRedo, FaSpinner } from "react-icons/fa";
 import "./index.css";
 import { Board } from "./components/Board";
-import TeamBar from "./components/TeamBar.tsx";
-import UserSwitcher from "./components/UserSwitcher";
+import TeamBar from "./components/TeamBar";
 import { useQuiz } from "./context/QuizContext";
 import { useCurrentUser } from "./context/useCurrentUser";
-import { buildStoredQuestionText } from "./utility/quizPersistence";
-
-const CREATE_QUIZ_MUTATION = gql`
-  mutation CreateQuiz(
-    $quizId: uuid!
-    $title: String!
-    $description: String
-    $ownerId: uuid!
-    $questions: [questions_insert_input!]!
-  ) {
-    insert_quizzes_one(
-      object: {
-        quiz_id: $quizId
-        title: $title
-        description: $description
-        owner_id: $ownerId
-      }
-    ) {
-      quiz_id
-    }
-    insert_questions(objects: $questions) {
-      affected_rows
-    }
-  }
-`;
-
-const UPDATE_QUIZ_MUTATION = gql`
-  mutation UpdateQuiz(
-    $quizId: uuid!
-    $title: String!
-    $description: String
-    $ownerId: uuid!
-    $questions: [questions_insert_input!]!
-    $updatedAt: timestamp!
-  ) {
-    update_quizzes(
-      where: { quiz_id: { _eq: $quizId }, owner_id: { _eq: $ownerId } }
-      _set: { title: $title, description: $description, updated_at: $updatedAt }
-    ) {
-      affected_rows
-    }
-    delete_questions(where: { quiz_id: { _eq: $quizId } }) {
-      affected_rows
-    }
-    insert_questions(objects: $questions) {
-      affected_rows
-    }
-  }
-`;
+import { useQuizPersistence } from "./hooks/useQuizPersistence";
 
 const SAVE_QUIZ_PLAYS_MUTATION = gql`
   mutation SaveQuizPlays($plays: [quiz_plays_insert_input!]!) {
@@ -78,25 +17,9 @@ const SAVE_QUIZ_PLAYS_MUTATION = gql`
   }
 `;
 
-function SidebarAction({
-  children,
-  label,
-}: {
-  children: React.ReactNode;
-  label: string;
-}) {
-  return (
-    <div className="group relative flex items-center">
-      {children}
-      <div className="pointer-events-none absolute left-full ml-3 whitespace-nowrap rounded-lg bg-black/85 px-3 py-2 text-sm font-medium text-white opacity-0 shadow-lg transition group-hover:opacity-100 group-focus-within:opacity-100">
-        {label}
-      </div>
-    </div>
-  );
-}
-
 function App() {
   const {
+    appearance,
     categories,
     currentQuizId,
     currentQuizTitle,
@@ -104,17 +27,11 @@ function App() {
     playReadyToSave,
     playSaveStatus,
     playSessionId,
-    renameQuiz,
-    setCurrentQuizId,
     setPlaySaveStatus,
     teams,
   } = useQuiz();
   const { currentUser, isLoading: isLoadingCurrentUser } = useCurrentUser();
-  const navigate = useNavigate();
-  const [createQuiz, { loading: isCreatingQuiz }] =
-    useMutation(CREATE_QUIZ_MUTATION);
-  const [updateQuiz, { loading: isUpdatingQuiz }] =
-    useMutation(UPDATE_QUIZ_MUTATION);
+  const { persistQuiz } = useQuizPersistence();
   const [saveQuizPlays, { loading: isSavingPlays }] = useMutation(
     SAVE_QUIZ_PLAYS_MUTATION,
   );
@@ -122,91 +39,6 @@ function App() {
   const allQuestionsUsed = categories.every((category) =>
     category.questions.every((question) => question.isUsed),
   );
-  const isSaving = isCreatingQuiz || isUpdatingQuiz;
-
-  const persistQuiz = useCallback(
-    async (askForTitle: boolean) => {
-      if (!currentUser) {
-        throw new Error("Nincs kiválasztott felhasználó a mentéshez.");
-      }
-
-      const defaultTitle =
-        currentQuizTitle ||
-        `Mentett kvíz ${new Date().toLocaleString("hu-HU")}`;
-      const title = askForTitle
-        ? window.prompt("Kvíz címe", defaultTitle)?.trim()
-        : defaultTitle.trim();
-
-      if (!title) {
-        return null;
-      }
-
-      const quizId = currentQuizId ?? crypto.randomUUID();
-      const questions = categories.flatMap((category) =>
-        category.questions.map((question) => ({
-          question_id: crypto.randomUUID(),
-          quiz_id: quizId,
-          category_name: category.category,
-          question_text: buildStoredQuestionText(
-            question.content,
-            question.source,
-          ),
-          question_type: question.type,
-          points: question.points,
-          answer_options: question.list?.length ? question.list : [],
-        })),
-      );
-      const variables = {
-        quizId,
-        title,
-        description: `${categories.length} kategória, ${questions.length} kérdés`,
-        ownerId: currentUser.user_id,
-        questions,
-      };
-
-      if (currentQuizId) {
-        await updateQuiz({
-          variables: {
-            ...variables,
-            updatedAt: new Date().toISOString(),
-          },
-        });
-      } else {
-        await createQuiz({ variables });
-      }
-
-      setCurrentQuizId(quizId);
-      renameQuiz(title);
-      return { quizId, title, wasUpdate: Boolean(currentQuizId) };
-    },
-    [
-      categories,
-      createQuiz,
-      currentQuizId,
-      currentQuizTitle,
-      currentUser,
-      renameQuiz,
-      setCurrentQuizId,
-      updateQuiz,
-    ],
-  );
-
-  const handleSaveQuiz = async () => {
-    try {
-      const result = await persistQuiz(true);
-      if (!result) {
-        return;
-      }
-
-      window.alert(
-        `A(z) "${result.title}" kvíz ${result.wasUpdate ? "frissítve" : "elmentve"}.`,
-      );
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Ismeretlen mentési hiba.";
-      window.alert(`A mentés nem sikerült: ${message}`);
-    }
-  };
 
   const handleSaveCompletedPlay = useCallback(async () => {
     if (
@@ -223,20 +55,15 @@ function App() {
     try {
       const persistedQuiz = currentQuizId
         ? { quizId: currentQuizId }
-        : await persistQuiz(false);
-
-      if (!persistedQuiz) {
-        throw new Error("A kvízt nem sikerült elmenteni a lejátszás előtt.");
-      }
-
+        : await persistQuiz();
       const playedAt = new Date().toISOString();
       const plays = teams.length
         ? teams.map((team) => ({
             play_id: crypto.randomUUID(),
-            session_id: playSessionId,
-            quiz_id: persistedQuiz.quizId,
             play_time: playedAt,
+            quiz_id: persistedQuiz.quizId,
             score: team.points,
+            session_id: playSessionId,
             team_name: team.name,
             team_score: team.points,
             user_id: currentUser.user_id,
@@ -244,10 +71,10 @@ function App() {
         : [
             {
               play_id: crypto.randomUUID(),
-              session_id: playSessionId,
-              quiz_id: persistedQuiz.quizId,
               play_time: playedAt,
+              quiz_id: persistedQuiz.quizId,
               score: 0,
+              session_id: playSessionId,
               team_name: null,
               team_score: 0,
               user_id: currentUser.user_id,
@@ -259,9 +86,7 @@ function App() {
     } catch (error) {
       playSaveStartedForSession.current = null;
       setPlaySaveStatus("error");
-      const message =
-        error instanceof Error ? error.message : "Ismeretlen mentési hiba.";
-      window.alert(`A lejátszás mentése nem sikerült: ${message}`);
+      console.error("A lejátszás mentése nem sikerült", error);
     }
   }, [
     allQuestionsUsed,
@@ -286,121 +111,53 @@ function App() {
   ]);
 
   return (
-    <div className="min-h-screen flex items-center flex-col justify-between text-black">
-      <div className="flex h-full w-full max-w-5xl flex-col items-center px-2 pl-14 text-center sm:px-4 sm:pl-4">
-        <div className="mt-8 flex w-full justify-end">
-          <UserSwitcher />
-        </div>
-        <h1 className="mb-6 mt-10 text-4xl font-bold font-display sm:mb-8 sm:mt-16 sm:text-6xl">
+    <main
+      className="flex min-h-screen flex-col items-center justify-between"
+      style={{ color: appearance.textColor }}
+    >
+      <div className="flex h-full w-full max-w-5xl flex-col items-center px-2 text-center sm:px-4">
+        <h1 className="readable-on-image mb-6 mt-16 font-display text-4xl font-bold sm:mb-8 sm:mt-24 sm:text-6xl">
           {currentQuizTitle}
         </h1>
         <Board
           data={categories}
-          font="font-display"
+          font="font-display readable-on-image"
           onSelect={(catIndex, qIndex, used) =>
             markUsed(catIndex, qIndex, used)
           }
         />
       </div>
-      <div className="fixed bottom-4 left-4 z-30 flex flex-1 flex-col items-start gap-2">
-        <SidebarAction label="Kvíz mentése">
-          <button
-            onClick={handleSaveQuiz}
-            disabled={isSaving || isLoadingCurrentUser || !currentUser}
-            className="bg-emerald-700 text-white p-3 rounded-full shadow-lg hover:bg-emerald-600 disabled:cursor-wait disabled:bg-emerald-400"
-            aria-label="Save quiz"
-            title="Kvíz mentése"
-          >
-            <FaSave size={20} />
-          </button>
-        </SidebarAction>
-        {playSaveStatus !== "idle" ? (
-          <div aria-live="polite">
-            {playSaveStatus === "saving" ? (
-              <div className="inline-flex items-center gap-2 rounded-full bg-yellow-100 px-3 py-2 text-sm font-medium text-yellow-900 shadow">
-                <FaSpinner className="animate-spin" aria-hidden="true" />
-                Lejátszás mentése...
-              </div>
-            ) : playSaveStatus === "saved" ? (
-              <div className="inline-flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-2 text-sm font-medium text-emerald-900 shadow">
-                <FaCheck aria-hidden="true" />
-                Lejátszás elmentve
-              </div>
-            ) : (
-              <button
-                onClick={() => void handleSaveCompletedPlay()}
-                disabled={isSavingPlays || isLoadingCurrentUser || !currentUser}
-                className="inline-flex items-center gap-2 rounded-full bg-red-700 px-3 py-2 text-sm font-medium text-white shadow hover:bg-red-600 disabled:cursor-wait disabled:bg-red-400"
-              >
-                <FaRedo aria-hidden="true" />
-                Mentés újrapróbálása
-              </button>
-            )}
-          </div>
-        ) : null}
-        <SidebarAction label="Mentett kvíz betöltése">
-          <button
-            onClick={() => navigate("/quizzes")}
-            className="bg-blue-700 text-white p-3 rounded-full shadow-lg hover:bg-blue-600"
-            aria-label="Load quiz"
-            title="Mentett kvíz betöltése"
-          >
-            <FaFolderOpen size={20} />
-          </button>
-        </SidebarAction>
-        <SidebarAction label="Új kvíz létrehozása">
-          <button
-            onClick={() => navigate("/quizzes/new")}
-            className="bg-fuchsia-700 text-white p-3 rounded-full shadow-lg hover:bg-fuchsia-600"
-            aria-label="New quiz"
-            title="Új kvíz létrehozása"
-          >
-            <FaPlus size={20} />
-          </button>
-        </SidebarAction>
-        <SidebarAction label="Pontszámok szerkesztése">
-          <button
-            onClick={() => navigate("/editor")}
-            className="bg-amber-600 text-white p-3 rounded-full shadow-lg hover:bg-amber-500"
-            aria-label="Edit quiz"
-            title="Pontszámok szerkesztése"
-          >
-            <FaEdit size={20} />
-          </button>
-        </SidebarAction>
-        <SidebarAction label="Csapatok">
-          <button
-            onClick={() => navigate("/teams")}
-            className="bg-gray-800 text-white p-3 rounded-full shadow-lg hover:bg-gray-700"
-            aria-label="Teams"
-            title="Csapatok"
-          >
-            <FaUsers size={20} />
-          </button>
-        </SidebarAction>
-        <SidebarAction label="Profil">
-          <button
-            onClick={() => navigate("/profile")}
-            className="bg-gray-800 text-white p-3 rounded-full shadow-lg hover:bg-gray-700"
-            aria-label="Profile"
-            title="Profil"
-          >
-            <FaUser size={20} />
-          </button>
-        </SidebarAction>
-        <SidebarAction label="Beállítások">
-          <button
-            onClick={() => navigate("/settings")}
-            className="bg-gray-800 text-white p-3 rounded-full shadow-lg hover:bg-gray-700"
-            aria-label="Settings"
-            title="Beállítások"
-          >
-            <FaCog size={20} />
-          </button>
-        </SidebarAction>
-      </div>
+
+      {playSaveStatus !== "idle" ? (
+        <div
+          aria-live="polite"
+          className="fixed right-4 top-4 z-30 rounded-lg border-2 border-[#24211c] bg-[#fff4d6] px-3 py-2 text-sm font-semibold text-[#24211c] shadow-[0_3px_0_#24211c]"
+        >
+          {playSaveStatus === "saving" ? (
+            <span className="inline-flex items-center gap-2">
+              <FaSpinner className="animate-spin" aria-hidden="true" />
+              Lejátszás mentése…
+            </span>
+          ) : playSaveStatus === "saved" ? (
+            <span className="inline-flex items-center gap-2">
+              <FaCheck aria-hidden="true" />
+              Lejátszás elmentve
+            </span>
+          ) : (
+            <button
+              onClick={() => void handleSaveCompletedPlay()}
+              disabled={isSavingPlays || isLoadingCurrentUser || !currentUser}
+              className="inline-flex items-center gap-2 underline decoration-2 underline-offset-2 disabled:opacity-50"
+            >
+              <FaRedo aria-hidden="true" />
+              Mentés újrapróbálása
+            </button>
+          )}
+        </div>
+      ) : null}
+
       <TeamBar mode="board" />
-    </div>
+    </main>
   );
 }
 

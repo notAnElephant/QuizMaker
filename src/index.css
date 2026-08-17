@@ -13,3 +13,88 @@ body {
   background-color: #f8eac5;
   background-image: url("./assets/bg.png");
 }
+
+.readable-on-image {
+  text-shadow:
+    0 1px 0 rgb(255 255 255 / 45%),
+    0 0 12px rgb(255 248 231 / 70%);
+}
+
+.editor-button {
+  display: inline-flex;
+  min-height: 2.65rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  border: 2px solid #fff8e7;
+  border-radius: 0.5rem;
+  padding: 0.55rem 0.9rem;
+  font-size: 0.875rem;
+  font-weight: 800;
+  line-height: 1;
+  transition:
+    transform 150ms ease,
+    background-color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.editor-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.editor-button:disabled {
+  cursor: wait;
+  opacity: 0.55;
+}
+
+.editor-button-dark {
+  background: #24211c;
+  color: #fff8e7;
+}
+
+.editor-button-light {
+  background: #fff8e7;
+  color: #24211c;
+}
+
+.editor-button-primary {
+  border-color: #ffd75a;
+  background: #ffd75a;
+  color: #24211c;
+  box-shadow: 0 3px 0 #b97900;
+}
+
+.editor-secondary-action,
+.editor-danger-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.55rem;
+  border-radius: 0.5rem;
+  padding: 0.65rem 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 750;
+}
+
+.editor-secondary-action:hover {
+  background: rgb(255 255 255 / 55%);
+}
+
+.editor-danger-button {
+  border: 1px solid #d5572a;
+  color: #b83e18;
+}
+
+.editor-danger-button:hover {
+  background: #d5572a;
+  color: white;
+}
+
+.editor-field-label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  color: #514a40;
+  font-size: 0.75rem;
+  font-weight: 800;
+}

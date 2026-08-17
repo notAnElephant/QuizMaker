@@ -26,6 +26,7 @@ export function parseStoredQuestionText(questionText: string) {
 type PersistedQuestion = {
   answer_options?: string[] | null;
   category_name: string;
+  correct_answer?: string | null;
   points?: number | null;
   question_text: string;
   question_type: string;
@@ -48,14 +49,17 @@ export function buildCategoriesFromPersistedQuestions(
         question.points ?? 1000,
         false,
         question.answer_options?.length ? question.answer_options : undefined,
+        question.correct_answer ?? undefined,
       ),
     );
 
     categories.set(question.category_name, categoryQuestions);
   }
 
-  return Array.from(categories.entries()).map(([category, groupedQuestions]) => ({
-    category,
-    questions: groupedQuestions.sort((a, b) => a.points - b.points),
-  }));
+  return Array.from(categories.entries()).map(
+    ([category, groupedQuestions]) => ({
+      category,
+      questions: groupedQuestions.sort((a, b) => a.points - b.points),
+    }),
+  );
 }
