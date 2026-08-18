@@ -1,5 +1,7 @@
-import defaultBackgroundUrl from "../assets/bg.png";
 import { QuizAppearance } from "../context/types";
+
+export const defaultBackgroundUrl =
+  "https://firebasestorage.googleapis.com/v0/b/mok-wiki.firebasestorage.app/o/app-assets%2Fdefault-background.png?alt=media&token=26b88aa3-f4dc-4743-986b-3a6c4bf8eb6d";
 
 export const defaultQuizAppearance: QuizAppearance = {
   backgroundMode: "preset",

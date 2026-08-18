@@ -11,7 +11,7 @@ body {
   padding: 0;
   @apply bg-cover bg-center bg-no-repeat;
   background-color: #f8eac5;
-  background-image: url("./assets/bg.png");
+  background-image: var(--default-quiz-background);
 }
 
 .readable-on-image {
