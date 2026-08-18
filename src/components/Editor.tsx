@@ -40,6 +40,7 @@ import {
   uploadQuizBackground,
   uploadQuizMedia,
 } from "../utility/quizMediaStorage";
+import GameplaySettings from "./GameplaySettings";
 import UserSwitcher from "./UserSwitcher";
 
 type DraggedQuestion = {
@@ -958,143 +959,147 @@ export default function Editor() {
         </section>
 
         <aside className="border-t border-[#cfc2aa] p-5 lg:min-h-[calc(100vh-74px)] lg:border-l lg:border-t-0">
-          <h2 className="text-xl font-black">Megjelenés</h2>
-          <h3 className="mb-3 mt-6 font-bold">Háttér</h3>
-          <div className="grid grid-cols-2 gap-2">
-            {(
-              Object.keys(
-                backgroundPresets,
-              ) as QuizAppearance["backgroundPreset"][]
-            ).map((preset) => {
-              const option = backgroundPresets[preset];
-              const isSelected =
-                appearance.backgroundMode === "preset" &&
-                appearance.backgroundPreset === preset;
-              return (
-                <button
-                  key={preset}
-                  onClick={() => selectPreset(preset)}
-                  className={`overflow-hidden rounded-lg border-2 text-left ${
-                    isSelected ? "border-[#e0a20c]" : "border-[#8c8374]"
-                  }`}
-                >
-                  <span
-                    className="block h-16 bg-cover bg-center"
-                    style={{ backgroundImage: option.background }}
-                  />
-                  <span className="block bg-[#fffaf0] px-2 py-1.5 text-xs font-bold">
-                    {option.label}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+          <GameplaySettings />
 
-          {customBackgrounds.length ? (
-            <div className="mt-3 grid grid-cols-2 gap-2">
-              {customBackgrounds.map((background) => {
+          <section className="mt-7 border-t border-[#cfc2aa] pt-6">
+            <h2 className="text-xl font-black">Megjelenés</h2>
+            <h3 className="mb-3 mt-6 font-bold">Háttér</h3>
+            <div className="grid grid-cols-2 gap-2">
+              {(
+                Object.keys(
+                  backgroundPresets,
+                ) as QuizAppearance["backgroundPreset"][]
+              ).map((preset) => {
+                const option = backgroundPresets[preset];
                 const isSelected =
-                  appearance.backgroundMode === "image" &&
-                  appearance.backgroundImage === background.url;
-
+                  appearance.backgroundMode === "preset" &&
+                  appearance.backgroundPreset === preset;
                 return (
-                  <div
-                    key={background.objectPath}
-                    className={`relative overflow-hidden rounded-lg border-2 ${
+                  <button
+                    key={preset}
+                    onClick={() => selectPreset(preset)}
+                    className={`overflow-hidden rounded-lg border-2 text-left ${
                       isSelected ? "border-[#e0a20c]" : "border-[#8c8374]"
                     }`}
                   >
-                    <button
-                      type="button"
-                      onClick={() => void selectCustomBackground(background)}
-                      className="block w-full"
-                      aria-label="Saját háttér kiválasztása"
-                    >
-                      <img
-                        src={background.url}
-                        alt="Saját háttér"
-                        className="h-20 w-full object-cover"
-                      />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => void removeCustomBackground(background)}
-                      className="absolute right-1.5 top-1.5 grid size-7 place-items-center rounded-full bg-[#24211c] text-white shadow"
-                      aria-label="Saját háttér törlése"
-                      title="Háttér törlése"
-                    >
-                      <FaTrash size={11} />
-                    </button>
-                  </div>
+                    <span
+                      className="block h-16 bg-cover bg-center"
+                      style={{ backgroundImage: option.background }}
+                    />
+                    <span className="block bg-[#fffaf0] px-2 py-1.5 text-xs font-bold">
+                      {option.label}
+                    </span>
+                  </button>
                 );
               })}
             </div>
-          ) : null}
 
-          <label className="mt-3 flex cursor-pointer items-center justify-center gap-2 rounded-lg border-2 border-dashed border-[#aa9d86] px-3 py-4 text-sm font-bold hover:bg-white/50">
-            {uploadingMedia === "background" ? (
-              <FaSpinner className="animate-spin" />
-            ) : (
-              <FaImage />
-            )}
-            {uploadingMedia === "background"
-              ? "Feltöltés…"
-              : "Saját háttér feltöltése"}
-            <input
-              type="file"
-              accept="image/*"
-              disabled={uploadingMedia !== null}
-              className="sr-only"
-              onChange={(event) => {
-                void handleBackgroundUpload(event.target.files?.[0]);
-                event.target.value = "";
-              }}
-            />
-          </label>
+            {customBackgrounds.length ? (
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                {customBackgrounds.map((background) => {
+                  const isSelected =
+                    appearance.backgroundMode === "image" &&
+                    appearance.backgroundImage === background.url;
 
-          <div className="mt-7 border-t border-[#cfc2aa] pt-5">
-            <h3 className="font-bold">Szövegszín</h3>
-            <p className="mt-1 text-xs leading-relaxed text-[#756b5c]">
-              A javaslat a háttér átlagos fényerejét használja. Részletes képnél
-              kézzel is finomhangolhatod.
-            </p>
-            <div className="mt-3 flex items-center gap-3">
+                  return (
+                    <div
+                      key={background.objectPath}
+                      className={`relative overflow-hidden rounded-lg border-2 ${
+                        isSelected ? "border-[#e0a20c]" : "border-[#8c8374]"
+                      }`}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => void selectCustomBackground(background)}
+                        className="block w-full"
+                        aria-label="Saját háttér kiválasztása"
+                      >
+                        <img
+                          src={background.url}
+                          alt="Saját háttér"
+                          className="h-20 w-full object-cover"
+                        />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => void removeCustomBackground(background)}
+                        className="absolute right-1.5 top-1.5 grid size-7 place-items-center rounded-full bg-[#24211c] text-white shadow"
+                        aria-label="Saját háttér törlése"
+                        title="Háttér törlése"
+                      >
+                        <FaTrash size={11} />
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : null}
+
+            <label className="mt-3 flex cursor-pointer items-center justify-center gap-2 rounded-lg border-2 border-dashed border-[#aa9d86] px-3 py-4 text-sm font-bold hover:bg-white/50">
+              {uploadingMedia === "background" ? (
+                <FaSpinner className="animate-spin" />
+              ) : (
+                <FaImage />
+              )}
+              {uploadingMedia === "background"
+                ? "Feltöltés…"
+                : "Saját háttér feltöltése"}
               <input
-                type="color"
-                value={appearance.textColor}
-                onChange={(event) =>
-                  setAppearance((current) => ({
-                    ...current,
-                    textColor: event.target.value,
-                  }))
-                }
-                aria-label="Szövegszín"
-                className="h-11 w-14 cursor-pointer rounded border border-[#8c8374] bg-transparent p-1"
+                type="file"
+                accept="image/*"
+                disabled={uploadingMedia !== null}
+                className="sr-only"
+                onChange={(event) => {
+                  void handleBackgroundUpload(event.target.files?.[0]);
+                  event.target.value = "";
+                }}
               />
-              <input
-                value={textColorDraft}
-                onChange={(event) => setTextColorDraft(event.target.value)}
-                onBlur={() => {
-                  if (/^#[0-9a-fA-F]{6}$/.test(textColorDraft)) {
+            </label>
+
+            <div className="mt-7 border-t border-[#cfc2aa] pt-5">
+              <h3 className="font-bold">Szövegszín</h3>
+              <p className="mt-1 text-xs leading-relaxed text-[#756b5c]">
+                A javaslat a háttér átlagos fényerejét használja. Részletes
+                képnél kézzel is finomhangolhatod.
+              </p>
+              <div className="mt-3 flex items-center gap-3">
+                <input
+                  type="color"
+                  value={appearance.textColor}
+                  onChange={(event) =>
                     setAppearance((current) => ({
                       ...current,
-                      textColor: textColorDraft,
-                    }));
-                  } else {
-                    setTextColorDraft(appearance.textColor);
+                      textColor: event.target.value,
+                    }))
                   }
-                }}
-                className={fieldClass}
-                aria-label="Szövegszín hexadecimális értéke"
-              />
+                  aria-label="Szövegszín"
+                  className="h-11 w-14 cursor-pointer rounded border border-[#8c8374] bg-transparent p-1"
+                />
+                <input
+                  value={textColorDraft}
+                  onChange={(event) => setTextColorDraft(event.target.value)}
+                  onBlur={() => {
+                    if (/^#[0-9a-fA-F]{6}$/.test(textColorDraft)) {
+                      setAppearance((current) => ({
+                        ...current,
+                        textColor: textColorDraft,
+                      }));
+                    } else {
+                      setTextColorDraft(appearance.textColor);
+                    }
+                  }}
+                  className={fieldClass}
+                  aria-label="Szövegszín hexadecimális értéke"
+                />
+              </div>
+              <button
+                onClick={() => void applySuggestedTextColor()}
+                className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-lg border border-[#8c8374] bg-[#fffaf0] px-3 py-2.5 text-sm font-bold hover:bg-[#ffd75a]"
+              >
+                <FaMagic /> Automatikus javaslat alkalmazása
+              </button>
             </div>
-            <button
-              onClick={() => void applySuggestedTextColor()}
-              className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-lg border border-[#8c8374] bg-[#fffaf0] px-3 py-2.5 text-sm font-bold hover:bg-[#ffd75a]"
-            >
-              <FaMagic /> Automatikus javaslat alkalmazása
-            </button>
-          </div>
+          </section>
         </aside>
       </div>
     </main>

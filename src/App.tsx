@@ -1,7 +1,7 @@
 import { gql } from "@apollo/client";
 import { useMutation } from "@apollo/client/react";
 import { useCallback, useEffect, useRef } from "react";
-import { FaCog, FaUser, FaUsers } from "react-icons/fa";
+import { FaUser, FaUsers } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import "./index.css";
@@ -180,11 +180,6 @@ function App() {
           icon={<FaUser aria-hidden="true" size={20} />}
           label="Profil"
           onClick={() => navigate("/profile")}
-        />
-        <SidebarAction
-          icon={<FaCog aria-hidden="true" size={20} />}
-          label="Beállítások"
-          onClick={() => navigate("/settings")}
         />
       </nav>
 

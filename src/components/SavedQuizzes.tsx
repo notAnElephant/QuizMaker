@@ -154,7 +154,7 @@ export default function SavedQuizzes() {
   return (
     <div className="min-h-screen p-8 text-black">
       <div className="mx-auto flex w-full max-w-4xl flex-col gap-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-col gap-3">
             <h1 className="font-display text-4xl text-[#24211c]">
               Mentett kvízek
@@ -167,7 +167,7 @@ export default function SavedQuizzes() {
               saját kvízei látszanak.
             </p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center justify-between gap-3 sm:justify-end">
             <UserSwitcher />
             <button
               onClick={() => navigate("/")}

@@ -14,7 +14,6 @@ import QuestionView from "./components/QuestionView";
 import QuizPreview from "./components/QuizPreview";
 import RequireLogin from "./components/RequireLogin";
 import SavedQuizzes from "./components/SavedQuizzes.tsx";
-import Settings from "./components/Settings.tsx";
 import Teams from "./components/Teams.tsx";
 import { CurrentUserProvider } from "./context/CurrentUserContext.tsx";
 import { QuizProvider } from "./context/QuizContext";
@@ -52,11 +51,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
                 />
                 <Route
                   path="/settings"
-                  element={
-                    <RequireLogin>
-                      <Settings />
-                    </RequireLogin>
-                  }
+                  element={<Navigate to="/editor" replace />}
                 />
                 <Route
                   path="/teams"
