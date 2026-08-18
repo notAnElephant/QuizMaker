@@ -51,31 +51,36 @@ export function getSuggestedTextColor(appearance: QuizAppearance) {
 export async function suggestTextColorForImage(imageData: string) {
   return new Promise<string>((resolve) => {
     const image = new Image();
+    image.crossOrigin = "anonymous";
     image.onload = () => {
-      const canvas = document.createElement("canvas");
-      const sampleSize = 32;
-      canvas.width = sampleSize;
-      canvas.height = sampleSize;
-      const context = canvas.getContext("2d", { willReadFrequently: true });
+      try {
+        const canvas = document.createElement("canvas");
+        const sampleSize = 32;
+        canvas.width = sampleSize;
+        canvas.height = sampleSize;
+        const context = canvas.getContext("2d", { willReadFrequently: true });
 
-      if (!context) {
+        if (!context) {
+          resolve("#24211c");
+          return;
+        }
+
+        context.drawImage(image, 0, 0, sampleSize, sampleSize);
+        const pixels = context.getImageData(0, 0, sampleSize, sampleSize).data;
+        let luminance = 0;
+
+        for (let index = 0; index < pixels.length; index += 4) {
+          luminance +=
+            0.2126 * pixels[index] +
+            0.7152 * pixels[index + 1] +
+            0.0722 * pixels[index + 2];
+        }
+
+        const averageLuminance = luminance / (pixels.length / 4);
+        resolve(averageLuminance > 145 ? "#24211c" : "#fffaf0");
+      } catch {
         resolve("#24211c");
-        return;
       }
-
-      context.drawImage(image, 0, 0, sampleSize, sampleSize);
-      const pixels = context.getImageData(0, 0, sampleSize, sampleSize).data;
-      let luminance = 0;
-
-      for (let index = 0; index < pixels.length; index += 4) {
-        luminance +=
-          0.2126 * pixels[index] +
-          0.7152 * pixels[index + 1] +
-          0.0722 * pixels[index + 2];
-      }
-
-      const averageLuminance = luminance / (pixels.length / 4);
-      resolve(averageLuminance > 145 ? "#24211c" : "#fffaf0");
     };
     image.onerror = () => resolve("#24211c");
     image.src = imageData;

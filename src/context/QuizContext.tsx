@@ -7,7 +7,7 @@ import {
   useState,
 } from "react";
 import rawData from "../data/questions.json";
-import { Question, QuestionType } from "../models/Question";
+import { AnswerMediaType, Question, QuestionType } from "../models/Question";
 import {
   defaultQuizAppearance,
   getQuizBackground,
@@ -17,6 +17,9 @@ import { Category, QuizAppearance, Settings, Team } from "./types";
 type RawQuestion = {
   content: string;
   correctAnswer?: string;
+  revealAnswer?: boolean;
+  answerMediaType?: AnswerMediaType;
+  answerSource?: string;
   isUsed?: boolean;
   list?: string[];
   points?: number;
@@ -29,6 +32,9 @@ type RawCategory = { category: string; questions: RawQuestion[] };
 type QuestionUpdate = {
   content?: string;
   correctAnswer?: string;
+  revealAnswer?: boolean;
+  answerMediaType?: AnswerMediaType;
+  answerSource?: string;
   list?: string[];
   points?: number;
   source?: string;
@@ -47,6 +53,9 @@ const initialData: Category[] = (rawData as RawCategory[]).map((category) => ({
         question.isUsed,
         question.list,
         question.correctAnswer,
+        question.revealAnswer,
+        question.answerMediaType,
+        question.answerSource,
       ),
   ),
 }));
@@ -79,6 +88,7 @@ type QuizContextValue = {
     nextCategories: Category[],
     nextAppearance?: QuizAppearance,
   ) => void;
+  importCategories: (nextCategories: Category[]) => void;
   markPlayReadyToSave: () => void;
   markUsed: (catIndex: number, qIndex: number, value: boolean) => void;
   moveQuestion: (
@@ -185,6 +195,9 @@ export function QuizProvider({ children }: { children: ReactNode }) {
                   value,
                   question.list,
                   question.correctAnswer,
+                  question.revealAnswer,
+                  question.answerMediaType,
+                  question.answerSource,
                 )
               : question,
           ),
@@ -213,6 +226,9 @@ export function QuizProvider({ children }: { children: ReactNode }) {
                   question.isUsed,
                   updates.list ?? question.list,
                   updates.correctAnswer ?? question.correctAnswer,
+                  updates.revealAnswer ?? question.revealAnswer,
+                  updates.answerMediaType ?? question.answerMediaType,
+                  updates.answerSource ?? question.answerSource,
                 )
               : question,
           ),
@@ -239,6 +255,14 @@ export function QuizProvider({ children }: { children: ReactNode }) {
     setCurrentQuizDescription(description);
     setCategories(nextCategories);
     setAppearance(nextAppearance);
+    setPlaySessionId(crypto.randomUUID());
+    setPlayReadyToSave(false);
+    setPlaySaveStatus("idle");
+  };
+
+  const importCategories = (nextCategories: Category[]) => {
+    setCurrentQuizId(null);
+    setCategories(nextCategories);
     setPlaySessionId(crypto.randomUUID());
     setPlayReadyToSave(false);
     setPlaySaveStatus("idle");
@@ -409,6 +433,7 @@ export function QuizProvider({ children }: { children: ReactNode }) {
         currentQuizId,
         currentQuizTitle,
         describeQuiz: setCurrentQuizDescription,
+        importCategories,
         loadQuiz,
         markPlayReadyToSave,
         markUsed,

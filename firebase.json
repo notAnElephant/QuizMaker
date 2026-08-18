@@ -1,0 +1,13 @@
+{
+  "auth": {
+    "providers": {
+      "googleSignIn": {
+        "oAuthBrandDisplayName": "QuizMaker",
+        "supportEmail": "raiszoliver@gmail.com"
+      }
+    }
+  },
+  "storage": {
+    "rules": "storage.rules"
+  }
+}

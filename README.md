@@ -18,6 +18,7 @@ This project uses Hasura v2 (graphql-engine).
 ### Start Hasura v2 locally
 
 1. Start Postgres and Hasura v2 with Docker Compose:
+
    ```bash
    docker compose up -d
    ```
@@ -38,6 +39,14 @@ Before starting Docker for the first time, create a local `.env` file from `.env
 Local development uses the Docker Postgres service for both Hasura metadata and app data by default. The Vite dev server proxies `/v1/graphql` to local Hasura and injects the admin secret server-side, so keep backend-only values out of `VITE_*` variables.
 
 Google login is optional. If the Firebase `VITE_FIREBASE_*` values are present, the app uses Google sign-in and creates or updates the matching `users` row in Hasura on login. If they are absent, the app falls back to the local seeded user switcher for self-hosted development.
+
+Question and custom-background image uploads use Firebase Storage when Firebase is configured. Deploy the authenticated, per-user upload rules with:
+
+```bash
+firebase deploy --only storage
+```
+
+Uploads are stored below `quiz-media/<firebase-uid>/`, limited to image MIME types and 5 MB per file.
 
 For local end-to-end auth testing without a real Firebase project, you can run the Firebase Auth Emulator with a demo project ID and set:
 
@@ -90,17 +99,22 @@ Commit migrations, metadata, and seed changes together when the data model chang
 This project uses **GraphQL Codegen** to generate TypeScript types automatically from the Hasura schema.
 
 ### How it works
+
 1. **Introspection:** The codegen connects to the Hasura endpoint and downloads the schema.
 2. **Type Generation:** It generates TypeScript types for all your tables and specific GraphQL operations.
 3. **Usage:** Always import `gql` or specific document nodes (like `GetQuestionsDocument`) from the `./src/gql` directory to get full IntelliSense and type safety.
 
 ### Regenerate Types
+
 Whenever you change the database schema in Hasura or update a `.graphql` file, run:
+
 ```bash
 pnpm graphql-codegen
 ```
+
 This will update the files in `src/gql/` to match the latest server state.
 
 ### Tips for Development
+
 - **Exploring Fields:** Don't browse the generated `graphql.ts` file. Instead, use the **Hasura Console (GraphiQL)** at [http://localhost:8080/console](http://localhost:8080/console). Use the "Explorer" sidebar to discover available fields and test your queries before copy-pasting them into your code.
 - **Typed Data:** Always rely on IDE IntelliSense. Hover over variables in your `.tsx` files to see their types, and use "Go to Definition" (Cmd/Ctrl + Click) to jump to specific type definitions if needed.

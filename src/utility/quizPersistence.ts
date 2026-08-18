@@ -1,5 +1,5 @@
 import { Category } from "../context/types";
-import { Question, QuestionType } from "../models/Question";
+import { AnswerMediaType, Question, QuestionType } from "../models/Question";
 
 const SOURCE_MARKER = " [SOURCE: ";
 
@@ -25,11 +25,14 @@ export function parseStoredQuestionText(questionText: string) {
 
 type PersistedQuestion = {
   answer_options?: string[] | null;
+  answer_media_source?: string | null;
+  answer_media_type?: string | null;
   category_name: string;
   correct_answer?: string | null;
   points?: number | null;
   question_text: string;
   question_type: string;
+  reveal_answer?: boolean | null;
 };
 
 export function buildCategoriesFromPersistedQuestions(
@@ -50,6 +53,9 @@ export function buildCategoriesFromPersistedQuestions(
         false,
         question.answer_options?.length ? question.answer_options : undefined,
         question.correct_answer ?? undefined,
+        question.reveal_answer ?? false,
+        question.answer_media_type as AnswerMediaType | undefined,
+        question.answer_media_source ?? undefined,
       ),
     );
 

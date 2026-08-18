@@ -4,6 +4,7 @@ import {
   getAuth,
   GoogleAuthProvider,
 } from "firebase/auth";
+import { getStorage } from "firebase/storage";
 
 const firebaseProjectId = import.meta.env.VITE_FIREBASE_PROJECT_ID;
 const firebaseAuthEmulatorUrl = import.meta.env.VITE_FIREBASE_AUTH_EMULATOR_URL;
@@ -43,6 +44,8 @@ const firebaseApp = isFirebaseAuthEnabled
   : null;
 
 export const firebaseAuth = firebaseApp ? getAuth(firebaseApp) : null;
+export const firebaseStorage =
+  firebaseApp && hasRealFirebaseConfig ? getStorage(firebaseApp) : null;
 if (firebaseAuth && firebaseAuthEmulatorUrl) {
   connectAuthEmulator(firebaseAuth, firebaseAuthEmulatorUrl, {
     disableWarnings: true,

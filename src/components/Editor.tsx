@@ -3,6 +3,7 @@ import {
   FaArrowRight,
   FaCheck,
   FaEye,
+  FaFileImport,
   FaFolderOpen,
   FaGripVertical,
   FaImage,
@@ -23,24 +24,14 @@ import {
   getSuggestedTextColor,
   suggestTextColorForImage,
 } from "../utility/quizAppearance";
+import { parseQuestionsJson } from "../utility/questionsImport";
+import { uploadQuizImage } from "../utility/quizMediaStorage";
 import UserSwitcher from "./UserSwitcher";
 
 type DraggedQuestion = {
   sourceCatIndex: number;
   sourceQuestionIndex: number;
 };
-
-function readFileAsDataUrl(file: File) {
-  return new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () =>
-      typeof reader.result === "string"
-        ? resolve(reader.result)
-        : reject(new Error("A fájl nem olvasható."));
-    reader.onerror = () => reject(reader.error);
-    reader.readAsDataURL(file);
-  });
-}
 
 const fieldClass =
   "w-full rounded-lg border border-[#8c8374] bg-[#fffdf7] px-3 py-2 text-sm text-[#24211c] outline-none transition focus:border-[#d48313] focus:ring-2 focus:ring-[#ffd75a]/60";
@@ -56,6 +47,7 @@ export default function Editor() {
     currentQuizDescription,
     currentQuizTitle,
     describeQuiz,
+    importCategories,
     moveQuestion,
     removeCategory,
     removeQuestion,
@@ -72,6 +64,11 @@ export default function Editor() {
   const [draggedQuestion, setDraggedQuestion] =
     useState<DraggedQuestion | null>(null);
   const [saveMessage, setSaveMessage] = useState("");
+  const [importMessage, setImportMessage] = useState("");
+  const [mediaMessage, setMediaMessage] = useState("");
+  const [uploadingMedia, setUploadingMedia] = useState<
+    "answer" | "background" | "question" | null
+  >(null);
   const [textColorDraft, setTextColorDraft] = useState(appearance.textColor);
 
   const activeCategory = categories[selectedCategory];
@@ -120,14 +117,25 @@ export default function Editor() {
 
   const handleBackgroundUpload = async (file?: File) => {
     if (!file) return;
-    const imageData = await readFileAsDataUrl(file);
-    const textColor = await suggestTextColorForImage(imageData);
-    setAppearance((current) => ({
-      ...current,
-      backgroundImage: imageData,
-      backgroundMode: "image",
-      textColor,
-    }));
+    setMediaMessage("");
+    setUploadingMedia("background");
+    try {
+      const imageUrl = await uploadQuizImage(file);
+      const textColor = await suggestTextColorForImage(imageUrl);
+      setAppearance((current) => ({
+        ...current,
+        backgroundImage: imageUrl,
+        backgroundMode: "image",
+        textColor,
+      }));
+      setMediaMessage("A háttérkép feltöltve.");
+    } catch (error) {
+      setMediaMessage(
+        error instanceof Error ? error.message : "A feltöltés nem sikerült.",
+      );
+    } finally {
+      setUploadingMedia(null);
+    }
   };
 
   const applySuggestedTextColor = async () => {
@@ -149,11 +157,70 @@ export default function Editor() {
 
   const handleQuestionImageUpload = async (file?: File) => {
     if (!file || !activeQuestion) return;
-    const imageData = await readFileAsDataUrl(file);
-    updateQuestion(selectedCategory, selectedQuestion, {
-      source: imageData,
-      type: "image",
-    });
+    setMediaMessage("");
+    setUploadingMedia("question");
+    try {
+      const imageUrl = await uploadQuizImage(file);
+      updateQuestion(selectedCategory, selectedQuestion, {
+        source: imageUrl,
+        type: "image",
+      });
+      setMediaMessage("A kérdés képe feltöltve.");
+    } catch (error) {
+      setMediaMessage(
+        error instanceof Error ? error.message : "A feltöltés nem sikerült.",
+      );
+    } finally {
+      setUploadingMedia(null);
+    }
+  };
+
+  const handleAnswerImageUpload = async (file?: File) => {
+    if (!file || !activeQuestion) return;
+    setMediaMessage("");
+    setUploadingMedia("answer");
+    try {
+      const imageUrl = await uploadQuizImage(file);
+      updateQuestion(selectedCategory, selectedQuestion, {
+        answerMediaType: "image",
+        answerSource: imageUrl,
+      });
+      setMediaMessage("A válasz képe feltöltve.");
+    } catch (error) {
+      setMediaMessage(
+        error instanceof Error ? error.message : "A feltöltés nem sikerült.",
+      );
+    } finally {
+      setUploadingMedia(null);
+    }
+  };
+
+  const handleQuestionsImport = async (file?: File) => {
+    if (!file) return;
+    setImportMessage("");
+
+    try {
+      const nextCategories = parseQuestionsJson(await file.text());
+      if (
+        !window.confirm(
+          `A fájl ${nextCategories.length} kategóriát tartalmaz. Lecseréled a szerkesztő jelenlegi kérdéseit?`,
+        )
+      ) {
+        return;
+      }
+
+      importCategories(nextCategories);
+      setSelectedCategory(0);
+      setSelectedQuestion(0);
+      setSaveMessage("");
+      setImportMessage(
+        `${file.name} importálva (${nextCategories.length} kategória).`,
+      );
+    } catch (error) {
+      setImportMessage(
+        error instanceof Error ? error.message : "Az importálás nem sikerült.",
+      );
+    }
   };
 
   const handleDrop = (targetCatIndex: number, targetQuestionIndex: number) => {
@@ -264,6 +331,23 @@ export default function Editor() {
           </nav>
 
           <div className="mt-6 grid gap-2 border-t border-[#cfc2aa] pt-5">
+            <label className="editor-secondary-action cursor-pointer">
+              <FaFileImport /> JSON importálása
+              <input
+                type="file"
+                accept="application/json,.json"
+                className="sr-only"
+                onChange={(event) => {
+                  void handleQuestionsImport(event.target.files?.[0]);
+                  event.target.value = "";
+                }}
+              />
+            </label>
+            {importMessage ? (
+              <p className="px-3 text-xs text-[#756b5c]" aria-live="polite">
+                {importMessage}
+              </p>
+            ) : null}
             <button
               onClick={() => {
                 if (
@@ -454,9 +538,30 @@ export default function Editor() {
 
                           <div className="mt-4 grid gap-4 lg:grid-cols-2">
                             <div className="grid content-start gap-4">
-                              <label className="editor-field-label">
-                                Válasz
+                              <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-[#cfc2aa] bg-[#fff8e7] p-4">
                                 <input
+                                  type="checkbox"
+                                  checked={question.revealAnswer}
+                                  onChange={(event) =>
+                                    updateQuestion(selectedCategory, qIndex, {
+                                      revealAnswer: event.target.checked,
+                                    })
+                                  }
+                                  className="mt-0.5 size-4 accent-[#d48313]"
+                                />
+                                <span>
+                                  <strong className="block text-sm">
+                                    Válasz megjelenítése a játékban
+                                  </strong>
+                                  <span className="mt-1 block text-xs text-[#756b5c]">
+                                    A játékosok egy kártyafordítással fedhetik
+                                    fel a választ.
+                                  </span>
+                                </span>
+                              </label>
+                              <label className="editor-field-label">
+                                Válasz szövege
+                                <textarea
                                   value={question.correctAnswer ?? ""}
                                   onChange={(event) =>
                                     updateQuestion(selectedCategory, qIndex, {
@@ -465,6 +570,7 @@ export default function Editor() {
                                   }
                                   className={fieldClass}
                                   placeholder="A helyes válasz"
+                                  rows={3}
                                 />
                               </label>
                               <label className="editor-field-label">
@@ -517,10 +623,18 @@ export default function Editor() {
                                 </div>
                               ) : null}
                               <label className="mt-2 flex cursor-pointer items-center justify-center gap-2 rounded-xl border-2 border-dashed border-[#aa9d86] bg-white/40 px-4 py-5 text-sm font-bold hover:bg-white/75">
-                                <FaImage /> Kép hozzáadása
+                                {uploadingMedia === "question" ? (
+                                  <FaSpinner className="animate-spin" />
+                                ) : (
+                                  <FaImage />
+                                )}
+                                {uploadingMedia === "question"
+                                  ? "Feltöltés…"
+                                  : "Kép hozzáadása"}
                                 <input
                                   type="file"
                                   accept="image/*"
+                                  disabled={uploadingMedia !== null}
                                   className="sr-only"
                                   onChange={(event) => {
                                     void handleQuestionImageUpload(
@@ -544,6 +658,92 @@ export default function Editor() {
                                 />
                               </label>
                             </div>
+                          </div>
+
+                          <div className="mt-4 rounded-xl border border-[#cfc2aa] bg-white/35 p-4">
+                            <div className="grid gap-4 lg:grid-cols-[170px_minmax(0,1fr)]">
+                              <label className="editor-field-label">
+                                Válasz médiatípusa
+                                <select
+                                  value={question.answerMediaType ?? "image"}
+                                  onChange={(event) =>
+                                    updateQuestion(selectedCategory, qIndex, {
+                                      answerMediaType: event.target.value as
+                                        | "image"
+                                        | "video"
+                                        | "audio",
+                                    })
+                                  }
+                                  className={fieldClass}
+                                >
+                                  <option value="image">Kép</option>
+                                  <option value="video">Videó</option>
+                                  <option value="audio">Hang</option>
+                                </select>
+                              </label>
+                              <label className="editor-field-label">
+                                Válasz média URL
+                                <input
+                                  value={question.answerSource ?? ""}
+                                  onChange={(event) =>
+                                    updateQuestion(selectedCategory, qIndex, {
+                                      answerSource: event.target.value,
+                                    })
+                                  }
+                                  className={fieldClass}
+                                  placeholder="https://…"
+                                />
+                              </label>
+                            </div>
+                            {question.answerSource ? (
+                              <div className="relative mt-3 overflow-hidden rounded-xl border border-[#8c8374] bg-[#e9dfca]">
+                                {question.answerMediaType === "image" ||
+                                !question.answerMediaType ? (
+                                  <img
+                                    src={question.answerSource}
+                                    alt="Válasz képe"
+                                    className="h-44 w-full object-contain"
+                                  />
+                                ) : (
+                                  <div className="grid min-h-24 place-items-center break-all px-12 py-4 text-center text-sm">
+                                    {question.answerSource}
+                                  </div>
+                                )}
+                                <button
+                                  onClick={() =>
+                                    updateQuestion(selectedCategory, qIndex, {
+                                      answerSource: "",
+                                    })
+                                  }
+                                  className="absolute right-2 top-2 grid size-8 place-items-center rounded-full bg-[#24211c] text-white"
+                                  aria-label="Válasz médiájának eltávolítása"
+                                >
+                                  <FaTrash size={12} />
+                                </button>
+                              </div>
+                            ) : null}
+                            <label className="mt-3 flex cursor-pointer items-center justify-center gap-2 rounded-xl border-2 border-dashed border-[#aa9d86] bg-white/40 px-4 py-4 text-sm font-bold hover:bg-white/75">
+                              {uploadingMedia === "answer" ? (
+                                <FaSpinner className="animate-spin" />
+                              ) : (
+                                <FaImage />
+                              )}
+                              {uploadingMedia === "answer"
+                                ? "Feltöltés…"
+                                : "Válaszkép feltöltése"}
+                              <input
+                                type="file"
+                                accept="image/*"
+                                disabled={uploadingMedia !== null}
+                                className="sr-only"
+                                onChange={(event) => {
+                                  void handleAnswerImageUpload(
+                                    event.target.files?.[0],
+                                  );
+                                  event.target.value = "";
+                                }}
+                              />
+                            </label>
                           </div>
 
                           <div className="mt-5 flex justify-end">
@@ -631,10 +831,18 @@ export default function Editor() {
           </div>
 
           <label className="mt-3 flex cursor-pointer items-center justify-center gap-2 rounded-lg border-2 border-dashed border-[#aa9d86] px-3 py-4 text-sm font-bold hover:bg-white/50">
-            <FaImage /> Saját háttér feltöltése
+            {uploadingMedia === "background" ? (
+              <FaSpinner className="animate-spin" />
+            ) : (
+              <FaImage />
+            )}
+            {uploadingMedia === "background"
+              ? "Feltöltés…"
+              : "Saját háttér feltöltése"}
             <input
               type="file"
               accept="image/*"
+              disabled={uploadingMedia !== null}
               className="sr-only"
               onChange={(event) => {
                 void handleBackgroundUpload(event.target.files?.[0]);
@@ -642,6 +850,12 @@ export default function Editor() {
               }}
             />
           </label>
+
+          {mediaMessage ? (
+            <p className="mt-2 text-xs text-[#756b5c]" aria-live="polite">
+              {mediaMessage}
+            </p>
+          ) : null}
 
           {appearance.backgroundMode === "image" &&
           appearance.backgroundImage ? (

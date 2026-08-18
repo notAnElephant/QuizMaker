@@ -105,6 +105,10 @@ export function useQuizPersistence() {
     const questions = categories.flatMap((category) =>
       category.questions.map((question) => ({
         answer_options: question.list?.length ? question.list : [],
+        answer_media_source: question.answerSource?.trim() || null,
+        answer_media_type: question.answerSource
+          ? question.answerMediaType || "image"
+          : null,
         category_name: category.category,
         correct_answer: question.correctAnswer?.trim() || null,
         points: question.points,
@@ -115,6 +119,7 @@ export function useQuizPersistence() {
         ),
         question_type: question.type,
         quiz_id: quizId,
+        reveal_answer: question.revealAnswer,
       })),
     );
 

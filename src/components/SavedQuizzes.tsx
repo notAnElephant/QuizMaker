@@ -39,7 +39,10 @@ const GET_SAVED_QUIZ_QUESTIONS_QUERY = gql`
       question_type
       points
       answer_options
+      answer_media_source
+      answer_media_type
       correct_answer
+      reveal_answer
       category_name
     }
   }
@@ -57,12 +60,15 @@ const DELETE_QUIZ_MUTATION = gql`
 
 type SavedQuizQuestion = {
   answer_options?: string[] | null;
+  answer_media_source?: string | null;
+  answer_media_type?: string | null;
   category_name: string;
   correct_answer?: string | null;
   points?: number | null;
   question_id: string;
   question_text: string;
   question_type: string;
+  reveal_answer?: boolean | null;
   quiz_id?: string | null;
 };
 

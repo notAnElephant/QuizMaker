@@ -20,6 +20,36 @@ body {
     0 0 12px rgb(255 248 231 / 70%);
 }
 
+.quiz-card {
+  perspective: 1600px;
+}
+
+.quiz-card-inner {
+  display: grid;
+  transform-style: preserve-3d;
+  transition: transform 600ms cubic-bezier(0.2, 0.75, 0.25, 1);
+}
+
+.quiz-card-inner.is-flipped {
+  transform: rotateY(180deg);
+}
+
+.quiz-card-face {
+  grid-area: 1 / 1;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.quiz-card-answer {
+  transform: rotateY(180deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quiz-card-inner {
+    transition-duration: 1ms;
+  }
+}
+
 .editor-button {
   display: inline-flex;
   min-height: 2.65rem;

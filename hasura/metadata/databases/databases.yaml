@@ -25,6 +25,8 @@
                 owner_id:
                   _eq: X-Hasura-User-Id
             columns:
+              - answer_media_source
+              - answer_media_type
               - answer_options
               - category_name
               - correct_answer
@@ -33,10 +35,13 @@
               - question_text
               - question_type
               - quiz_id
+              - reveal_answer
       select_permissions:
         - role: user
           permission:
             columns:
+              - answer_media_source
+              - answer_media_type
               - answer_options
               - category_name
               - correct_answer
@@ -45,6 +50,7 @@
               - question_text
               - question_type
               - quiz_id
+              - reveal_answer
             filter:
               quiz:
                 owner_id:
@@ -53,12 +59,15 @@
         - role: user
           permission:
             columns:
+              - answer_media_source
+              - answer_media_type
               - answer_options
               - category_name
               - correct_answer
               - points
               - question_text
               - question_type
+              - reveal_answer
             filter:
               quiz:
                 owner_id:
