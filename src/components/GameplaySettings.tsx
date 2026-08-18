@@ -44,7 +44,7 @@ export default function GameplaySettings() {
         <span>
           <strong className="block text-sm">Időzítő</strong>
           <span className="mt-1 block text-xs leading-relaxed text-[#756b5c]">
-            Az időzítő jelenleg még nincs bekötve a játékmódba.
+            Minden kérdésnél újraindul, és a válasz felfedésekor megáll.
           </span>
         </span>
       </label>

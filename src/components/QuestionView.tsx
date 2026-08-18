@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { FaArrowLeft, FaEye, FaUndo } from "react-icons/fa";
+import { useEffect, useRef, useState } from "react";
+import { FaArrowLeft, FaClock, FaEye, FaUndo } from "react-icons/fa";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQuiz } from "../context/QuizContext";
 import { QuestionType } from "../models/Question";
@@ -37,15 +37,77 @@ function QuestionMedia({
   return <audio src={source} controls className="mx-auto mt-4 max-w-full" />;
 }
 
+function QuestionTimer({
+  duration,
+  remaining,
+  stopped,
+}: {
+  duration: number;
+  remaining: number;
+  stopped: boolean;
+}) {
+  const expired = remaining === 0;
+  const warning = !expired && remaining <= Math.min(10, duration * 0.25);
+  const progress = (remaining / duration) * 100;
+  const minutes = Math.floor(remaining / 60);
+  const seconds = String(remaining % 60).padStart(2, "0");
+
+  return (
+    <div
+      role="timer"
+      aria-label={expired ? "Lejárt az idő" : `${remaining} másodperc van hátra`}
+      className={`min-w-32 rounded-xl border-2 px-3 py-2 font-sans shadow-[0_3px_0_currentColor] ${
+        expired
+          ? "border-[#9d2d24] bg-[#ffd8d2] text-[#7b2019]"
+          : warning
+            ? "border-[#b65318] bg-[#ffe2ad] text-[#71320f]"
+            : "border-[#24211c] bg-white/65 text-[#24211c]"
+      }`}
+    >
+      <div className="flex items-center justify-center gap-2">
+        <FaClock aria-hidden="true" />
+        <span className="text-lg font-black tabular-nums">
+          {minutes}:{seconds}
+        </span>
+      </div>
+      <div
+        role="progressbar"
+        aria-label="Hátralévő idő"
+        aria-valuemin={0}
+        aria-valuemax={duration}
+        aria-valuenow={remaining}
+        className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-black/15"
+      >
+        <div
+          className="h-full rounded-full bg-current transition-[width] duration-200 motion-reduce:transition-none"
+          style={{ width: `${progress}%` }}
+        />
+      </div>
+      {expired || stopped ? (
+        <p className="mt-1 text-xs font-black uppercase tracking-wide">
+          {expired ? "Lejárt az idő" : "Megállítva"}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
 export default function QuestionView({
   preview = false,
 }: {
   preview?: boolean;
 }) {
   const { catIndex, qIndex } = useParams();
-  const { appearance, categories, markPlayReadyToSave } = useQuiz();
+  const { appearance, categories, markPlayReadyToSave, settings } = useQuiz();
   const navigate = useNavigate();
   const [showAnswer, setShowAnswer] = useState(false);
+  const timerDuration = Math.min(
+    60,
+    Math.max(1, Math.round(settings.timerDuration || 30)),
+  );
+  const [timeRemaining, setTimeRemaining] = useState(timerDuration);
+  const [timerStopped, setTimerStopped] = useState(false);
+  const timerDeadline = useRef(Date.now() + timerDuration * 1000);
   const category = categories[Number(catIndex) - 1];
   const question = category?.questions[Number(qIndex) - 1];
   const allQuestionsUsed = categories.every((currentCategory) =>
@@ -60,7 +122,29 @@ export default function QuestionView({
 
   useEffect(() => {
     setShowAnswer(false);
-  }, [catIndex, qIndex]);
+    setTimerStopped(false);
+    setTimeRemaining(timerDuration);
+    timerDeadline.current = Date.now() + timerDuration * 1000;
+  }, [catIndex, qIndex, settings.timerEnabled, timerDuration]);
+
+  useEffect(() => {
+    if (!settings.timerEnabled || timerStopped) return;
+
+    const updateTimer = () => {
+      const nextRemaining = Math.max(
+        0,
+        Math.ceil((timerDeadline.current - Date.now()) / 1000),
+      );
+      setTimeRemaining((current) =>
+        current === nextRemaining ? current : nextRemaining,
+      );
+      if (nextRemaining === 0) window.clearInterval(intervalId);
+    };
+    const intervalId = window.setInterval(updateTimer, 250);
+    updateTimer();
+
+    return () => window.clearInterval(intervalId);
+  }, [catIndex, qIndex, settings.timerEnabled, timerDuration, timerStopped]);
 
   if (!category || !question) {
     return (
@@ -93,9 +177,18 @@ export default function QuestionView({
               className="quiz-card-face rounded-2xl border-2 border-[#24211c] bg-[#fff4d6]/95 p-6 text-center text-[#24211c] shadow-[0_6px_0_#24211c] sm:p-10"
               aria-hidden={showAnswer}
             >
-              <h1 className="mb-6 font-display text-3xl font-bold">
-                {category.category} · {question.points}
-              </h1>
+              <div className="mb-6 flex flex-wrap items-center justify-center gap-4 sm:justify-between">
+                <h1 className="font-display text-3xl font-bold">
+                  {category.category} · {question.points}
+                </h1>
+                {settings.timerEnabled ? (
+                  <QuestionTimer
+                    duration={timerDuration}
+                    remaining={timeRemaining}
+                    stopped={timerStopped}
+                  />
+                ) : null}
+              </div>
 
               <p className="mb-6 font-display text-2xl font-medium">
                 {question.content}
@@ -125,10 +218,12 @@ export default function QuestionView({
                 </ul>
               ) : null}
 
-              {question.revealAnswer &&
-              (question.correctAnswer || question.answerSource) ? (
+              {question.correctAnswer || question.answerSource ? (
                 <button
-                  onClick={() => setShowAnswer(true)}
+                  onClick={() => {
+                    setTimerStopped(true);
+                    setShowAnswer(true);
+                  }}
                   tabIndex={showAnswer ? -1 : 0}
                   className="mt-7 inline-flex items-center gap-2 rounded-lg border-2 border-[#24211c] bg-[#ffd75a] px-5 py-3 font-bold shadow-[0_3px_0_#24211c] transition hover:-translate-y-0.5 hover:shadow-[0_5px_0_#24211c] motion-reduce:transition-none"
                 >

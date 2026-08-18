@@ -1,6 +1,7 @@
-import { DragEvent, useEffect, useMemo, useState } from "react";
+import { DragEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   FaArrowRight,
+  FaCheck,
   FaEye,
   FaFileImport,
   FaFolderOpen,
@@ -9,7 +10,6 @@ import {
   FaMagic,
   FaPlay,
   FaPlus,
-  FaSave,
   FaSpinner,
   FaTrash,
 } from "react-icons/fa";
@@ -88,6 +88,10 @@ function MediaPreview({
 const fieldClass =
   "w-full rounded-lg border border-[#8c8374] bg-[#fffdf7] px-3 py-2 text-sm text-[#24211c] outline-none transition focus:border-[#d48313] focus:ring-2 focus:ring-[#ffd75a]/60";
 
+type AutoSaveStatus = "error" | "pending" | "saved" | "saving";
+
+const AUTO_SAVE_DELAY_MS = 800;
+
 export default function Editor() {
   const navigate = useNavigate();
   const confirm = useConfirm();
@@ -111,7 +115,7 @@ export default function Editor() {
     updateQuestionPoints,
   } = useQuiz();
   const { currentUser } = useCurrentUser();
-  const { isSaving, persistQuiz } = useQuizPersistence();
+  const { persistQuiz } = useQuizPersistence();
   const [selectedCategory, setSelectedCategory] = useState(0);
   const [selectedQuestion, setSelectedQuestion] = useState(0);
   const [draggedQuestion, setDraggedQuestion] =
@@ -125,6 +129,9 @@ export default function Editor() {
     "answer" | "background" | "import" | "question" | null
   >(null);
   const [textColorDraft, setTextColorDraft] = useState(appearance.textColor);
+  const [autoSaveStatus, setAutoSaveStatus] =
+    useState<AutoSaveStatus>("saved");
+  const [isStartingGame, setIsStartingGame] = useState(false);
 
   const activeCategory = categories[selectedCategory];
   const activeQuestion = activeCategory?.questions[selectedQuestion];
@@ -136,6 +143,87 @@ export default function Editor() {
       ),
     [categories],
   );
+  const quizFingerprint = useMemo(
+    () =>
+      JSON.stringify({
+        appearance,
+        categories: categories.map((category) => ({
+          category: category.category,
+          questions: category.questions.map((question) => ({
+            answerMediaType: question.answerMediaType,
+            answerSource: question.answerSource,
+            content: question.content,
+            correctAnswer: question.correctAnswer,
+            list: question.list,
+            points: question.points,
+            revealAnswer: question.revealAnswer,
+            source: question.source,
+            type: question.type,
+          })),
+        })),
+        description: currentQuizDescription,
+        title: currentQuizTitle,
+      }),
+    [
+      appearance,
+      categories,
+      currentQuizDescription,
+      currentQuizTitle,
+    ],
+  );
+  const latestFingerprintRef = useRef(quizFingerprint);
+  const savedFingerprintRef = useRef(quizFingerprint);
+  const persistQuizRef = useRef(persistQuiz);
+  const currentUserRef = useRef(currentUser);
+  const savePromiseRef = useRef<Promise<boolean> | null>(null);
+  const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  latestFingerprintRef.current = quizFingerprint;
+  persistQuizRef.current = persistQuiz;
+  currentUserRef.current = currentUser;
+
+  const runAutoSave = useCallback(async (showSuccessToast = false) => {
+    if (!currentUserRef.current) return false;
+
+    while (savedFingerprintRef.current !== latestFingerprintRef.current) {
+      if (savePromiseRef.current) {
+        const previousSaveSucceeded = await savePromiseRef.current;
+        if (!previousSaveSucceeded) return false;
+        continue;
+      }
+
+      const fingerprintBeingSaved = latestFingerprintRef.current;
+      setAutoSaveStatus("saving");
+      const savePromise = persistQuizRef
+        .current()
+        .then((result) => {
+          savedFingerprintRef.current = fingerprintBeingSaved;
+          setAutoSaveStatus("saved");
+          if (showSuccessToast) {
+            toast.success(
+              result.wasUpdate ? "Módosítások elmentve" : "Kvíz létrehozva",
+            );
+          }
+          return true;
+        })
+        .catch((error) => {
+          setAutoSaveStatus("error");
+          toast.error(
+            error instanceof Error ? error.message : "A mentés nem sikerült.",
+          );
+          return false;
+        });
+
+      savePromiseRef.current = savePromise;
+      const saveSucceeded = await savePromise;
+      if (savePromiseRef.current === savePromise) {
+        savePromiseRef.current = null;
+      }
+      if (!saveSucceeded) return false;
+    }
+
+    return true;
+  }, []);
 
   useEffect(() => {
     if (selectedCategory >= categories.length) {
@@ -153,6 +241,24 @@ export default function Editor() {
   useEffect(() => {
     setTextColorDraft(appearance.textColor);
   }, [appearance.textColor]);
+
+  useEffect(() => {
+    if (!currentUser || savedFingerprintRef.current === quizFingerprint) return;
+
+    setAutoSaveStatus("pending");
+    if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+    autoSaveTimerRef.current = setTimeout(() => {
+      autoSaveTimerRef.current = null;
+      void runAutoSave();
+    }, AUTO_SAVE_DELAY_MS);
+
+    return () => {
+      if (autoSaveTimerRef.current) {
+        clearTimeout(autoSaveTimerRef.current);
+        autoSaveTimerRef.current = null;
+      }
+    };
+  }, [currentUser, quizFingerprint, runAutoSave]);
 
   useEffect(() => {
     if (!canUseQuizMediaStorage || !currentUser) return;
@@ -176,21 +282,6 @@ export default function Editor() {
       isCurrent = false;
     };
   }, [currentUser]);
-
-  const saveQuiz = async () => {
-    try {
-      const result = await persistQuiz();
-      toast.success(
-        result.wasUpdate ? "Módosítások elmentve" : "Kvíz létrehozva",
-      );
-      return true;
-    } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "A mentés nem sikerült.",
-      );
-      return false;
-    }
-  };
 
   const handleBackgroundUpload = async (file?: File) => {
     if (!file) return;
@@ -435,16 +526,31 @@ export default function Editor() {
           </div>
           <div className="flex flex-wrap items-center justify-end gap-2">
             <UserSwitcher />
-            <button
-              onClick={() => void saveQuiz()}
-              disabled={isSaving || !currentUser}
-              className="editor-button editor-button-dark"
+            <span
+              className="inline-flex items-center gap-2 px-2 text-sm font-bold text-[#fff8e7]/80"
+              role="status"
             >
-              {isSaving ? <FaSpinner className="animate-spin" /> : <FaSave />}
-              Mentés
-            </button>
+              {autoSaveStatus === "saving" ? (
+                <FaSpinner className="animate-spin" />
+              ) : autoSaveStatus === "saved" ? (
+                <FaCheck />
+              ) : null}
+              {autoSaveStatus === "pending"
+                ? "Mentés hamarosan…"
+                : autoSaveStatus === "saving"
+                  ? "Mentés…"
+                  : autoSaveStatus === "error"
+                    ? "A mentés sikertelen"
+                    : "Minden módosítás mentve"}
+            </span>
             <button
-              onClick={() => navigate("/preview")}
+              onClick={async () => {
+                if (autoSaveTimerRef.current) {
+                  clearTimeout(autoSaveTimerRef.current);
+                  autoSaveTimerRef.current = null;
+                }
+                if (await runAutoSave()) navigate("/preview");
+              }}
               className="editor-button editor-button-light"
             >
               <FaEye />
@@ -452,12 +558,22 @@ export default function Editor() {
             </button>
             <button
               onClick={async () => {
-                if (await saveQuiz()) navigate("/");
+                setIsStartingGame(true);
+                if (autoSaveTimerRef.current) {
+                  clearTimeout(autoSaveTimerRef.current);
+                  autoSaveTimerRef.current = null;
+                }
+                if (await runAutoSave(true)) navigate("/");
+                else setIsStartingGame(false);
               }}
-              disabled={isSaving || !currentUser}
+              disabled={isStartingGame || !currentUser}
               className="editor-button editor-button-primary"
             >
-              <FaPlay size={13} />
+              {isStartingGame ? (
+                <FaSpinner className="animate-spin" />
+              ) : (
+                <FaPlay size={13} />
+              )}
               Játék indítása
             </button>
           </div>
@@ -743,27 +859,6 @@ export default function Editor() {
 
                           <div className="mt-4 grid gap-4 lg:grid-cols-2">
                             <div className="grid content-start gap-4">
-                              <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-[#cfc2aa] bg-[#fff8e7] p-4">
-                                <input
-                                  type="checkbox"
-                                  checked={question.revealAnswer}
-                                  onChange={(event) =>
-                                    updateQuestion(selectedCategory, qIndex, {
-                                      revealAnswer: event.target.checked,
-                                    })
-                                  }
-                                  className="mt-0.5 size-4 accent-[#d48313]"
-                                />
-                                <span>
-                                  <strong className="block text-sm">
-                                    Válasz megjelenítése a játékban
-                                  </strong>
-                                  <span className="mt-1 block text-xs text-[#756b5c]">
-                                    A játékosok egy kártyafordítással fedhetik
-                                    fel a választ.
-                                  </span>
-                                </span>
-                              </label>
                               <label className="editor-field-label">
                                 Válasz szövege
                                 <textarea

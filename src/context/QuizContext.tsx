@@ -63,10 +63,10 @@ const initialData: Category[] = (rawData as RawCategory[]).map((category) => ({
 
 const defaultSettings: Settings = {
   classicMode: false,
-  timerEnabled: false,
-  timerDuration: 30,
+  timerEnabled: true,
+  timerDuration: 2,
 };
-const SETTINGS_STORAGE_KEY = "quizmaker.settings";
+const SETTINGS_STORAGE_KEY = "quizmaker.settings.qa";
 const EDITOR_STORAGE_KEY_PREFIX = "quizmaker.editor";
 const DEFAULT_QUIZ_DESCRIPTION = "Imported sample board quiz";
 const DEFAULT_QUIZ_ID = "47559e6f-f126-4124-84d7-9d71d9467f6d";
