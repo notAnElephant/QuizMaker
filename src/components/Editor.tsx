@@ -177,6 +177,7 @@ export default function Editor() {
   const currentUserRef = useRef(currentUser);
   const savePromiseRef = useRef<Promise<boolean> | null>(null);
   const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const autoSaveOwnerRef = useRef(currentUser?.user_id ?? null);
 
   latestFingerprintRef.current = quizFingerprint;
   persistQuizRef.current = persistQuiz;
@@ -243,6 +244,13 @@ export default function Editor() {
   }, [appearance.textColor]);
 
   useEffect(() => {
+    const ownerId = currentUser?.user_id ?? null;
+    if (autoSaveOwnerRef.current !== ownerId) {
+      autoSaveOwnerRef.current = ownerId;
+      savedFingerprintRef.current = quizFingerprint;
+      setAutoSaveStatus("saved");
+      return;
+    }
     if (!currentUser || savedFingerprintRef.current === quizFingerprint) return;
 
     setAutoSaveStatus("pending");
@@ -683,11 +691,16 @@ export default function Editor() {
             ) : null}
             <button
               onClick={async () => {
+                if (autoSaveTimerRef.current) {
+                  clearTimeout(autoSaveTimerRef.current);
+                  autoSaveTimerRef.current = null;
+                }
+                if (!(await runAutoSave())) return;
+
                 const shouldCreate = await confirm({
                   confirmLabel: "Új kvíz kezdése",
                   description:
-                    "A nem mentett módosítások elvesznek, amikor új kvízt kezdesz.",
-                  destructive: true,
+                    "A jelenlegi kvízt elmentettük. Szeretnél egy új, üres kvízt kezdeni?",
                   title: "Új kvíz",
                 });
                 if (!shouldCreate) return;
@@ -701,7 +714,13 @@ export default function Editor() {
               <FaPlus /> Új kvíz
             </button>
             <button
-              onClick={() => navigate("/quizzes")}
+              onClick={async () => {
+                if (autoSaveTimerRef.current) {
+                  clearTimeout(autoSaveTimerRef.current);
+                  autoSaveTimerRef.current = null;
+                }
+                if (await runAutoSave()) navigate("/quizzes");
+              }}
               className="editor-secondary-action"
             >
               <FaFolderOpen /> Mentett kvízek

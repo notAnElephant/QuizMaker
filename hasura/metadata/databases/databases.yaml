@@ -129,12 +129,15 @@
               - background_image
               - background_mode
               - background_preset
+              - classic_mode
               - created_at
               - description
               - owner_id
               - quiz_id
               - shared_user_ids
               - text_color
+              - timer_duration
+              - timer_enabled
               - title
               - updated_at
       select_permissions:
@@ -144,12 +147,15 @@
               - background_image
               - background_mode
               - background_preset
+              - classic_mode
               - created_at
               - description
               - owner_id
               - quiz_id
               - shared_user_ids
               - text_color
+              - timer_duration
+              - timer_enabled
               - title
               - updated_at
             filter:
@@ -162,9 +168,12 @@
               - background_image
               - background_mode
               - background_preset
+              - classic_mode
               - description
               - shared_user_ids
               - text_color
+              - timer_duration
+              - timer_enabled
               - title
               - updated_at
             filter:

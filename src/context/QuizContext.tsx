@@ -77,6 +77,7 @@ type StoredEditorState = {
   categories: RawCategory[];
   description: string;
   quizId: string | null;
+  settings?: Settings;
   title: string;
 };
 
@@ -148,6 +149,7 @@ type QuizContextValue = {
     description: string,
     nextCategories: Category[],
     nextAppearance?: QuizAppearance,
+    nextSettings?: Settings,
   ) => void;
   importCategories: (nextCategories: Category[]) => void;
   markPlayReadyToSave: () => void;
@@ -313,12 +315,14 @@ export function QuizProvider({ children }: { children: ReactNode }) {
     description: string,
     nextCategories: Category[],
     nextAppearance: QuizAppearance = defaultQuizAppearance,
+    nextSettings: Settings = defaultSettings,
   ) => {
     setCurrentQuizId(quizId);
     setCurrentQuizTitle(title);
     setCurrentQuizDescription(description);
     setCategories(nextCategories);
     setAppearance(nextAppearance);
+    setSettings(nextSettings);
     setPlaySessionId(crypto.randomUUID());
     setPlayReadyToSave(false);
     setPlaySaveStatus("idle");
@@ -467,6 +471,7 @@ export function QuizProvider({ children }: { children: ReactNode }) {
     setCurrentQuizDescription("");
     setCategories(nextCategories);
     setAppearance(defaultQuizAppearance);
+    setSettings(defaultSettings);
     setPlaySessionId(crypto.randomUUID());
     setPlayReadyToSave(false);
     setPlaySaveStatus("idle");
@@ -492,6 +497,7 @@ export function QuizProvider({ children }: { children: ReactNode }) {
     );
     setCurrentQuizId(storedState?.quizId ?? DEFAULT_QUIZ_ID);
     setCurrentQuizTitle(storedState?.title ?? DEFAULT_QUIZ_TITLE);
+    setSettings(storedState?.settings ?? defaultSettings);
     setHydratedOwnerId(currentUserId);
   }, [currentUserId]);
 
@@ -503,6 +509,7 @@ export function QuizProvider({ children }: { children: ReactNode }) {
       categories,
       description: currentQuizDescription,
       quizId: currentQuizId,
+      settings,
       title: currentQuizTitle,
     };
     window.localStorage.setItem(
@@ -517,6 +524,7 @@ export function QuizProvider({ children }: { children: ReactNode }) {
     currentQuizTitle,
     currentUserId,
     hydratedOwnerId,
+    settings,
   ]);
 
   useEffect(() => {

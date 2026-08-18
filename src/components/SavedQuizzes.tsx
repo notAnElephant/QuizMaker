@@ -4,7 +4,7 @@ import { FaArrowLeft, FaFolderOpen, FaTrash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useQuiz } from "../context/QuizContext";
-import { Category, QuizAppearance } from "../context/types";
+import { Category, QuizAppearance, Settings } from "../context/types";
 import { useConfirm } from "../context/useConfirm";
 import { useCurrentUser } from "../context/useCurrentUser";
 import { buildCategoriesFromPersistedQuestions } from "../utility/quizPersistence";
@@ -24,6 +24,9 @@ const GET_SAVED_QUIZZES_QUERY = gql`
       background_preset
       background_image
       text_color
+      classic_mode
+      timer_enabled
+      timer_duration
       updated_at
     }
   }
@@ -79,9 +82,12 @@ type SavedQuiz = {
   background_mode?: QuizAppearance["backgroundMode"] | null;
   background_preset?: QuizAppearance["backgroundPreset"] | null;
   description?: string | null;
+  classic_mode?: boolean | null;
   quiz_id: string;
   title: string;
   text_color?: string | null;
+  timer_duration?: number | null;
+  timer_enabled?: boolean | null;
   updated_at: string;
 };
 
@@ -122,9 +128,7 @@ export default function SavedQuizzes() {
 
   if (isLoadingCurrentUser || loading || isLoadingQuestions) {
     return (
-      <div className="p-8 text-center text-[#24211c]">
-        Kvízek betöltése...
-      </div>
+      <div className="p-8 text-center text-[#24211c]">Kvízek betöltése...</div>
     );
   }
 
@@ -230,6 +234,11 @@ export default function SavedQuizzes() {
                               quiz.text_color ??
                               defaultQuizAppearance.textColor,
                           },
+                          {
+                            classicMode: quiz.classic_mode ?? false,
+                            timerEnabled: quiz.timer_enabled ?? true,
+                            timerDuration: quiz.timer_duration ?? 2,
+                          } satisfies Settings,
                         );
                         navigate("/editor");
                       }}

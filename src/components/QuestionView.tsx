@@ -3,6 +3,7 @@ import { FaArrowLeft, FaClock, FaEye, FaUndo } from "react-icons/fa";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQuiz } from "../context/QuizContext";
 import { QuestionType } from "../models/Question";
+import PreviewBar from "./PreviewBar";
 import TeamBar from "./TeamBar";
 
 function QuestionMedia({
@@ -149,8 +150,9 @@ export default function QuestionView({
   if (!category || !question) {
     return (
       <main className="grid min-h-screen place-items-center p-8">
+        {preview ? <PreviewBar fixed /> : null}
         <button
-          onClick={() => navigate(preview ? "/editor" : "/")}
+          onClick={() => navigate(preview ? "/preview" : "/")}
           className="rounded-lg border-2 border-[#24211c] bg-[#fff4d6] px-5 py-3 font-semibold text-[#24211c]"
         >
           Vissza
@@ -164,17 +166,13 @@ export default function QuestionView({
       className="flex min-h-screen flex-col items-center justify-between p-5 sm:p-8"
       style={{ color: appearance.textColor }}
     >
-      {preview ? (
-        <div className="fixed left-1/2 top-4 z-20 -translate-x-1/2 rounded-lg border-2 border-[#24211c] bg-[#fff4d6] px-4 py-2 text-sm font-bold text-[#24211c] shadow-[0_3px_0_#24211c]">
-          Előnézet · a játékállás nem változik
-        </div>
-      ) : null}
+      {preview ? <PreviewBar fixed /> : null}
 
       <div className="flex w-full flex-1 items-center justify-center py-12">
         <div className="quiz-card w-full max-w-3xl">
           <div className={`quiz-card-inner ${showAnswer ? "is-flipped" : ""}`}>
             <section
-              className="quiz-card-face rounded-2xl border-2 border-[#24211c] bg-[#fff4d6]/95 p-6 text-center text-[#24211c] shadow-[0_6px_0_#24211c] sm:p-10"
+              className="quiz-card-face flex flex-col rounded-2xl border-2 border-[#24211c] bg-[#fff4d6]/95 p-6 text-center text-[#24211c] shadow-[0_6px_0_#24211c] sm:p-10"
               aria-hidden={showAnswer}
             >
               <div className="mb-6 flex flex-wrap items-center justify-center gap-4 sm:justify-between">
@@ -219,22 +217,24 @@ export default function QuestionView({
               ) : null}
 
               {question.correctAnswer || question.answerSource ? (
-                <button
-                  onClick={() => {
-                    setTimerStopped(true);
-                    setShowAnswer(true);
-                  }}
-                  tabIndex={showAnswer ? -1 : 0}
-                  className="mt-7 inline-flex items-center gap-2 rounded-lg border-2 border-[#24211c] bg-[#ffd75a] px-5 py-3 font-bold shadow-[0_3px_0_#24211c] transition hover:-translate-y-0.5 hover:shadow-[0_5px_0_#24211c] motion-reduce:transition-none"
-                >
-                  <FaEye aria-hidden="true" />
-                  Válasz felfedése
-                </button>
+                <div className="mt-auto pt-7">
+                  <button
+                    onClick={() => {
+                      setTimerStopped(true);
+                      setShowAnswer(true);
+                    }}
+                    tabIndex={showAnswer ? -1 : 0}
+                    className="inline-flex items-center gap-2 rounded-lg border-2 border-[#24211c] bg-[#ffd75a] px-5 py-3 font-bold shadow-[0_3px_0_#24211c] transition hover:-translate-y-0.5 hover:shadow-[0_5px_0_#24211c] motion-reduce:transition-none"
+                  >
+                    <FaEye aria-hidden="true" />
+                    Válasz felfedése
+                  </button>
+                </div>
               ) : null}
             </section>
 
             <section
-              className="quiz-card-face quiz-card-answer rounded-2xl border-2 border-[#356b3f] bg-[#dff2d9] p-6 text-center text-[#183a20] shadow-[0_6px_0_#183a20] sm:p-10"
+              className="quiz-card-face quiz-card-answer flex flex-col rounded-2xl border-2 border-[#356b3f] bg-[#dff2d9] p-6 text-center text-[#183a20] shadow-[0_6px_0_#183a20] sm:p-10"
               aria-hidden={!showAnswer}
             >
               <p className="text-sm font-black uppercase tracking-[0.18em] text-[#356b3f]">
@@ -250,14 +250,16 @@ export default function QuestionView({
                 source={question.answerSource}
                 alt="Válasz médiája"
               />
-              <button
-                onClick={() => setShowAnswer(false)}
-                tabIndex={showAnswer ? 0 : -1}
-                className="mt-7 inline-flex items-center gap-2 rounded-lg border-2 border-[#183a20] bg-white/60 px-5 py-3 font-bold shadow-[0_3px_0_#183a20] transition hover:-translate-y-0.5 hover:shadow-[0_5px_0_#183a20] motion-reduce:transition-none"
-              >
-                <FaUndo aria-hidden="true" />
-                Kérdés visszafordítása
-              </button>
+              <div className="mt-auto pt-7">
+                <button
+                  onClick={() => setShowAnswer(false)}
+                  tabIndex={showAnswer ? 0 : -1}
+                  className="inline-flex items-center gap-2 rounded-lg border-2 border-[#183a20] bg-white/60 px-5 py-3 font-bold shadow-[0_3px_0_#183a20] transition hover:-translate-y-0.5 hover:shadow-[0_5px_0_#183a20] motion-reduce:transition-none"
+                >
+                  <FaUndo aria-hidden="true" />
+                  Kérdés visszafordítása
+                </button>
+              </div>
             </section>
           </div>
         </div>

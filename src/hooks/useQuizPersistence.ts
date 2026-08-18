@@ -15,6 +15,9 @@ const CREATE_QUIZ_MUTATION = gql`
     $backgroundPreset: String!
     $backgroundImage: String
     $textColor: String!
+    $classicMode: Boolean!
+    $timerEnabled: Boolean!
+    $timerDuration: Int!
     $questions: [questions_insert_input!]!
   ) {
     insert_quizzes_one(
@@ -27,6 +30,9 @@ const CREATE_QUIZ_MUTATION = gql`
         background_preset: $backgroundPreset
         background_image: $backgroundImage
         text_color: $textColor
+        classic_mode: $classicMode
+        timer_enabled: $timerEnabled
+        timer_duration: $timerDuration
       }
     ) {
       quiz_id
@@ -47,6 +53,9 @@ const UPDATE_QUIZ_MUTATION = gql`
     $backgroundPreset: String!
     $backgroundImage: String
     $textColor: String!
+    $classicMode: Boolean!
+    $timerEnabled: Boolean!
+    $timerDuration: Int!
     $questions: [questions_insert_input!]!
     $updatedAt: timestamp!
   ) {
@@ -59,6 +68,9 @@ const UPDATE_QUIZ_MUTATION = gql`
         background_preset: $backgroundPreset
         background_image: $backgroundImage
         text_color: $textColor
+        classic_mode: $classicMode
+        timer_enabled: $timerEnabled
+        timer_duration: $timerDuration
         updated_at: $updatedAt
       }
     ) {
@@ -87,6 +99,7 @@ export function useQuizPersistence() {
     currentQuizId,
     currentQuizTitle,
     setCurrentQuizId,
+    settings,
   } = useQuiz();
   const { currentUser } = useCurrentUser();
   const [createQuiz, { loading: isCreating }] =
@@ -136,11 +149,14 @@ export function useQuizPersistence() {
           : null,
       backgroundMode: appearance.backgroundMode,
       backgroundPreset: appearance.backgroundPreset,
+      classicMode: settings.classicMode,
       description: currentQuizDescription.trim() || null,
       ownerId: currentUser.user_id,
       questions,
       quizId,
       textColor: appearance.textColor,
+      timerDuration: settings.timerDuration,
+      timerEnabled: settings.timerEnabled,
       title,
     };
 
@@ -164,6 +180,7 @@ export function useQuizPersistence() {
     currentQuizTitle,
     currentUser,
     setCurrentQuizId,
+    settings,
     updateQuiz,
   ]);
 
