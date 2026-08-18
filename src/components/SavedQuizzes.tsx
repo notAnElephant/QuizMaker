@@ -122,13 +122,15 @@ export default function SavedQuizzes() {
 
   if (isLoadingCurrentUser || loading || isLoadingQuestions) {
     return (
-      <div className="p-8 text-center text-white">Kvízek betöltése...</div>
+      <div className="p-8 text-center text-[#24211c]">
+        Kvízek betöltése...
+      </div>
     );
   }
 
   if (!currentUser) {
     return (
-      <div className="p-8 text-center text-red-100">
+      <div className="p-8 text-center text-[#b83e18]">
         <h1 className="text-2xl font-bold">Nincs kiválasztott felhasználó</h1>
       </div>
     );
@@ -136,7 +138,7 @@ export default function SavedQuizzes() {
 
   if (error || questionsError) {
     return (
-      <div className="p-8 text-center text-red-100">
+      <div className="p-8 text-center text-[#b83e18]">
         <h1 className="text-2xl font-bold">
           Nem sikerült betölteni a kvízeket
         </h1>
@@ -154,8 +156,10 @@ export default function SavedQuizzes() {
       <div className="mx-auto flex w-full max-w-4xl flex-col gap-6">
         <div className="flex items-center justify-between">
           <div className="flex flex-col gap-3">
-            <h1 className="text-4xl font-display text-white">Mentett kvízek</h1>
-            <p className="text-sm text-white/80">
+            <h1 className="font-display text-4xl text-[#24211c]">
+              Mentett kvízek
+            </h1>
+            <p className="text-sm text-[#756b5c]">
               Csak a(z){" "}
               {currentUser.display_name ||
                 currentUser.email ||

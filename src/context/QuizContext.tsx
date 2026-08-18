@@ -13,6 +13,7 @@ import {
   getQuizBackground,
 } from "../utility/quizAppearance";
 import { Category, QuizAppearance, Settings, Team } from "./types";
+import { useCurrentUser } from "./useCurrentUser";
 
 type RawQuestion = {
   content: string;
@@ -66,6 +67,66 @@ const defaultSettings: Settings = {
   timerDuration: 30,
 };
 const SETTINGS_STORAGE_KEY = "quizmaker.settings";
+const EDITOR_STORAGE_KEY_PREFIX = "quizmaker.editor";
+const DEFAULT_QUIZ_DESCRIPTION = "Imported sample board quiz";
+const DEFAULT_QUIZ_ID = "47559e6f-f126-4124-84d7-9d71d9467f6d";
+const DEFAULT_QUIZ_TITLE = "Vágó Pesta";
+
+type StoredEditorState = {
+  appearance: QuizAppearance;
+  categories: RawCategory[];
+  description: string;
+  quizId: string | null;
+  title: string;
+};
+
+function getEditorStorageKey(ownerId: string) {
+  return `${EDITOR_STORAGE_KEY_PREFIX}.${ownerId}`;
+}
+
+function readStoredEditorState(ownerId: string): StoredEditorState | null {
+  try {
+    const storedState = window.localStorage.getItem(
+      getEditorStorageKey(ownerId),
+    );
+    if (!storedState) return null;
+
+    const parsedState = JSON.parse(storedState) as StoredEditorState;
+    if (
+      typeof parsedState.title !== "string" ||
+      typeof parsedState.description !== "string" ||
+      !Array.isArray(parsedState.categories) ||
+      !parsedState.appearance
+    ) {
+      return null;
+    }
+
+    return parsedState;
+  } catch {
+    return null;
+  }
+}
+
+function hydrateCategories(categories: RawCategory[]): Category[] {
+  return categories.map((category) => ({
+    category: category.category,
+    questions: category.questions.map(
+      (question) =>
+        new Question(
+          question.type,
+          question.content,
+          question.source,
+          question.points,
+          question.isUsed,
+          question.list,
+          question.correctAnswer,
+          question.revealAnswer,
+          question.answerMediaType,
+          question.answerSource,
+        ),
+    ),
+  }));
+}
 
 type QuizContextValue = {
   addCategory: () => void;
@@ -134,17 +195,20 @@ export const useQuiz = () => {
 };
 
 export function QuizProvider({ children }: { children: ReactNode }) {
+  const { currentUser } = useCurrentUser();
+  const currentUserId = currentUser?.user_id ?? null;
   const [appearance, setAppearance] = useState<QuizAppearance>(
     defaultQuizAppearance,
   );
   const [categories, setCategories] = useState(initialData);
   const [currentQuizDescription, setCurrentQuizDescription] = useState(
-    "Imported sample board quiz",
+    DEFAULT_QUIZ_DESCRIPTION,
   );
   const [currentQuizId, setCurrentQuizId] = useState<string | null>(
-    "47559e6f-f126-4124-84d7-9d71d9467f6d",
+    DEFAULT_QUIZ_ID,
   );
-  const [currentQuizTitle, setCurrentQuizTitle] = useState("Vágó Pesta");
+  const [currentQuizTitle, setCurrentQuizTitle] = useState(DEFAULT_QUIZ_TITLE);
+  const [hydratedOwnerId, setHydratedOwnerId] = useState<string | null>(null);
   const [playSessionId, setPlaySessionId] = useState(() => crypto.randomUUID());
   const [playReadyToSave, setPlayReadyToSave] = useState(false);
   const [playSaveStatus, setPlaySaveStatus] = useState<
@@ -411,6 +475,49 @@ export function QuizProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     window.localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(settings));
   }, [settings]);
+
+  useEffect(() => {
+    if (!currentUserId) {
+      setHydratedOwnerId(null);
+      return;
+    }
+
+    const storedState = readStoredEditorState(currentUserId);
+    setAppearance(storedState?.appearance ?? defaultQuizAppearance);
+    setCategories(
+      storedState ? hydrateCategories(storedState.categories) : initialData,
+    );
+    setCurrentQuizDescription(
+      storedState?.description ?? DEFAULT_QUIZ_DESCRIPTION,
+    );
+    setCurrentQuizId(storedState?.quizId ?? DEFAULT_QUIZ_ID);
+    setCurrentQuizTitle(storedState?.title ?? DEFAULT_QUIZ_TITLE);
+    setHydratedOwnerId(currentUserId);
+  }, [currentUserId]);
+
+  useEffect(() => {
+    if (!currentUserId || hydratedOwnerId !== currentUserId) return;
+
+    const editorState: StoredEditorState = {
+      appearance,
+      categories,
+      description: currentQuizDescription,
+      quizId: currentQuizId,
+      title: currentQuizTitle,
+    };
+    window.localStorage.setItem(
+      getEditorStorageKey(currentUserId),
+      JSON.stringify(editorState),
+    );
+  }, [
+    appearance,
+    categories,
+    currentQuizDescription,
+    currentQuizId,
+    currentQuizTitle,
+    currentUserId,
+    hydratedOwnerId,
+  ]);
 
   useEffect(() => {
     document.body.style.backgroundImage = getQuizBackground(appearance);

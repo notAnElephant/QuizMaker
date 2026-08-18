@@ -35,7 +35,7 @@ export default function NewQuiz() {
     <div className="min-h-screen p-8 text-black">
       <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-4xl font-display text-white">Új kvíz</h1>
+          <h1 className="font-display text-4xl text-[#24211c]">Új kvíz</h1>
           <button
             onClick={() => navigate("/")}
             className="rounded-full bg-gray-800 p-3 text-white shadow-lg hover:bg-gray-700"

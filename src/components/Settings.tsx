@@ -16,10 +16,6 @@ export default function Settings() {
           <FaArrowLeft /> Szerkesztő
         </button>
         <h1 className="font-display text-4xl">Játékbeállítások</h1>
-        <p className="mt-2 text-sm text-[#756b5c]">
-          A kvíz hátterét és szövegszínét mostantól a szerkesztőben, kvízenként
-          állíthatod be.
-        </p>
 
         <section className="mt-8 border-y border-[#cfc2aa] py-6">
           <label className="flex items-start gap-3">

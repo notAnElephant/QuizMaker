@@ -42,12 +42,16 @@ export default function Profile() {
   );
 
   if (isLoadingCurrentUser || loading) {
-    return <div className="p-8 text-center text-white">Profil betöltése...</div>;
+    return (
+      <div className="p-8 text-center text-[#24211c]">
+        Profil betöltése...
+      </div>
+    );
   }
 
   if (!currentUser) {
     return (
-      <div className="p-8 text-center text-red-100">
+      <div className="p-8 text-center text-[#b83e18]">
         <h1 className="text-2xl font-bold">Nincs kiválasztott felhasználó</h1>
       </div>
     );
@@ -55,7 +59,7 @@ export default function Profile() {
 
   if (error) {
     return (
-      <div className="p-8 text-center text-red-100">
+      <div className="p-8 text-center text-[#b83e18]">
         <h1 className="text-2xl font-bold">Nem sikerült betölteni a profilt</h1>
         <p className="mt-2 text-sm">{error.message}</p>
       </div>
@@ -69,8 +73,8 @@ export default function Profile() {
       <div className="mx-auto flex w-full max-w-4xl flex-col gap-6">
         <div className="flex items-center justify-between">
           <div className="flex flex-col gap-3">
-            <h1 className="text-4xl font-display text-white">Profil</h1>
-            <p className="text-sm text-white/80">
+            <h1 className="font-display text-4xl text-[#24211c]">Profil</h1>
+            <p className="text-sm text-[#756b5c]">
               Itt látszanak az aktív felhasználóhoz tartozó mentett kvízek.
             </p>
           </div>
