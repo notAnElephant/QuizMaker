@@ -1,7 +1,13 @@
-import { DragEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  DragEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   FaArrowRight,
-  FaCheck,
   FaEye,
   FaFileImport,
   FaFolderOpen,
@@ -88,8 +94,6 @@ function MediaPreview({
 const fieldClass =
   "w-full rounded-lg border border-[#8c8374] bg-[#fffdf7] px-3 py-2 text-sm text-[#24211c] outline-none transition focus:border-[#d48313] focus:ring-2 focus:ring-[#ffd75a]/60";
 
-type AutoSaveStatus = "error" | "pending" | "saved" | "saving";
-
 const AUTO_SAVE_DELAY_MS = 800;
 
 export default function Editor() {
@@ -129,8 +133,6 @@ export default function Editor() {
     "answer" | "background" | "import" | "question" | null
   >(null);
   const [textColorDraft, setTextColorDraft] = useState(appearance.textColor);
-  const [autoSaveStatus, setAutoSaveStatus] =
-    useState<AutoSaveStatus>("saved");
   const [isStartingGame, setIsStartingGame] = useState(false);
 
   const activeCategory = categories[selectedCategory];
@@ -164,12 +166,7 @@ export default function Editor() {
         description: currentQuizDescription,
         title: currentQuizTitle,
       }),
-    [
-      appearance,
-      categories,
-      currentQuizDescription,
-      currentQuizTitle,
-    ],
+    [appearance, categories, currentQuizDescription, currentQuizTitle],
   );
   const latestFingerprintRef = useRef(quizFingerprint);
   const savedFingerprintRef = useRef(quizFingerprint);
@@ -194,7 +191,6 @@ export default function Editor() {
       }
 
       const fingerprintBeingSaved = latestFingerprintRef.current;
-      setAutoSaveStatus("saving");
       const savePromise = persistQuizRef
         .current()
         .then((result) => {
@@ -534,23 +530,6 @@ export default function Editor() {
           </div>
           <div className="flex flex-wrap items-center justify-end gap-2">
             <UserSwitcher />
-            <span
-              className="inline-flex items-center gap-2 px-2 text-sm font-bold text-[#fff8e7]/80"
-              role="status"
-            >
-              {autoSaveStatus === "saving" ? (
-                <FaSpinner className="animate-spin" />
-              ) : autoSaveStatus === "saved" ? (
-                <FaCheck />
-              ) : null}
-              {autoSaveStatus === "pending"
-                ? "Mentés hamarosan…"
-                : autoSaveStatus === "saving"
-                  ? "Mentés…"
-                  : autoSaveStatus === "error"
-                    ? "A mentés sikertelen"
-                    : "Minden módosítás mentve"}
-            </span>
             <button
               onClick={async () => {
                 if (autoSaveTimerRef.current) {
