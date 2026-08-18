@@ -16,22 +16,68 @@ import {
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { useQuiz } from "../context/QuizContext";
-import { QuizAppearance } from "../context/types";
+import type { Category, QuizAppearance } from "../context/types";
 import { useCurrentUser } from "../context/useCurrentUser";
 import { useQuizPersistence } from "../hooks/useQuizPersistence";
+import type { AnswerMediaType } from "../models/Question";
+import {
+  getRequiredMediaFilenames,
+  parseQuestionsJson,
+  resolveImportedMedia,
+} from "../utility/questionsImport";
 import {
   backgroundPresets,
   getSuggestedTextColor,
   suggestTextColorForImage,
 } from "../utility/quizAppearance";
-import { parseQuestionsJson } from "../utility/questionsImport";
-import { uploadQuizImage } from "../utility/quizMediaStorage";
+import {
+  deleteUploadedQuizMedia,
+  uploadQuizImage,
+  uploadQuizMedia,
+} from "../utility/quizMediaStorage";
 import UserSwitcher from "./UserSwitcher";
 
 type DraggedQuestion = {
   sourceCatIndex: number;
   sourceQuestionIndex: number;
 };
+
+type PendingQuestionsImport = {
+  categories: Category[];
+  fileName: string;
+  mediaFilenames: string[];
+};
+
+function MediaPreview({
+  source,
+  type,
+  label,
+}: {
+  source: string;
+  type: AnswerMediaType;
+  label: string;
+}) {
+  if (type === "image") {
+    return (
+      <img src={source} alt={label} className="h-44 w-full object-contain" />
+    );
+  }
+  if (type === "video") {
+    return (
+      <video
+        src={source}
+        controls
+        aria-label={label}
+        className="h-44 w-full object-contain"
+      />
+    );
+  }
+  return (
+    <div className="grid min-h-24 place-items-center px-4">
+      <audio src={source} controls aria-label={label} className="max-w-full" />
+    </div>
+  );
+}
 
 const fieldClass =
   "w-full rounded-lg border border-[#8c8374] bg-[#fffdf7] px-3 py-2 text-sm text-[#24211c] outline-none transition focus:border-[#d48313] focus:ring-2 focus:ring-[#ffd75a]/60";
@@ -65,9 +111,11 @@ export default function Editor() {
     useState<DraggedQuestion | null>(null);
   const [saveMessage, setSaveMessage] = useState("");
   const [importMessage, setImportMessage] = useState("");
+  const [pendingImport, setPendingImport] =
+    useState<PendingQuestionsImport | null>(null);
   const [mediaMessage, setMediaMessage] = useState("");
   const [uploadingMedia, setUploadingMedia] = useState<
-    "answer" | "background" | "question" | null
+    "answer" | "background" | "import" | "question" | null
   >(null);
   const [textColorDraft, setTextColorDraft] = useState(appearance.textColor);
 
@@ -155,17 +203,17 @@ export default function Editor() {
     }));
   };
 
-  const handleQuestionImageUpload = async (file?: File) => {
+  const handleQuestionMediaUpload = async (file?: File) => {
     if (!file || !activeQuestion) return;
     setMediaMessage("");
     setUploadingMedia("question");
     try {
-      const imageUrl = await uploadQuizImage(file);
+      const uploaded = await uploadQuizMedia(file);
       updateQuestion(selectedCategory, selectedQuestion, {
-        source: imageUrl,
-        type: "image",
+        source: uploaded.url,
+        type: uploaded.type,
       });
-      setMediaMessage("A kérdés képe feltöltve.");
+      setMediaMessage("A kérdés médiája feltöltve.");
     } catch (error) {
       setMediaMessage(
         error instanceof Error ? error.message : "A feltöltés nem sikerült.",
@@ -175,17 +223,17 @@ export default function Editor() {
     }
   };
 
-  const handleAnswerImageUpload = async (file?: File) => {
+  const handleAnswerMediaUpload = async (file?: File) => {
     if (!file || !activeQuestion) return;
     setMediaMessage("");
     setUploadingMedia("answer");
     try {
-      const imageUrl = await uploadQuizImage(file);
+      const uploaded = await uploadQuizMedia(file);
       updateQuestion(selectedCategory, selectedQuestion, {
-        answerMediaType: "image",
-        answerSource: imageUrl,
+        answerMediaType: uploaded.type,
+        answerSource: uploaded.url,
       });
-      setMediaMessage("A válasz képe feltöltve.");
+      setMediaMessage("A válasz médiája feltöltve.");
     } catch (error) {
       setMediaMessage(
         error instanceof Error ? error.message : "A feltöltés nem sikerült.",
@@ -198,6 +246,7 @@ export default function Editor() {
   const handleQuestionsImport = async (file?: File) => {
     if (!file) return;
     setImportMessage("");
+    setPendingImport(null);
 
     try {
       const nextCategories = parseQuestionsJson(await file.text());
@@ -206,6 +255,19 @@ export default function Editor() {
           `A fájl ${nextCategories.length} kategóriát tartalmaz. Lecseréled a szerkesztő jelenlegi kérdéseit?`,
         )
       ) {
+        return;
+      }
+
+      const mediaFilenames = getRequiredMediaFilenames(nextCategories);
+      if (mediaFilenames.length > 0) {
+        setPendingImport({
+          categories: nextCategories,
+          fileName: file.name,
+          mediaFilenames,
+        });
+        setImportMessage(
+          `A JSON ${mediaFilenames.length} médiafájlt hivatkozik. Válaszd ki mindet az importálás befejezéséhez.`,
+        );
         return;
       }
 
@@ -220,6 +282,65 @@ export default function Editor() {
       setImportMessage(
         error instanceof Error ? error.message : "Az importálás nem sikerült.",
       );
+    }
+  };
+
+  const handleImportMediaUpload = async (files?: FileList | null) => {
+    if (!files || !pendingImport) return;
+
+    const selectedFiles = new Map(
+      Array.from(files).map((file) => [file.name, file]),
+    );
+    const missingFiles = pendingImport.mediaFilenames.filter(
+      (filename) => !selectedFiles.has(filename),
+    );
+    if (missingFiles.length > 0) {
+      setImportMessage(`Hiányzó fájlok: ${missingFiles.join(", ")}`);
+      return;
+    }
+
+    setUploadingMedia("import");
+    setImportMessage("Médiafájlok feltöltése…");
+    const successfulUploads: Array<
+      [string, Awaited<ReturnType<typeof uploadQuizMedia>>]
+    > = [];
+    try {
+      for (const filename of pendingImport.mediaFilenames) {
+        const file = selectedFiles.get(filename);
+        if (!file) throw new Error(`Hiányzó fájl: ${filename}`);
+        successfulUploads.push([filename, await uploadQuizMedia(file)]);
+      }
+      const nextCategories = resolveImportedMedia(
+        pendingImport.categories,
+        new Map(
+          successfulUploads.map(([filename, uploaded]) => [
+            filename,
+            { type: uploaded.type, url: uploaded.url },
+          ]),
+        ),
+      );
+      const importedFileName = pendingImport.fileName;
+      const categoryCount = pendingImport.categories.length;
+
+      importCategories(nextCategories);
+      setPendingImport(null);
+      setSelectedCategory(0);
+      setSelectedQuestion(0);
+      setSaveMessage("");
+      setImportMessage(
+        `${importedFileName} és ${successfulUploads.length} médiafájl importálva (${categoryCount} kategória).`,
+      );
+    } catch (error) {
+      await Promise.allSettled(
+        successfulUploads.map(([, uploaded]) =>
+          deleteUploadedQuizMedia(uploaded.objectPath),
+        ),
+      );
+      setImportMessage(
+        error instanceof Error ? error.message : "Az importálás nem sikerült.",
+      );
+    } finally {
+      setUploadingMedia(null);
     }
   };
 
@@ -245,7 +366,7 @@ export default function Editor() {
               Vágó Pesta
             </strong>
             <span className="hidden border-l border-white/25 pl-4 text-lg font-bold text-[#ffd75a] sm:block">
-              Kvíz szerkesztő
+              Kvízszerkesztő
             </span>
           </div>
           <div className="flex flex-wrap items-center justify-end gap-2">
@@ -347,6 +468,52 @@ export default function Editor() {
               <p className="px-3 text-xs text-[#756b5c]" aria-live="polite">
                 {importMessage}
               </p>
+            ) : null}
+            {pendingImport ? (
+              <div className="grid gap-3 rounded-xl border border-[#d48313] bg-[#fff8e7] p-3 text-xs">
+                <div>
+                  <strong className="block text-sm">
+                    Szükséges médiafájlok
+                  </strong>
+                  <ul className="mt-2 grid gap-1 break-all text-[#756b5c]">
+                    {pendingImport.mediaFilenames.map((filename) => (
+                      <li key={filename}>• {filename}</li>
+                    ))}
+                  </ul>
+                </div>
+                <label className="editor-secondary-action cursor-pointer justify-center">
+                  {uploadingMedia === "import" ? (
+                    <FaSpinner className="animate-spin" />
+                  ) : (
+                    <FaFileImport />
+                  )}
+                  {uploadingMedia === "import"
+                    ? "Feltöltés…"
+                    : "Fájlok kiválasztása"}
+                  <input
+                    type="file"
+                    accept="image/*,audio/*,video/*"
+                    multiple
+                    disabled={uploadingMedia !== null}
+                    className="sr-only"
+                    onChange={(event) => {
+                      void handleImportMediaUpload(event.target.files);
+                      event.target.value = "";
+                    }}
+                  />
+                </label>
+                <button
+                  type="button"
+                  disabled={uploadingMedia !== null}
+                  onClick={() => {
+                    setPendingImport(null);
+                    setImportMessage("Az importálás megszakítva.");
+                  }}
+                  className="text-[#756b5c] underline disabled:opacity-50"
+                >
+                  Mégse
+                </button>
+              </div>
             ) : null}
             <button
               onClick={() => {
@@ -576,21 +743,19 @@ export default function Editor() {
 
                             <div>
                               <span className="editor-field-label">
-                                Kérdés képe
+                                Kérdés médiája
                               </span>
                               {question.source ? (
                                 <div className="relative mt-1 overflow-hidden rounded-xl border border-[#8c8374] bg-[#e9dfca]">
-                                  {question.type === "image" ? (
-                                    <img
-                                      src={question.source}
-                                      alt="Kérdés képe"
-                                      className="h-44 w-full object-contain"
-                                    />
-                                  ) : (
-                                    <div className="grid h-28 place-items-center px-4 text-center text-sm">
-                                      {question.source}
-                                    </div>
-                                  )}
+                                  <MediaPreview
+                                    source={question.source}
+                                    type={
+                                      question.type === "text"
+                                        ? "image"
+                                        : question.type
+                                    }
+                                    label="Kérdés médiája"
+                                  />
                                   <button
                                     onClick={() =>
                                       updateQuestion(selectedCategory, qIndex, {
@@ -613,14 +778,14 @@ export default function Editor() {
                                 )}
                                 {uploadingMedia === "question"
                                   ? "Feltöltés…"
-                                  : "Kép hozzáadása"}
+                                  : "Média hozzáadása"}
                                 <input
                                   type="file"
-                                  accept="image/*"
+                                  accept="image/*,audio/*,video/*"
                                   disabled={uploadingMedia !== null}
                                   className="sr-only"
                                   onChange={(event) => {
-                                    void handleQuestionImageUpload(
+                                    void handleQuestionMediaUpload(
                                       event.target.files?.[0],
                                     );
                                     event.target.value = "";
@@ -632,26 +797,20 @@ export default function Editor() {
 
                           <div className="mt-4 rounded-xl border border-[#cfc2aa] bg-white/35 p-4">
                             <span className="editor-field-label">
-                              Válasz képe
+                              Válasz médiája
                             </span>
                             {question.answerSource ? (
                               <div className="relative mt-3 overflow-hidden rounded-xl border border-[#8c8374] bg-[#e9dfca]">
-                                {question.answerMediaType === "image" ||
-                                !question.answerMediaType ? (
-                                  <img
-                                    src={question.answerSource}
-                                    alt="Válasz képe"
-                                    className="h-44 w-full object-contain"
-                                  />
-                                ) : (
-                                  <div className="grid min-h-24 place-items-center break-all px-12 py-4 text-center text-sm">
-                                    {question.answerSource}
-                                  </div>
-                                )}
+                                <MediaPreview
+                                  source={question.answerSource}
+                                  type={question.answerMediaType ?? "image"}
+                                  label="Válasz médiája"
+                                />
                                 <button
                                   onClick={() =>
                                     updateQuestion(selectedCategory, qIndex, {
                                       answerSource: "",
+                                      answerMediaType: undefined,
                                     })
                                   }
                                   className="absolute right-2 top-2 grid size-8 place-items-center rounded-full bg-[#24211c] text-white"
@@ -669,14 +828,14 @@ export default function Editor() {
                               )}
                               {uploadingMedia === "answer"
                                 ? "Feltöltés…"
-                                : "Válaszkép feltöltése"}
+                                : "Válaszmédia feltöltése"}
                               <input
                                 type="file"
-                                accept="image/*"
+                                accept="image/*,audio/*,video/*"
                                 disabled={uploadingMedia !== null}
                                 className="sr-only"
                                 onChange={(event) => {
-                                  void handleAnswerImageUpload(
+                                  void handleAnswerMediaUpload(
                                     event.target.files?.[0],
                                   );
                                   event.target.value = "";

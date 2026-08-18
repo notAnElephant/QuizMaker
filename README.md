@@ -40,13 +40,37 @@ Local development uses the Docker Postgres service for both Hasura metadata and 
 
 Google login is optional. If the Firebase `VITE_FIREBASE_*` values are present, the app uses Google sign-in and creates or updates the matching `users` row in Hasura on login. If they are absent, the app falls back to the local seeded user switcher for self-hosted development.
 
-Question and custom-background image uploads use Firebase Storage when Firebase is configured. Deploy the authenticated, per-user upload rules with:
+Question and answer media uploads, plus custom-background images, use Firebase Storage when Firebase is configured. Deploy the authenticated, per-user upload rules with:
 
 ```bash
 firebase deploy --only storage
 ```
 
-Uploads are stored below `quiz-media/<firebase-uid>/`, limited to image MIME types and 5 MB per file.
+Uploads are stored below `quiz-media/<firebase-uid>/`. Images are limited to 5 MB, audio to 25 MB, and video to 100 MB per file. The editor infers whether an upload is an image, audio file, or video from its MIME type.
+
+### Importing questions with media
+
+In imported JSON, put only the filename in `source` or `answerSource`. Do not include a URL, directory, `type`, or `answerMediaType`:
+
+```json
+[
+  {
+    "category": "Example",
+    "questions": [
+      {
+        "content": "Which place is shown?",
+        "source": "question-photo.jpg",
+        "correctAnswer": "Budapest",
+        "answerSource": "answer-clip.mp4",
+        "revealAnswer": true,
+        "points": 1000
+      }
+    ]
+  }
+]
+```
+
+After the JSON is selected, the editor lists every referenced filename and asks for those files together. Files are matched by their exact filename and uploaded before the current quiz is replaced. A filename may be reused by multiple questions when they should share the same uploaded media.
 
 ### Production version tags
 
