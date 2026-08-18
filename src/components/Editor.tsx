@@ -1,7 +1,6 @@
 import { DragEvent, useEffect, useMemo, useState } from "react";
 import {
   FaArrowRight,
-  FaCheck,
   FaEye,
   FaFileImport,
   FaFolderOpen,
@@ -15,8 +14,10 @@ import {
   FaTrash,
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import { useQuiz } from "../context/QuizContext";
 import type { Category, QuizAppearance } from "../context/types";
+import { useConfirm } from "../context/useConfirm";
 import { useCurrentUser } from "../context/useCurrentUser";
 import { useQuizPersistence } from "../hooks/useQuizPersistence";
 import type { AnswerMediaType } from "../models/Question";
@@ -31,8 +32,12 @@ import {
   suggestTextColorForImage,
 } from "../utility/quizAppearance";
 import {
+  canUseQuizMediaStorage,
+  deleteQuizBackground,
   deleteUploadedQuizMedia,
-  uploadQuizImage,
+  listQuizBackgrounds,
+  type UploadedQuizBackground,
+  uploadQuizBackground,
   uploadQuizMedia,
 } from "../utility/quizMediaStorage";
 import UserSwitcher from "./UserSwitcher";
@@ -84,6 +89,7 @@ const fieldClass =
 
 export default function Editor() {
   const navigate = useNavigate();
+  const confirm = useConfirm();
   const {
     addCategory,
     addQuestionToCategory,
@@ -109,11 +115,11 @@ export default function Editor() {
   const [selectedQuestion, setSelectedQuestion] = useState(0);
   const [draggedQuestion, setDraggedQuestion] =
     useState<DraggedQuestion | null>(null);
-  const [saveMessage, setSaveMessage] = useState("");
-  const [importMessage, setImportMessage] = useState("");
   const [pendingImport, setPendingImport] =
     useState<PendingQuestionsImport | null>(null);
-  const [mediaMessage, setMediaMessage] = useState("");
+  const [customBackgrounds, setCustomBackgrounds] = useState<
+    UploadedQuizBackground[]
+  >([]);
   const [uploadingMedia, setUploadingMedia] = useState<
     "answer" | "background" | "import" | "question" | null
   >(null);
@@ -147,16 +153,38 @@ export default function Editor() {
     setTextColorDraft(appearance.textColor);
   }, [appearance.textColor]);
 
+  useEffect(() => {
+    if (!canUseQuizMediaStorage || !currentUser) return;
+
+    let isCurrent = true;
+    void listQuizBackgrounds()
+      .then((backgrounds) => {
+        if (isCurrent) setCustomBackgrounds(backgrounds);
+      })
+      .catch((error) => {
+        if (isCurrent) {
+          toast.error(
+            error instanceof Error
+              ? error.message
+              : "A saját hátterek betöltése nem sikerült.",
+          );
+        }
+      });
+
+    return () => {
+      isCurrent = false;
+    };
+  }, [currentUser]);
+
   const saveQuiz = async () => {
-    setSaveMessage("");
     try {
       const result = await persistQuiz();
-      setSaveMessage(
+      toast.success(
         result.wasUpdate ? "Módosítások elmentve" : "Kvíz létrehozva",
       );
       return true;
     } catch (error) {
-      setSaveMessage(
+      toast.error(
         error instanceof Error ? error.message : "A mentés nem sikerült.",
       );
       return false;
@@ -165,24 +193,60 @@ export default function Editor() {
 
   const handleBackgroundUpload = async (file?: File) => {
     if (!file) return;
-    setMediaMessage("");
     setUploadingMedia("background");
     try {
-      const imageUrl = await uploadQuizImage(file);
-      const textColor = await suggestTextColorForImage(imageUrl);
+      const uploaded = await uploadQuizBackground(file);
+      const textColor = await suggestTextColorForImage(uploaded.url);
       setAppearance((current) => ({
         ...current,
-        backgroundImage: imageUrl,
+        backgroundImage: uploaded.url,
         backgroundMode: "image",
         textColor,
       }));
-      setMediaMessage("A háttérkép feltöltve.");
+      setCustomBackgrounds((current) => [uploaded, ...current]);
+      toast.success("A háttérkép feltöltve.");
     } catch (error) {
-      setMediaMessage(
+      toast.error(
         error instanceof Error ? error.message : "A feltöltés nem sikerült.",
       );
     } finally {
       setUploadingMedia(null);
+    }
+  };
+
+  const selectCustomBackground = async (background: UploadedQuizBackground) => {
+    const textColor = await suggestTextColorForImage(background.url);
+    setAppearance((current) => ({
+      ...current,
+      backgroundImage: background.url,
+      backgroundMode: "image",
+      textColor,
+    }));
+  };
+
+  const removeCustomBackground = async (background: UploadedQuizBackground) => {
+    const shouldDelete = await confirm({
+      confirmLabel: "Háttér törlése",
+      description:
+        "A kép végleg törlődik a saját háttérképeid közül. Ez a művelet nem vonható vissza.",
+      destructive: true,
+      title: "Háttérkép törlése",
+    });
+    if (!shouldDelete) return;
+
+    try {
+      await deleteQuizBackground(background.objectPath);
+      setCustomBackgrounds((current) =>
+        current.filter((item) => item.objectPath !== background.objectPath),
+      );
+      if (appearance.backgroundImage === background.url) {
+        selectPreset("default");
+      }
+      toast.success("A háttérkép törölve.");
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "A törlés nem sikerült.",
+      );
     }
   };
 
@@ -205,7 +269,6 @@ export default function Editor() {
 
   const handleQuestionMediaUpload = async (file?: File) => {
     if (!file || !activeQuestion) return;
-    setMediaMessage("");
     setUploadingMedia("question");
     try {
       const uploaded = await uploadQuizMedia(file);
@@ -213,9 +276,9 @@ export default function Editor() {
         source: uploaded.url,
         type: uploaded.type,
       });
-      setMediaMessage("A kérdés médiája feltöltve.");
+      toast.success("A kérdés médiája feltöltve.");
     } catch (error) {
-      setMediaMessage(
+      toast.error(
         error instanceof Error ? error.message : "A feltöltés nem sikerült.",
       );
     } finally {
@@ -225,7 +288,6 @@ export default function Editor() {
 
   const handleAnswerMediaUpload = async (file?: File) => {
     if (!file || !activeQuestion) return;
-    setMediaMessage("");
     setUploadingMedia("answer");
     try {
       const uploaded = await uploadQuizMedia(file);
@@ -233,9 +295,9 @@ export default function Editor() {
         answerMediaType: uploaded.type,
         answerSource: uploaded.url,
       });
-      setMediaMessage("A válasz médiája feltöltve.");
+      toast.success("A válasz médiája feltöltve.");
     } catch (error) {
-      setMediaMessage(
+      toast.error(
         error instanceof Error ? error.message : "A feltöltés nem sikerült.",
       );
     } finally {
@@ -245,16 +307,17 @@ export default function Editor() {
 
   const handleQuestionsImport = async (file?: File) => {
     if (!file) return;
-    setImportMessage("");
     setPendingImport(null);
 
     try {
       const nextCategories = parseQuestionsJson(await file.text());
-      if (
-        !window.confirm(
-          `A fájl ${nextCategories.length} kategóriát tartalmaz. Lecseréled a szerkesztő jelenlegi kérdéseit?`,
-        )
-      ) {
+      const shouldImport = await confirm({
+        confirmLabel: "Kérdések cseréje",
+        description: `A fájl ${nextCategories.length} kategóriát tartalmaz. A szerkesztő jelenlegi kérdései lecserélődnek.`,
+        destructive: true,
+        title: "JSON importálása",
+      });
+      if (!shouldImport) {
         return;
       }
 
@@ -265,7 +328,7 @@ export default function Editor() {
           fileName: file.name,
           mediaFilenames,
         });
-        setImportMessage(
+        toast.info(
           `A JSON ${mediaFilenames.length} médiafájlt hivatkozik. Válaszd ki mindet az importálás befejezéséhez.`,
         );
         return;
@@ -274,12 +337,11 @@ export default function Editor() {
       importCategories(nextCategories);
       setSelectedCategory(0);
       setSelectedQuestion(0);
-      setSaveMessage("");
-      setImportMessage(
+      toast.success(
         `${file.name} importálva (${nextCategories.length} kategória).`,
       );
     } catch (error) {
-      setImportMessage(
+      toast.error(
         error instanceof Error ? error.message : "Az importálás nem sikerült.",
       );
     }
@@ -295,12 +357,12 @@ export default function Editor() {
       (filename) => !selectedFiles.has(filename),
     );
     if (missingFiles.length > 0) {
-      setImportMessage(`Hiányzó fájlok: ${missingFiles.join(", ")}`);
+      toast.error(`Hiányzó fájlok: ${missingFiles.join(", ")}`);
       return;
     }
 
     setUploadingMedia("import");
-    setImportMessage("Médiafájlok feltöltése…");
+    const importToastId = toast.loading("Médiafájlok feltöltése…");
     const successfulUploads: Array<
       [string, Awaited<ReturnType<typeof uploadQuizMedia>>]
     > = [];
@@ -326,9 +388,9 @@ export default function Editor() {
       setPendingImport(null);
       setSelectedCategory(0);
       setSelectedQuestion(0);
-      setSaveMessage("");
-      setImportMessage(
+      toast.success(
         `${importedFileName} és ${successfulUploads.length} médiafájl importálva (${categoryCount} kategória).`,
+        { id: importToastId },
       );
     } catch (error) {
       await Promise.allSettled(
@@ -336,8 +398,9 @@ export default function Editor() {
           deleteUploadedQuizMedia(uploaded.objectPath),
         ),
       );
-      setImportMessage(
+      toast.error(
         error instanceof Error ? error.message : "Az importálás nem sikerült.",
+        { id: importToastId },
       );
     } finally {
       setUploadingMedia(null);
@@ -370,15 +433,6 @@ export default function Editor() {
             </span>
           </div>
           <div className="flex flex-wrap items-center justify-end gap-2">
-            {saveMessage ? (
-              <span
-                aria-live="polite"
-                className="mr-1 inline-flex items-center gap-2 text-sm text-[#b8db92]"
-              >
-                <FaCheck aria-hidden="true" />
-                {saveMessage}
-              </span>
-            ) : null}
             <UserSwitcher />
             <button
               onClick={() => void saveQuiz()}
@@ -464,11 +518,6 @@ export default function Editor() {
                 }}
               />
             </label>
-            {importMessage ? (
-              <p className="px-3 text-xs text-[#756b5c]" aria-live="polite">
-                {importMessage}
-              </p>
-            ) : null}
             {pendingImport ? (
               <div className="grid gap-3 rounded-xl border border-[#d48313] bg-[#fff8e7] p-3 text-xs">
                 <div>
@@ -507,7 +556,7 @@ export default function Editor() {
                   disabled={uploadingMedia !== null}
                   onClick={() => {
                     setPendingImport(null);
-                    setImportMessage("Az importálás megszakítva.");
+                    toast.info("Az importálás megszakítva.");
                   }}
                   className="text-[#756b5c] underline disabled:opacity-50"
                 >
@@ -516,17 +565,19 @@ export default function Editor() {
               </div>
             ) : null}
             <button
-              onClick={() => {
-                if (
-                  window.confirm(
-                    "Új kvízt kezdesz. A nem mentett módosítások elvesznek. Folytatod?",
-                  )
-                ) {
-                  createQuiz("Új kvíz", ["Új kategória"], 1);
-                  setSelectedCategory(0);
-                  setSelectedQuestion(0);
-                  setSaveMessage("");
-                }
+              onClick={async () => {
+                const shouldCreate = await confirm({
+                  confirmLabel: "Új kvíz kezdése",
+                  description:
+                    "A nem mentett módosítások elvesznek, amikor új kvízt kezdesz.",
+                  destructive: true,
+                  title: "Új kvíz",
+                });
+                if (!shouldCreate) return;
+
+                createQuiz("Új kvíz", ["Új kategória"], 1);
+                setSelectedCategory(0);
+                setSelectedQuestion(0);
               }}
               className="editor-secondary-action"
             >
@@ -597,10 +648,14 @@ export default function Editor() {
                   />
                 </label>
                 <button
-                  onClick={() => {
-                    if (window.confirm("Biztosan törlöd ezt a kategóriát?")) {
-                      removeCategory(selectedCategory);
-                    }
+                  onClick={async () => {
+                    const shouldDelete = await confirm({
+                      confirmLabel: "Kategória törlése",
+                      description: `A(z) „${activeCategory.category || "Névtelen kategória"}” kategória és minden kérdése végleg törlődik.`,
+                      destructive: true,
+                      title: "Kategória törlése",
+                    });
+                    if (shouldDelete) removeCategory(selectedCategory);
                   }}
                   className="editor-danger-button"
                 >
@@ -846,8 +901,15 @@ export default function Editor() {
 
                           <div className="mt-5 flex justify-end">
                             <button
-                              onClick={() => {
-                                if (window.confirm("Törlöd ezt a kérdést?")) {
+                              onClick={async () => {
+                                const shouldDelete = await confirm({
+                                  confirmLabel: "Kérdés törlése",
+                                  description:
+                                    "A kérdés végleg törlődik a kategóriából. Ez a művelet nem vonható vissza.",
+                                  destructive: true,
+                                  title: "Kérdés törlése",
+                                });
+                                if (shouldDelete) {
                                   removeQuestion(selectedCategory, qIndex);
                                 }
                               }}
@@ -928,6 +990,47 @@ export default function Editor() {
             })}
           </div>
 
+          {customBackgrounds.length ? (
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              {customBackgrounds.map((background) => {
+                const isSelected =
+                  appearance.backgroundMode === "image" &&
+                  appearance.backgroundImage === background.url;
+
+                return (
+                  <div
+                    key={background.objectPath}
+                    className={`relative overflow-hidden rounded-lg border-2 ${
+                      isSelected ? "border-[#e0a20c]" : "border-[#8c8374]"
+                    }`}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => void selectCustomBackground(background)}
+                      className="block w-full"
+                      aria-label="Saját háttér kiválasztása"
+                    >
+                      <img
+                        src={background.url}
+                        alt="Saját háttér"
+                        className="h-20 w-full object-cover"
+                      />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => void removeCustomBackground(background)}
+                      className="absolute right-1.5 top-1.5 grid size-7 place-items-center rounded-full bg-[#24211c] text-white shadow"
+                      aria-label="Saját háttér törlése"
+                      title="Háttér törlése"
+                    >
+                      <FaTrash size={11} />
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          ) : null}
+
           <label className="mt-3 flex cursor-pointer items-center justify-center gap-2 rounded-lg border-2 border-dashed border-[#aa9d86] px-3 py-4 text-sm font-bold hover:bg-white/50">
             {uploadingMedia === "background" ? (
               <FaSpinner className="animate-spin" />
@@ -948,21 +1051,6 @@ export default function Editor() {
               }}
             />
           </label>
-
-          {mediaMessage ? (
-            <p className="mt-2 text-xs text-[#756b5c]" aria-live="polite">
-              {mediaMessage}
-            </p>
-          ) : null}
-
-          {appearance.backgroundMode === "image" &&
-          appearance.backgroundImage ? (
-            <img
-              src={appearance.backgroundImage}
-              alt="Saját háttér előnézete"
-              className="mt-3 h-28 w-full rounded-lg border border-[#8c8374] object-cover"
-            />
-          ) : null}
 
           <div className="mt-7 border-t border-[#cfc2aa] pt-5">
             <h3 className="font-bold">Szövegszín</h3>

@@ -1,6 +1,7 @@
 import { FormEvent, useState } from "react";
 import { FaArrowLeft, FaPlus } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import { useQuiz } from "../context/QuizContext";
 
 const DEFAULT_CATEGORIES = ["Témakör 1", "Témakör 2", "Témakör 3", "Témakör 4"];
@@ -22,7 +23,7 @@ export default function NewQuiz() {
       .filter(Boolean);
 
     if (!title.trim() || !parsedCategories.length) {
-      window.alert("Adj meg címet és legalább egy témakört.");
+      toast.error("Adj meg címet és legalább egy témakört.");
       return;
     }
 
@@ -73,7 +74,9 @@ export default function NewQuiz() {
             </label>
 
             <label className="flex flex-col gap-2">
-              <span className="font-semibold">Kérdések száma kategóriánként</span>
+              <span className="font-semibold">
+                Kérdések száma kategóriánként
+              </span>
               <input
                 type="number"
                 min={1}

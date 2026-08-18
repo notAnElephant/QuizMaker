@@ -1,4 +1,5 @@
 import { FaChevronDown, FaGoogle, FaSignOutAlt, FaUser } from "react-icons/fa";
+import { toast } from "sonner";
 import { useCurrentUser } from "../context/useCurrentUser";
 
 export default function UserSwitcher() {
@@ -12,6 +13,32 @@ export default function UserSwitcher() {
     signOutCurrentUser,
     users,
   } = useCurrentUser();
+
+  const handleSignIn = async () => {
+    try {
+      await signInWithGoogle();
+      toast.success("Sikeres bejelentkezés.");
+    } catch (error) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "A bejelentkezés nem sikerült.",
+      );
+    }
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await signOutCurrentUser();
+      toast.success("Sikeres kijelentkezés.");
+    } catch (error) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "A kijelentkezés nem sikerült.",
+      );
+    }
+  };
 
   return (
     <div className="inline-flex min-h-11 max-w-full items-center gap-2 rounded-xl border-2 border-[#24211c] bg-[#fff4d6]/95 px-2.5 py-2 text-[#24211c] shadow-[0_3px_0_#24211c] backdrop-blur-sm">
@@ -31,7 +58,7 @@ export default function UserSwitcher() {
                     "Bejelentkezve"}
                 </span>
                 <button
-                  onClick={() => void signOutCurrentUser()}
+                  onClick={() => void handleSignOut()}
                   aria-label="Kijelentkezés"
                   title="Kijelentkezés"
                   className="grid size-7 shrink-0 place-items-center rounded-md border border-[#24211c] bg-[#ffd75a] transition-colors hover:bg-[#ffc928]"
@@ -41,7 +68,7 @@ export default function UserSwitcher() {
               </>
             ) : (
               <button
-                onClick={() => void signInWithGoogle()}
+                onClick={() => void handleSignIn()}
                 className="inline-flex items-center gap-2 rounded-md px-1 text-sm font-semibold transition-colors hover:text-[#8a5200]"
               >
                 <FaGoogle size={12} />

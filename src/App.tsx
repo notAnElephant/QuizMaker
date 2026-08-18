@@ -1,7 +1,9 @@
 import { gql } from "@apollo/client";
 import { useMutation } from "@apollo/client/react";
 import { useCallback, useEffect, useRef } from "react";
-import { FaCheck, FaRedo, FaSpinner } from "react-icons/fa";
+import { FaCog, FaUser, FaUsers } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import "./index.css";
 import { Board } from "./components/Board";
 import TeamBar from "./components/TeamBar";
@@ -17,6 +19,33 @@ const SAVE_QUIZ_PLAYS_MUTATION = gql`
   }
 `;
 
+function SidebarAction({
+  icon,
+  label,
+  onClick,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <div className="group relative flex items-center">
+      <button
+        aria-label={label}
+        className="rounded-full bg-gray-800 p-3 text-white shadow-lg hover:bg-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+        onClick={onClick}
+        title={label}
+        type="button"
+      >
+        {icon}
+      </button>
+      <div className="pointer-events-none absolute left-full ml-3 whitespace-nowrap rounded-lg bg-black/85 px-3 py-2 text-sm font-medium text-white opacity-0 shadow-lg transition group-hover:opacity-100 group-focus-within:opacity-100">
+        {label}
+      </div>
+    </div>
+  );
+}
+
 function App() {
   const {
     appearance,
@@ -30,11 +59,10 @@ function App() {
     setPlaySaveStatus,
     teams,
   } = useQuiz();
-  const { currentUser, isLoading: isLoadingCurrentUser } = useCurrentUser();
+  const { currentUser } = useCurrentUser();
   const { persistQuiz } = useQuizPersistence();
-  const [saveQuizPlays, { loading: isSavingPlays }] = useMutation(
-    SAVE_QUIZ_PLAYS_MUTATION,
-  );
+  const navigate = useNavigate();
+  const [saveQuizPlays] = useMutation(SAVE_QUIZ_PLAYS_MUTATION);
   const playSaveStartedForSession = useRef<string | null>(null);
   const allQuestionsUsed = categories.every((category) =>
     category.questions.every((question) => question.isUsed),
@@ -51,6 +79,9 @@ function App() {
 
     playSaveStartedForSession.current = playSessionId;
     setPlaySaveStatus("saving");
+    const saveToastId = toast.loading("Lejátszás mentése…", {
+      id: `play-save-${playSessionId}`,
+    });
 
     try {
       const persistedQuiz = currentQuizId
@@ -83,10 +114,18 @@ function App() {
 
       await saveQuizPlays({ variables: { plays } });
       setPlaySaveStatus("saved");
+      toast.success("Lejátszás elmentve", { id: saveToastId });
     } catch (error) {
       playSaveStartedForSession.current = null;
       setPlaySaveStatus("error");
       console.error("A lejátszás mentése nem sikerült", error);
+      toast.error("A lejátszás mentése nem sikerült.", {
+        action: {
+          label: "Újrapróbálás",
+          onClick: () => setPlaySaveStatus("idle"),
+        },
+        id: saveToastId,
+      });
     }
   }, [
     allQuestionsUsed,
@@ -115,7 +154,7 @@ function App() {
       className="flex min-h-screen flex-col items-center justify-between"
       style={{ color: appearance.textColor }}
     >
-      <div className="flex h-full w-full max-w-5xl flex-col items-center px-2 text-center sm:px-4">
+      <div className="flex h-full w-full max-w-5xl flex-col items-center px-2 pl-14 text-center sm:px-4 sm:pl-4">
         <h1 className="readable-on-image mb-6 mt-16 font-display text-4xl font-bold sm:mb-8 sm:mt-24 sm:text-6xl">
           {currentQuizTitle}
         </h1>
@@ -128,33 +167,26 @@ function App() {
         />
       </div>
 
-      {playSaveStatus !== "idle" ? (
-        <div
-          aria-live="polite"
-          className="fixed right-4 top-4 z-30 rounded-lg border-2 border-[#24211c] bg-[#fff4d6] px-3 py-2 text-sm font-semibold text-[#24211c] shadow-[0_3px_0_#24211c]"
-        >
-          {playSaveStatus === "saving" ? (
-            <span className="inline-flex items-center gap-2">
-              <FaSpinner className="animate-spin" aria-hidden="true" />
-              Lejátszás mentése…
-            </span>
-          ) : playSaveStatus === "saved" ? (
-            <span className="inline-flex items-center gap-2">
-              <FaCheck aria-hidden="true" />
-              Lejátszás elmentve
-            </span>
-          ) : (
-            <button
-              onClick={() => void handleSaveCompletedPlay()}
-              disabled={isSavingPlays || isLoadingCurrentUser || !currentUser}
-              className="inline-flex items-center gap-2 underline decoration-2 underline-offset-2 disabled:opacity-50"
-            >
-              <FaRedo aria-hidden="true" />
-              Mentés újrapróbálása
-            </button>
-          )}
-        </div>
-      ) : null}
+      <nav
+        aria-label="Game controls"
+        className="fixed bottom-4 left-4 z-30 flex flex-col items-start gap-2"
+      >
+        <SidebarAction
+          icon={<FaUsers aria-hidden="true" size={20} />}
+          label="Csapatok"
+          onClick={() => navigate("/teams")}
+        />
+        <SidebarAction
+          icon={<FaUser aria-hidden="true" size={20} />}
+          label="Profil"
+          onClick={() => navigate("/profile")}
+        />
+        <SidebarAction
+          icon={<FaCog aria-hidden="true" size={20} />}
+          label="Beállítások"
+          onClick={() => navigate("/settings")}
+        />
+      </nav>
 
       <TeamBar mode="board" />
     </main>

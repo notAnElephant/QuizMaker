@@ -1,10 +1,12 @@
 import { useNavigate } from "react-router-dom";
 import { useQuiz } from "../context/QuizContext";
+import { useConfirm } from "../context/useConfirm";
 import { useRef, useState } from "react";
 import { FaArrowLeft, FaPen, FaTrash } from "react-icons/fa";
 
 export default function Teams() {
   const navigate = useNavigate();
+  const confirm = useConfirm();
   const { teams, setTeams } = useQuiz();
 
   const [name, setName] = useState("");
@@ -115,8 +117,14 @@ export default function Teams() {
               </button>
 
               <button
-                onClick={() => {
-                  if (confirm(`Tényleg törlöd a(z) "${team.name}" csapatot?`)) {
+                onClick={async () => {
+                  const shouldDelete = await confirm({
+                    confirmLabel: "Csapat törlése",
+                    description: `A(z) „${team.name}” csapat végleg törlődik.`,
+                    destructive: true,
+                    title: "Csapat törlése",
+                  });
+                  if (shouldDelete) {
                     setTeams((prev) => prev.filter((_, idx) => idx !== i));
                   }
                 }}

@@ -46,7 +46,7 @@ Question and answer media uploads, plus custom-background images, use Firebase S
 firebase deploy --only storage
 ```
 
-Uploads are stored below `quiz-media/<firebase-uid>/`. Images are limited to 5 MB, audio to 25 MB, and video to 100 MB per file. The editor infers whether an upload is an image, audio file, or video from its MIME type.
+Question and answer uploads are stored below `quiz-media/<firebase-uid>/`. Reusable custom backgrounds are stored below `quiz-backgrounds/<firebase-uid>/`, where the signed-in user can select or delete them in the editor. Images are limited to 5 MB, audio to 25 MB, and video to 100 MB per file. The editor infers whether an upload is an image, audio file, or video from its MIME type.
 
 ### Importing questions with media
 

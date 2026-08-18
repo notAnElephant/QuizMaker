@@ -2,8 +2,10 @@ import { gql } from "@apollo/client";
 import { useMutation, useQuery } from "@apollo/client/react";
 import { FaArrowLeft, FaFolderOpen, FaTrash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import { useQuiz } from "../context/QuizContext";
 import { Category, QuizAppearance } from "../context/types";
+import { useConfirm } from "../context/useConfirm";
 import { useCurrentUser } from "../context/useCurrentUser";
 import { buildCategoriesFromPersistedQuestions } from "../utility/quizPersistence";
 import { defaultQuizAppearance } from "../utility/quizAppearance";
@@ -93,6 +95,7 @@ type SavedQuizQuestionsQueryResult = {
 
 export default function SavedQuizzes() {
   const navigate = useNavigate();
+  const confirm = useConfirm();
   const { loadQuiz } = useQuiz();
   const { currentUser, isLoading: isLoadingCurrentUser } = useCurrentUser();
   const {
@@ -233,9 +236,12 @@ export default function SavedQuizzes() {
                     </button>
                     <button
                       onClick={async () => {
-                        const shouldDelete = window.confirm(
-                          `Biztosan törlöd ezt a kvízt?\n\n${quiz.title}`,
-                        );
+                        const shouldDelete = await confirm({
+                          confirmLabel: "Kvíz törlése",
+                          description: `A(z) „${quiz.title}” kvíz és minden kérdése végleg törlődik.`,
+                          destructive: true,
+                          title: "Kvíz törlése",
+                        });
 
                         if (!shouldDelete) {
                           return;
@@ -249,12 +255,13 @@ export default function SavedQuizzes() {
                             },
                           });
                           await refetchQuizzes();
+                          toast.success("A kvíz törölve.");
                         } catch (mutationError) {
                           const message =
                             mutationError instanceof Error
                               ? mutationError.message
                               : "Ismeretlen törlési hiba.";
-                          window.alert(`A törlés nem sikerült: ${message}`);
+                          toast.error(`A törlés nem sikerült: ${message}`);
                         }
                       }}
                       disabled={isDeleting}

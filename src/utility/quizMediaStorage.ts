@@ -1,6 +1,7 @@
 import {
   deleteObject,
   getDownloadURL,
+  listAll,
   ref,
   uploadBytes,
 } from "firebase/storage";
@@ -22,6 +23,14 @@ const mediaLimitLabels: Record<AnswerMediaType, string> = {
   audio: "25 MB",
   video: "100 MB",
 };
+
+export type UploadedQuizBackground = {
+  name: string;
+  objectPath: string;
+  url: string;
+};
+
+export const canUseQuizMediaStorage = Boolean(firebaseStorage && firebaseAuth);
 
 function getFileExtension(file: File) {
   const extension = file.name.split(".").pop()?.toLowerCase();
@@ -68,11 +77,57 @@ export async function deleteUploadedQuizMedia(objectPath: string) {
   await deleteObject(ref(firebaseStorage, objectPath));
 }
 
-export async function uploadQuizImage(file: File) {
+function getAuthenticatedBackgroundFolder() {
+  if (!firebaseStorage || !firebaseAuth?.currentUser) {
+    throw new Error("A háttérképek kezeléséhez jelentkezz be.");
+  }
+
+  return `quiz-backgrounds/${firebaseAuth.currentUser.uid}`;
+}
+
+export async function listQuizBackgrounds(): Promise<UploadedQuizBackground[]> {
+  const folder = getAuthenticatedBackgroundFolder();
+  const result = await listAll(ref(firebaseStorage!, folder));
+
+  return Promise.all(
+    result.items.map(async (item) => ({
+      name: item.name,
+      objectPath: item.fullPath,
+      url: await getDownloadURL(item),
+    })),
+  );
+}
+
+export async function uploadQuizBackground(
+  file: File,
+): Promise<UploadedQuizBackground> {
   if (!file.type.startsWith("image/")) {
     throw new Error("Csak képfájl tölthető fel háttérként.");
   }
+  if (file.size > MAX_QUIZ_IMAGE_SIZE) {
+    throw new Error(`${file.name}: a fájl legfeljebb 5 MB lehet.`);
+  }
 
-  const uploaded = await uploadQuizMedia(file);
-  return uploaded.url;
+  const folder = getAuthenticatedBackgroundFolder();
+  const objectPath = `${folder}/${crypto.randomUUID()}.${getFileExtension(file)}`;
+  const objectReference = ref(firebaseStorage!, objectPath);
+  const snapshot = await uploadBytes(objectReference, file, {
+    contentType: file.type,
+    customMetadata: { originalName: file.name },
+  });
+
+  return {
+    name: file.name,
+    objectPath,
+    url: await getDownloadURL(snapshot.ref),
+  };
+}
+
+export async function deleteQuizBackground(objectPath: string) {
+  const folder = getAuthenticatedBackgroundFolder();
+  if (!objectPath.startsWith(`${folder}/`)) {
+    throw new Error("Csak a saját háttérképed törölhető.");
+  }
+
+  await deleteObject(ref(firebaseStorage!, objectPath));
 }

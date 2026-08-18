@@ -1,4 +1,4 @@
-import { gql } from "@apollo/client";
+import { gql, type ApolloCache } from "@apollo/client";
 import { useMutation } from "@apollo/client/react";
 import { useCallback } from "react";
 import { useQuiz } from "../context/QuizContext";
@@ -73,6 +73,12 @@ const UPDATE_QUIZ_MUTATION = gql`
   }
 `;
 
+function invalidateSavedQuizzes(cache: ApolloCache) {
+  cache.evict({ id: "ROOT_QUERY", fieldName: "quizzes" });
+  cache.evict({ id: "ROOT_QUERY", fieldName: "questions" });
+  cache.gc();
+}
+
 export function useQuizPersistence() {
   const {
     appearance,
@@ -140,10 +146,11 @@ export function useQuizPersistence() {
 
     if (currentQuizId) {
       await updateQuiz({
+        update: invalidateSavedQuizzes,
         variables: { ...variables, updatedAt: new Date().toISOString() },
       });
     } else {
-      await createQuiz({ variables });
+      await createQuiz({ update: invalidateSavedQuizzes, variables });
       setCurrentQuizId(quizId);
     }
 
