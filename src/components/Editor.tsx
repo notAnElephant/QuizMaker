@@ -485,7 +485,7 @@ export default function Editor() {
 
                       {isSelected ? (
                         <div className="border-t border-[#e7d7b7] p-4 sm:p-5">
-                          <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_120px_170px]">
+                          <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_120px]">
                             <label className="editor-field-label">
                               Kérdés
                               <textarea
@@ -515,24 +515,6 @@ export default function Editor() {
                                 }
                                 className={fieldClass}
                               />
-                            </label>
-                            <label className="editor-field-label">
-                              Kérdés típusa
-                              <select
-                                value={question.type}
-                                onChange={(event) =>
-                                  updateQuestion(selectedCategory, qIndex, {
-                                    type: event.target
-                                      .value as typeof question.type,
-                                  })
-                                }
-                                className={fieldClass}
-                              >
-                                <option value="text">Szöveg</option>
-                                <option value="image">Kép</option>
-                                <option value="video">Videó</option>
-                                <option value="audio">Hang</option>
-                              </select>
                             </label>
                           </div>
 
@@ -594,7 +576,7 @@ export default function Editor() {
 
                             <div>
                               <span className="editor-field-label">
-                                Kép vagy média
+                                Kérdés képe
                               </span>
                               {question.source ? (
                                 <div className="relative mt-1 overflow-hidden rounded-xl border border-[#8c8374] bg-[#e9dfca]">
@@ -613,6 +595,7 @@ export default function Editor() {
                                     onClick={() =>
                                       updateQuestion(selectedCategory, qIndex, {
                                         source: "",
+                                        type: "text",
                                       })
                                     }
                                     className="absolute right-2 top-2 grid size-8 place-items-center rounded-full bg-[#24211c] text-white"
@@ -644,57 +627,13 @@ export default function Editor() {
                                   }}
                                 />
                               </label>
-                              <label className="editor-field-label mt-3">
-                                Média URL
-                                <input
-                                  value={question.source ?? ""}
-                                  onChange={(event) =>
-                                    updateQuestion(selectedCategory, qIndex, {
-                                      source: event.target.value,
-                                    })
-                                  }
-                                  className={fieldClass}
-                                  placeholder="https://…"
-                                />
-                              </label>
                             </div>
                           </div>
 
                           <div className="mt-4 rounded-xl border border-[#cfc2aa] bg-white/35 p-4">
-                            <div className="grid gap-4 lg:grid-cols-[170px_minmax(0,1fr)]">
-                              <label className="editor-field-label">
-                                Válasz médiatípusa
-                                <select
-                                  value={question.answerMediaType ?? "image"}
-                                  onChange={(event) =>
-                                    updateQuestion(selectedCategory, qIndex, {
-                                      answerMediaType: event.target.value as
-                                        | "image"
-                                        | "video"
-                                        | "audio",
-                                    })
-                                  }
-                                  className={fieldClass}
-                                >
-                                  <option value="image">Kép</option>
-                                  <option value="video">Videó</option>
-                                  <option value="audio">Hang</option>
-                                </select>
-                              </label>
-                              <label className="editor-field-label">
-                                Válasz média URL
-                                <input
-                                  value={question.answerSource ?? ""}
-                                  onChange={(event) =>
-                                    updateQuestion(selectedCategory, qIndex, {
-                                      answerSource: event.target.value,
-                                    })
-                                  }
-                                  className={fieldClass}
-                                  placeholder="https://…"
-                                />
-                              </label>
-                            </div>
+                            <span className="editor-field-label">
+                              Válasz képe
+                            </span>
                             {question.answerSource ? (
                               <div className="relative mt-3 overflow-hidden rounded-xl border border-[#8c8374] bg-[#e9dfca]">
                                 {question.answerMediaType === "image" ||

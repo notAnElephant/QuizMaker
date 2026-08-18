@@ -1,4 +1,4 @@
-name: Deploy Production
+name: Deploy Hasura Production
 
 on:
   push:
@@ -45,9 +45,3 @@ jobs:
           --project hasura
           --endpoint "$HASURA_GRAPHQL_ENDPOINT"
           --admin-secret "$HASURA_GRAPHQL_ADMIN_SECRET"
-
-      - name: Trigger Vercel production deployment
-        run: >-
-          curl --fail --silent --show-error
-          --request POST
-          "${{ secrets.VERCEL_DEPLOY_HOOK_URL }}"

@@ -48,6 +48,12 @@ firebase deploy --only storage
 
 Uploads are stored below `quiz-media/<firebase-uid>/`, limited to image MIME types and 5 MB per file.
 
+### Production version tags
+
+After Vercel reports a successful `Production` deployment, GitHub Actions tags the deployed commit. The first release is `v1.0.0`; subsequent releases increment the patch number.
+
+To choose a version explicitly, include `[version: 2.0.0]` in the deployed commit message, push a SemVer tag that already points to the commit, or run the **Tag Production Version** workflow manually with a version and optional commit SHA. Preview deployments are ignored.
+
 For local end-to-end auth testing without a real Firebase project, you can run the Firebase Auth Emulator with a demo project ID and set:
 
 ```bash

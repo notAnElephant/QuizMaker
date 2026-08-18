@@ -1,0 +1,100 @@
+name: Tag Production Version
+
+on:
+  deployment_status:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version to tag, with or without the v prefix
+        required: true
+        type: string
+      sha:
+        description: Commit SHA to tag (defaults to the current main commit)
+        required: false
+        type: string
+
+concurrency:
+  group: production-version-tags
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  tag-version:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.deployment_status.state == 'success' &&
+      github.event.deployment.environment == 'Production' &&
+      github.event.deployment.creator.login == 'vercel[bot]')
+    runs-on: ubuntu-latest
+    env:
+      REQUESTED_VERSION: ${{ inputs.version }}
+      TARGET_SHA: ${{ github.event.deployment.sha || inputs.sha || github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create version tag
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          git fetch --tags --force
+          target_sha=$(git rev-parse "${TARGET_SHA}^{commit}")
+          existing_tag=$(
+            git tag --points-at "$target_sha" |
+              awk '/^v[0-9]+\.[0-9]+\.[0-9]+$/ { print; exit }'
+          )
+
+          requested_tag=""
+          if [[ -n "${REQUESTED_VERSION:-}" ]]; then
+            requested_tag="v${REQUESTED_VERSION#v}"
+          else
+            requested_tag=$(
+              git show -s --format=%B "$target_sha" |
+                sed -nE 's/.*\[version:[[:space:]]*v?([0-9]+\.[0-9]+\.[0-9]+)\].*/v\1/p' |
+                head -n 1
+            )
+          fi
+
+          if [[ -n "$requested_tag" ]]; then
+            if [[ ! "$requested_tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              echo "Invalid version: $requested_tag"
+              exit 1
+            fi
+            next_tag="$requested_tag"
+          elif [[ -n "$existing_tag" ]]; then
+            echo "$target_sha is already tagged as $existing_tag"
+            exit 0
+          else
+            latest_tag=$(
+              git tag --list 'v*' --sort=-version:refname |
+                awk '/^v[0-9]+\.[0-9]+\.[0-9]+$/ { print; exit }'
+            )
+
+            if [[ -z "$latest_tag" ]]; then
+              next_tag="v1.0.0"
+            else
+              version=${latest_tag#v}
+              IFS=. read -r major minor patch <<< "$version"
+              next_tag="v${major}.${minor}.$((patch + 1))"
+            fi
+          fi
+
+          if git rev-parse -q --verify "refs/tags/$next_tag" >/dev/null; then
+            tagged_sha=$(git rev-list -n 1 "$next_tag")
+            if [[ "$tagged_sha" == "$target_sha" ]]; then
+              echo "$next_tag already points to $target_sha"
+              exit 0
+            fi
+
+            echo "$next_tag already points to a different commit"
+            exit 1
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag --annotate "$next_tag" "$target_sha" --message "Release $next_tag"
+          git push origin "$next_tag"
