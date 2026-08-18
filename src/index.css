@@ -21,11 +21,13 @@ body {
 }
 
 .quiz-card {
+  height: min(38rem, calc(100dvh - 10rem));
   perspective: 1600px;
 }
 
 .quiz-card-inner {
   display: grid;
+  height: 100%;
   transform-style: preserve-3d;
   transition: transform 600ms cubic-bezier(0.2, 0.75, 0.25, 1);
 }
@@ -36,6 +38,10 @@ body {
 
 .quiz-card-face {
   grid-area: 1 / 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
 }
