@@ -1,51 +1,22 @@
-import { gql } from "@apollo/client";
-import { useQuery } from "@apollo/client/react";
+import { useQuery } from "@tanstack/react-query";
 import { FaArrowLeft, FaFolderOpen, FaUser } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { api } from "../api/client";
 import { useCurrentUser } from "../context/useCurrentUser";
 import UserSwitcher from "./UserSwitcher";
-
-const GET_PROFILE_QUIZZES_QUERY = gql`
-  query GetProfileQuizzes($ownerId: uuid!) {
-    quizzes(
-      where: { owner_id: { _eq: $ownerId } }
-      order_by: [{ updated_at: desc }]
-    ) {
-      quiz_id
-      title
-      description
-      updated_at
-    }
-  }
-`;
-
-type ProfileQuiz = {
-  description?: string | null;
-  quiz_id: string;
-  title: string;
-  updated_at: string;
-};
-
-type ProfileQuizzesQueryResult = {
-  quizzes: ProfileQuiz[];
-};
 
 export default function Profile() {
   const navigate = useNavigate();
   const { currentUser, isLoading: isLoadingCurrentUser } = useCurrentUser();
-  const { data, loading, error } = useQuery<ProfileQuizzesQueryResult>(
-    GET_PROFILE_QUIZZES_QUERY,
-    {
-      skip: !currentUser,
-      variables: currentUser ? { ownerId: currentUser.user_id } : undefined,
-    },
-  );
+  const { data, error, isPending } = useQuery({
+    enabled: Boolean(currentUser),
+    queryFn: () => api.getQuizzes(currentUser?.user_id),
+    queryKey: ["quizzes", currentUser?.user_id],
+  });
 
-  if (isLoadingCurrentUser || loading) {
+  if (isLoadingCurrentUser || isPending) {
     return (
-      <div className="p-8 text-center text-[#24211c]">
-        Profil betöltése...
-      </div>
+      <div className="p-8 text-center text-[#24211c]">Profil betöltése...</div>
     );
   }
 

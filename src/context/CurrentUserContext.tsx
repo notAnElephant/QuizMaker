@@ -1,5 +1,4 @@
-import { gql } from "@apollo/client";
-import { useQuery } from "@apollo/client/react";
+import { useQuery } from "@tanstack/react-query";
 import {
   onAuthStateChanged,
   signInWithPopup,
@@ -8,7 +7,8 @@ import {
   User as FirebaseUser,
 } from "firebase/auth";
 import { ReactNode, useEffect, useMemo, useState } from "react";
-import { client } from "../client";
+import { api } from "../api/client";
+import type { ApiUser } from "../api/types";
 import {
   firebaseAuth,
   isFirebaseAuthEmulatorMode,
@@ -18,49 +18,9 @@ import {
 import { createStableUuid } from "../utility/stableUuid";
 import { CurrentUserContext } from "./currentUserState";
 
-type CurrentUser = {
-  display_name?: string | null;
-  email?: string | null;
-  user_id: string;
-};
-
-type CurrentUsersQueryResult = {
-  users: CurrentUser[];
-};
-
-const GET_USERS_QUERY = gql`
-  query GetCurrentUsers {
-    users(order_by: [{ display_name: asc }, { created_at: asc }]) {
-      user_id
-      display_name
-      email
-    }
-  }
-`;
-
-const UPSERT_USER_MUTATION = gql`
-  mutation UpsertCurrentUser($userId: uuid!, $displayName: String, $email: String) {
-    insert_users_one(
-      object: {
-        user_id: $userId
-        display_name: $displayName
-        email: $email
-      }
-      on_conflict: {
-        constraint: users_pkey
-        update_columns: [display_name, email]
-      }
-    ) {
-      user_id
-      display_name
-      email
-    }
-  }
-`;
-
 const STORAGE_KEY = "quizmaker.currentUserId";
 
-function mapFirebaseUser(user: FirebaseUser): CurrentUser {
+function mapFirebaseUser(user: FirebaseUser): ApiUser {
   return {
     display_name: user.displayName,
     email: user.email,
@@ -77,12 +37,15 @@ export function CurrentUserProvider({ children }: { children: ReactNode }) {
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
   const [authReady, setAuthReady] = useState(!isFirebaseAuthEnabled);
   const [authError, setAuthError] = useState<Error | undefined>(undefined);
-  const { data, loading, error } = useQuery<CurrentUsersQueryResult>(
-    GET_USERS_QUERY,
-    {
-      skip: isFirebaseAuthEnabled,
-    },
-  );
+  const {
+    data,
+    error,
+    isPending: isLoadingUsers,
+  } = useQuery({
+    enabled: !isFirebaseAuthEnabled,
+    queryFn: api.getUsers,
+    queryKey: ["users"],
+  });
 
   const users = useMemo(() => data?.users ?? [], [data]);
 
@@ -94,13 +57,9 @@ export function CurrentUserProvider({ children }: { children: ReactNode }) {
     return onAuthStateChanged(firebaseAuth, async (user) => {
       try {
         if (user) {
-          await client.mutate({
-            mutation: UPSERT_USER_MUTATION,
-            variables: {
-              displayName: user.displayName,
-              email: user.email,
-              userId: createStableUuid(`firebase:${user.uid}`),
-            },
+          await api.syncCurrentUser({
+            display_name: user.displayName,
+            email: user.email,
           });
         }
 
@@ -110,7 +69,9 @@ export function CurrentUserProvider({ children }: { children: ReactNode }) {
         setAuthError(
           mutationError instanceof Error
             ? mutationError
-            : new Error("Nem sikerült szinkronizálni a bejelentkezett felhasználót."),
+            : new Error(
+                "Nem sikerült szinkronizálni a bejelentkezett felhasználót.",
+              ),
         );
       } finally {
         setAuthReady(true);
@@ -155,7 +116,7 @@ export function CurrentUserProvider({ children }: { children: ReactNode }) {
       currentUser,
       error: (authError ?? error) as Error | undefined,
       isAuthenticated: !!currentUser,
-      isLoading: isFirebaseAuthEnabled ? !authReady : loading,
+      isLoading: isFirebaseAuthEnabled ? !authReady : isLoadingUsers,
       setCurrentUserId: (userId: string) => {
         if (isFirebaseAuthEnabled) {
           return;
@@ -184,13 +145,9 @@ export function CurrentUserProvider({ children }: { children: ReactNode }) {
 
         setSelectedUserId(users[0]?.user_id ?? null);
       },
-      users: isFirebaseAuthEnabled
-        ? currentUser
-          ? [currentUser]
-          : []
-        : users,
+      users: isFirebaseAuthEnabled ? (currentUser ? [currentUser] : []) : users,
     }),
-    [authError, authMode, authReady, currentUser, error, loading, users],
+    [authError, authMode, authReady, currentUser, error, isLoadingUsers, users],
   );
 
   return (

@@ -1,0 +1,88 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../server/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  user_id      String     @id @db.Uuid
+  created_at   DateTime   @default(now()) @db.Timestamp(6)
+  display_name String?
+  email        String?
+  quiz_plays   QuizPlay[]
+  quizzes      Quiz[]
+
+  @@map("users")
+}
+
+model Quiz {
+  quiz_id           String     @id @db.Uuid
+  title             String
+  description       String?
+  owner_id          String?    @db.Uuid
+  shared_user_ids   String[]   @default([]) @db.Uuid
+  created_at        DateTime   @default(now()) @db.Timestamp(6)
+  updated_at        DateTime   @default(now()) @db.Timestamp(6)
+  background_mode   String     @default("preset")
+  background_preset String     @default("default")
+  background_image  String?
+  text_color        String     @default("#24211c")
+  classic_mode      Boolean    @default(false)
+  timer_enabled     Boolean    @default(true)
+  timer_duration    Int        @default(2)
+  owner             User?      @relation(fields: [owner_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
+  questions         Question[]
+  quiz_plays        QuizPlay[]
+
+  @@map("quizzes")
+}
+
+model Question {
+  question_id         String   @id @db.Uuid
+  quiz_id             String?  @db.Uuid
+  question_text       String
+  question_type       String
+  answer_options      String[] @default([])
+  correct_answer      String?
+  points              Int?     @default(1000)
+  category_name       String
+  reveal_answer       Boolean  @default(false)
+  answer_media_type   String?
+  answer_media_source String?
+  quiz                Quiz?    @relation(fields: [quiz_id], references: [quiz_id], onDelete: Cascade, onUpdate: NoAction)
+  answers             Answer[]
+
+  @@map("questions")
+}
+
+model QuizPlay {
+  play_id    String   @id @db.Uuid
+  quiz_id    String?  @db.Uuid
+  user_id    String?  @db.Uuid
+  play_time  DateTime @default(now()) @db.Timestamp(6)
+  score      Int?     @default(0)
+  team_name  String?
+  team_score Int?
+  session_id String   @db.Uuid
+  quiz       Quiz?    @relation(fields: [quiz_id], references: [quiz_id], onDelete: Cascade, onUpdate: NoAction)
+  user       User?    @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
+  answers    Answer[]
+
+  @@index([session_id], map: "quiz_plays_session_id_idx")
+  @@map("quiz_plays")
+}
+
+model Answer {
+  answer_id   String    @id @db.Uuid
+  play_id     String?   @db.Uuid
+  question_id String?   @db.Uuid
+  answer_text String
+  play        QuizPlay? @relation(fields: [play_id], references: [play_id], onDelete: Cascade, onUpdate: NoAction)
+  question    Question? @relation(fields: [question_id], references: [question_id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@map("answers")
+}

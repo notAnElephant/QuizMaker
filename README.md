@@ -1,150 +1,60 @@
-# Description of the project
+# QuizMaker
 
-TODO
+QuizMaker is a Vite, React, and TypeScript quiz-board application backed by a Fastify REST API and PostgreSQL.
 
-# Tech stack
+## Stack
 
-The project is built with:
+- React 19 and Vite
+- Fastify with TypeBox request validation
+- Prisma ORM and PostgreSQL
+- TanStack Query for server state
+- Firebase Authentication and Storage in production
+- Local user switching when Firebase is not configured
 
-- React (TypeScript)
-- Hasura v2 (graphql-engine)
-- Tailwind
-- Vite
+## Local setup
 
-## Hasura
+1. Copy `.env.example` to `.env` and adjust values if needed.
+2. Install dependencies:
 
-This project uses Hasura v2 (graphql-engine).
-
-### Start Hasura v2 locally
-
-1. Start Postgres and Hasura v2 with Docker Compose:
-
-   ```bash
-   docker compose up -d
+   ```sh
+   pnpm install
    ```
 
-   This exposes the Hasura console at [http://localhost:8080/console](http://localhost:8080/console) and the GraphQL endpoint at `http://localhost:8080/v1/graphql`.
+3. Start PostgreSQL, apply migrations, and load sample data:
 
-2. Start the frontend (Vite):
-   ```bash
+   ```sh
+   docker compose up -d
+   pnpm db:reset:local
+   ```
+
+4. Start the API and web app together:
+
+   ```sh
    pnpm dev
    ```
 
-Before starting Docker for the first time, create a local `.env` file from `.env.example`.
+The web app runs at `http://localhost:5173`, the API at `http://localhost:3001`, and Vite proxies `/api` requests to the API.
 
-- Local backend / Docker Compose variables: `POSTGRES_PASSWORD`, `HASURA_GRAPHQL_ADMIN_SECRET`
-- Frontend / Vite variables: `VITE_HASURA_GRAPHQL_ENDPOINT`
-- Optional Google login / Firebase variables: `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_APP_ID`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_MESSAGING_SENDER_ID`, `VITE_FIREBASE_PROJECT_ID`, `VITE_FIREBASE_STORAGE_BUCKET`, `VITE_FIREBASE_MEASUREMENT_ID`, `VITE_FIREBASE_AUTH_EMULATOR_URL`
+## Commands
 
-Local development uses the Docker Postgres service for both Hasura metadata and app data by default. The Vite dev server proxies `/v1/graphql` to local Hasura and injects the admin secret server-side, so keep backend-only values out of `VITE_*` variables.
+- `pnpm dev`: run the API and Vite development servers.
+- `pnpm dev:api`: run only Fastify with file watching.
+- `pnpm dev:web`: run only Vite.
+- `pnpm build`: generate Prisma Client, type-check the app and API, and build both.
+- `pnpm lint`: run ESLint.
+- `pnpm db:migrate`: apply Prisma migrations using `DATABASE_URL`.
+- `pnpm db:migrate:local`: apply migrations to local Docker PostgreSQL.
+- `pnpm db:reset:local`: recreate the local schema, apply migrations, and load sample data.
+- `pnpm db:seed:local`: reload local sample data.
 
-Google login is optional. If the Firebase `VITE_FIREBASE_*` values are present, the app uses Google sign-in and creates or updates the matching `users` row in Hasura on login. If they are absent, the app falls back to the local seeded user switcher for self-hosted development.
+## Authentication
 
-Question and answer media uploads, plus custom-background images, use Firebase Storage when Firebase is configured. Deploy the authenticated, per-user upload rules with:
+When Firebase variables are configured, the browser sends a Firebase ID token and the API verifies it with Firebase Admin. Set `FIREBASE_PROJECT_ID` on the API service and the matching `VITE_FIREBASE_PROJECT_ID` in the frontend build.
 
-```bash
-firebase deploy --only storage
-```
+Without Firebase, non-production API instances allow the seeded local users. Set `ALLOW_LOCAL_AUTH=true` explicitly to enable this mode. Never enable local authentication in production.
 
-Question and answer uploads are stored below `quiz-media/<firebase-uid>/`. Reusable custom backgrounds are stored below `quiz-backgrounds/<firebase-uid>/`, where the signed-in user can select or delete them in the editor. Images are limited to 5 MB, audio to 25 MB, and video to 100 MB per file. The editor infers whether an upload is an image, audio file, or video from its MIME type.
+## Production deployment
 
-### Importing questions with media
+The connected Vercel project deploys the Vite frontend and Fastify API together. Requests under `/api/*` run in a Vercel Node function; all other routes use the SPA fallback.
 
-In imported JSON, put only the filename in `source` or `answerSource`. Do not include a URL, directory, `type`, or `answerMediaType`:
-
-```json
-[
-  {
-    "category": "Example",
-    "questions": [
-      {
-        "content": "Which place is shown?",
-        "source": "question-photo.jpg",
-        "correctAnswer": "Budapest",
-        "answerSource": "answer-clip.mp4",
-        "revealAnswer": true,
-        "points": 1000
-      }
-    ]
-  }
-]
-```
-
-After the JSON is selected, the editor lists every referenced filename and asks for those files together. Files are matched by their exact filename and uploaded before the current quiz is replaced. A filename may be reused by multiple questions when they should share the same uploaded media.
-
-### Production version tags
-
-After Vercel reports a successful `Production` deployment, GitHub Actions tags the deployed commit. The first release is `v1.0.0`; subsequent releases increment the patch number.
-
-To choose a version explicitly, include `[version: 2.0.0]` in the deployed commit message, push a SemVer tag that already points to the commit, or run the **Tag Production Version** workflow manually with a version and optional commit SHA. Preview deployments are ignored.
-
-For local end-to-end auth testing without a real Firebase project, you can run the Firebase Auth Emulator with a demo project ID and set:
-
-```bash
-VITE_FIREBASE_PROJECT_ID=demo-quizmaker
-VITE_FIREBASE_AUTH_EMULATOR_URL=http://127.0.0.1:9099
-```
-
-The app will then render the Google login button and use the emulator-hosted popup flow locally.
-
-### Production environment
-
-Use a separate production environment configuration instead of reusing local `.env`.
-
-- Local development: `.env`
-- Production example values: `.env.production.example`
-
-Set `HASURA_APP_DATABASE_URL` only in production or shared environments where Hasura should point at a remote Postgres instance such as Neon.
-
-### Hasura migrations and local seed
-
-The repository now tracks Hasura metadata in `hasura/metadata/` and expects SQL migrations under `hasura/migrations/default/`.
-
-Typical workflow:
-
-```bash
-hasura migrate create "describe_change" --database-name default --from-server --project hasura
-pnpm hasura:migrate:apply
-pnpm hasura:metadata:apply
-```
-
-To rebuild the local database from the committed schema and seed snapshot:
-
-```bash
-pnpm db:reset:local
-```
-
-This resets the local `public` schema, reapplies Hasura migrations and metadata, then loads `db/seeds/local.sql`, which mirrors the current quiz data snapshot copied from Neon. Use:
-
-```bash
-pnpm db:seed:local
-```
-
-if the schema already exists and you only want to reload the local data set.
-
-Commit migrations, metadata, and seed changes together when the data model changes. If the Hasura CLI is not installed locally yet, install it before using the migration scripts.
-
-## GraphQL Workflow
-
-This project uses **GraphQL Codegen** to generate TypeScript types automatically from the Hasura schema.
-
-### How it works
-
-1. **Introspection:** The codegen connects to the Hasura endpoint and downloads the schema.
-2. **Type Generation:** It generates TypeScript types for all your tables and specific GraphQL operations.
-3. **Usage:** Always import `gql` or specific document nodes (like `GetQuestionsDocument`) from the `./src/gql` directory to get full IntelliSense and type safety.
-
-### Regenerate Types
-
-Whenever you change the database schema in Hasura or update a `.graphql` file, run:
-
-```bash
-pnpm graphql-codegen
-```
-
-This will update the files in `src/gql/` to match the latest server state.
-
-### Tips for Development
-
-- **Exploring Fields:** Don't browse the generated `graphql.ts` file. Instead, use the **Hasura Console (GraphiQL)** at [http://localhost:8080/console](http://localhost:8080/console). Use the "Explorer" sidebar to discover available fields and test your queries before copy-pasting them into your code.
-- **Typed Data:** Always rely on IDE IntelliSense. Hover over variables in your `.tsx` files to see their types, and use "Go to Definition" (Cmd/Ctrl + Click) to jump to specific type definitions if needed.
+Set `DATABASE_URL` and `FIREBASE_PROJECT_ID` in Vercel. `VITE_API_URL` should remain empty for the default same-origin deployment. Run `pnpm db:migrate` as a release step whenever new Prisma migrations are added.

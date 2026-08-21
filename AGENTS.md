@@ -1,23 +1,29 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-The app is a Vite + React + TypeScript project. Main application code lives in `src/`. Route entrypoints are in `src/main.tsx` and `src/App.tsx`. UI components live in `src/components/`, shared state is in `src/context/`, GraphQL client setup is in `src/client.ts`, operations are in `src/queries/`, and generated types are in `src/gql/`. Static assets live in `public/` and `src/assets/`. Hasura local config and metadata live in `hasura/`, with Docker services defined in `docker-compose.yaml`.
+
+The app uses Vite + React + TypeScript with a Fastify REST API. Frontend code lives in `src/`, API code in `server/`, and Prisma schema/migrations in `prisma/`. UI components live in `src/components/`, shared state is in `src/context/`, and the typed API client is in `src/api/`. Static assets live in `public/` and `src/assets/`. Docker Compose provides local PostgreSQL.
 
 ## Build, Test, and Development Commands
-- `pnpm dev`: start the Vite dev server.
-- `pnpm build`: run TypeScript compilation and produce a production build.
+
+- `pnpm dev`: start Fastify and Vite together.
+- `pnpm build`: generate Prisma Client, type-check the frontend and API, and produce production builds.
 - `pnpm lint`: run ESLint across the repository.
-- `pnpm graphql-codegen`: regenerate `src/gql/` after schema or `.graphql` changes.
-- `docker compose up -d`: start Postgres, Hasura, and the data connector locally.
+- `pnpm db:migrate:local`: apply Prisma migrations to local PostgreSQL.
+- `docker compose up -d`: start PostgreSQL locally.
 
 ## Coding Style & Naming Conventions
-Use TypeScript with 2-space indentation and keep formatting Prettier-compatible. Components, context providers, and model classes use PascalCase files such as `Board.tsx` and `Question.ts`. Utility modules use lower-case names such as `utils.ts`. Prefer named imports, keep React components functional, and avoid editing generated GraphQL files manually. Run `pnpm lint` before opening a PR.
+
+Use TypeScript with 2-space indentation and keep formatting Prettier-compatible. Components, context providers, and model classes use PascalCase files such as `Board.tsx` and `Question.ts`. Utility modules use lower-case names such as `utils.ts`. Prefer named imports, keep React components functional, and avoid editing generated Prisma Client files manually. Run `pnpm lint` before opening a PR.
 
 ## Testing Guidelines
+
 There is currently no test runner configured. Until tests are added, treat `pnpm lint`, `pnpm build`, and a manual UI check as the minimum verification bar. If you add tests, place them near the feature or under `src/__tests__/` and use `*.test.ts` or `*.test.tsx`.
 
 ## Commit & Pull Request Guidelines
+
 Prefer Conventional Commits: `feat:`, `fix:`, `chore:`. Recent history contains a few `wip` commits; do not use that pattern for final commits. Keep messages imperative and specific, for example `fix: handle empty questions response`. PRs should include a short summary, note schema or env changes, link related issues, and add screenshots for UI changes.
 
 ## Security & Configuration Tips
-Do not commit real secrets. Local development uses Docker Postgres by default, so keep local `.env` minimal and reserve `HASURA_APP_DATABASE_URL` for production or shared environments. In local dev, Vite proxies `/v1/graphql` to Hasura and injects the admin secret server-side; keep browser-exposed values limited to `VITE_*` such as `VITE_HASURA_GRAPHQL_ENDPOINT`. If GraphQL schema changes, update Hasura metadata first, then regenerate types.
+
+Do not commit real secrets. Local development uses Docker PostgreSQL by default. Keep `DATABASE_URL` server-only and use `LOCAL_DATABASE_URL` only to override the local connection. Browser-exposed values must be limited to `VITE_*`. Apply schema changes through Prisma migrations and keep ownership checks in authenticated API queries.

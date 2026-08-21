@@ -195,7 +195,6 @@ export default function Editor() {
         .current()
         .then((result) => {
           savedFingerprintRef.current = fingerprintBeingSaved;
-          setAutoSaveStatus("saved");
           if (showSuccessToast) {
             toast.success(
               result.wasUpdate ? "Módosítások elmentve" : "Kvíz létrehozva",
@@ -204,7 +203,6 @@ export default function Editor() {
           return true;
         })
         .catch((error) => {
-          setAutoSaveStatus("error");
           toast.error(
             error instanceof Error ? error.message : "A mentés nem sikerült.",
           );
@@ -244,12 +242,10 @@ export default function Editor() {
     if (autoSaveOwnerRef.current !== ownerId) {
       autoSaveOwnerRef.current = ownerId;
       savedFingerprintRef.current = quizFingerprint;
-      setAutoSaveStatus("saved");
       return;
     }
     if (!currentUser || savedFingerprintRef.current === quizFingerprint) return;
 
-    setAutoSaveStatus("pending");
     if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
     autoSaveTimerRef.current = setTimeout(() => {
       autoSaveTimerRef.current = null;

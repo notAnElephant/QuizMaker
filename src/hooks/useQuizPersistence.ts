@@ -1,95 +1,10 @@
-import { gql, type ApolloCache } from "@apollo/client";
-import { useMutation } from "@apollo/client/react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
+import { api } from "../api/client";
+import type { QuizInput } from "../api/types";
 import { useQuiz } from "../context/QuizContext";
 import { useCurrentUser } from "../context/useCurrentUser";
 import { buildStoredQuestionText } from "../utility/quizPersistence";
-
-const CREATE_QUIZ_MUTATION = gql`
-  mutation CreateQuiz(
-    $quizId: uuid!
-    $title: String!
-    $description: String
-    $ownerId: uuid!
-    $backgroundMode: String!
-    $backgroundPreset: String!
-    $backgroundImage: String
-    $textColor: String!
-    $classicMode: Boolean!
-    $timerEnabled: Boolean!
-    $timerDuration: Int!
-    $questions: [questions_insert_input!]!
-  ) {
-    insert_quizzes_one(
-      object: {
-        quiz_id: $quizId
-        title: $title
-        description: $description
-        owner_id: $ownerId
-        background_mode: $backgroundMode
-        background_preset: $backgroundPreset
-        background_image: $backgroundImage
-        text_color: $textColor
-        classic_mode: $classicMode
-        timer_enabled: $timerEnabled
-        timer_duration: $timerDuration
-      }
-    ) {
-      quiz_id
-    }
-    insert_questions(objects: $questions) {
-      affected_rows
-    }
-  }
-`;
-
-const UPDATE_QUIZ_MUTATION = gql`
-  mutation UpdateQuiz(
-    $quizId: uuid!
-    $title: String!
-    $description: String
-    $ownerId: uuid!
-    $backgroundMode: String!
-    $backgroundPreset: String!
-    $backgroundImage: String
-    $textColor: String!
-    $classicMode: Boolean!
-    $timerEnabled: Boolean!
-    $timerDuration: Int!
-    $questions: [questions_insert_input!]!
-    $updatedAt: timestamp!
-  ) {
-    update_quizzes(
-      where: { quiz_id: { _eq: $quizId }, owner_id: { _eq: $ownerId } }
-      _set: {
-        title: $title
-        description: $description
-        background_mode: $backgroundMode
-        background_preset: $backgroundPreset
-        background_image: $backgroundImage
-        text_color: $textColor
-        classic_mode: $classicMode
-        timer_enabled: $timerEnabled
-        timer_duration: $timerDuration
-        updated_at: $updatedAt
-      }
-    ) {
-      affected_rows
-    }
-    delete_questions(where: { quiz_id: { _eq: $quizId } }) {
-      affected_rows
-    }
-    insert_questions(objects: $questions) {
-      affected_rows
-    }
-  }
-`;
-
-function invalidateSavedQuizzes(cache: ApolloCache) {
-  cache.evict({ id: "ROOT_QUERY", fieldName: "quizzes" });
-  cache.evict({ id: "ROOT_QUERY", fieldName: "questions" });
-  cache.gc();
-}
 
 export function useQuizPersistence() {
   const {
@@ -102,10 +17,22 @@ export function useQuizPersistence() {
     settings,
   } = useQuiz();
   const { currentUser } = useCurrentUser();
-  const [createQuiz, { loading: isCreating }] =
-    useMutation(CREATE_QUIZ_MUTATION);
-  const [updateQuiz, { loading: isUpdating }] =
-    useMutation(UPDATE_QUIZ_MUTATION);
+  const queryClient = useQueryClient();
+  const saveQuiz = useMutation({
+    mutationFn: async ({
+      input,
+      quizId,
+      wasUpdate,
+    }: {
+      input: QuizInput;
+      quizId: string;
+      wasUpdate: boolean;
+    }) =>
+      wasUpdate
+        ? api.updateQuiz(quizId, input, currentUser?.user_id)
+        : api.createQuiz(quizId, input, currentUser?.user_id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["quizzes"] }),
+  });
 
   const persistQuiz = useCallback(async () => {
     if (!currentUser) {
@@ -137,36 +64,33 @@ export function useQuizPersistence() {
           question.source,
         ),
         question_type: question.type,
-        quiz_id: quizId,
         reveal_answer: question.revealAnswer,
       })),
     );
 
-    const variables = {
-      backgroundImage:
+    const input: QuizInput = {
+      background_image:
         appearance.backgroundMode === "image"
           ? appearance.backgroundImage || null
           : null,
-      backgroundMode: appearance.backgroundMode,
-      backgroundPreset: appearance.backgroundPreset,
-      classicMode: settings.classicMode,
+      background_mode: appearance.backgroundMode,
+      background_preset: appearance.backgroundPreset,
+      classic_mode: settings.classicMode,
       description: currentQuizDescription.trim() || null,
-      ownerId: currentUser.user_id,
       questions,
-      quizId,
-      textColor: appearance.textColor,
-      timerDuration: settings.timerDuration,
-      timerEnabled: settings.timerEnabled,
+      text_color: appearance.textColor,
+      timer_duration: settings.timerDuration,
+      timer_enabled: settings.timerEnabled,
       title,
     };
 
-    if (currentQuizId) {
-      await updateQuiz({
-        update: invalidateSavedQuizzes,
-        variables: { ...variables, updatedAt: new Date().toISOString() },
-      });
-    } else {
-      await createQuiz({ update: invalidateSavedQuizzes, variables });
+    await saveQuiz.mutateAsync({
+      input,
+      quizId,
+      wasUpdate: Boolean(currentQuizId),
+    });
+
+    if (!currentQuizId) {
       setCurrentQuizId(quizId);
     }
 
@@ -174,15 +98,14 @@ export function useQuizPersistence() {
   }, [
     appearance,
     categories,
-    createQuiz,
     currentQuizDescription,
     currentQuizId,
     currentQuizTitle,
     currentUser,
+    saveQuiz,
     setCurrentQuizId,
     settings,
-    updateQuiz,
   ]);
 
-  return { isSaving: isCreating || isUpdating, persistQuiz };
+  return { isSaving: saveQuiz.isPending, persistQuiz };
 }

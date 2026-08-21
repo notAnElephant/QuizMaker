@@ -1,132 +1,40 @@
-import { gql } from "@apollo/client";
-import { useMutation, useQuery } from "@apollo/client/react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FaArrowLeft, FaFolderOpen, FaTrash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { api } from "../api/client";
 import { useQuiz } from "../context/QuizContext";
-import { Category, QuizAppearance, Settings } from "../context/types";
+import { Category, Settings } from "../context/types";
 import { useConfirm } from "../context/useConfirm";
 import { useCurrentUser } from "../context/useCurrentUser";
-import { buildCategoriesFromPersistedQuestions } from "../utility/quizPersistence";
 import { defaultQuizAppearance } from "../utility/quizAppearance";
+import { buildCategoriesFromPersistedQuestions } from "../utility/quizPersistence";
 import UserSwitcher from "./UserSwitcher";
-
-const GET_SAVED_QUIZZES_QUERY = gql`
-  query GetSavedQuizzes($ownerId: uuid!) {
-    quizzes(
-      where: { owner_id: { _eq: $ownerId } }
-      order_by: [{ updated_at: desc }]
-    ) {
-      quiz_id
-      title
-      description
-      background_mode
-      background_preset
-      background_image
-      text_color
-      classic_mode
-      timer_enabled
-      timer_duration
-      updated_at
-    }
-  }
-`;
-
-const GET_SAVED_QUIZ_QUESTIONS_QUERY = gql`
-  query GetSavedQuizQuestions($quizIds: [uuid!]!) {
-    questions(
-      where: { quiz_id: { _in: $quizIds } }
-      order_by: [{ category_name: asc }, { points: asc }]
-    ) {
-      question_id
-      quiz_id
-      question_text
-      question_type
-      points
-      answer_options
-      answer_media_source
-      answer_media_type
-      correct_answer
-      reveal_answer
-      category_name
-    }
-  }
-`;
-
-const DELETE_QUIZ_MUTATION = gql`
-  mutation DeleteQuiz($quizId: uuid!, $ownerId: uuid!) {
-    delete_quizzes(
-      where: { quiz_id: { _eq: $quizId }, owner_id: { _eq: $ownerId } }
-    ) {
-      affected_rows
-    }
-  }
-`;
-
-type SavedQuizQuestion = {
-  answer_options?: string[] | null;
-  answer_media_source?: string | null;
-  answer_media_type?: string | null;
-  category_name: string;
-  correct_answer?: string | null;
-  points?: number | null;
-  question_id: string;
-  question_text: string;
-  question_type: string;
-  reveal_answer?: boolean | null;
-  quiz_id?: string | null;
-};
-
-type SavedQuiz = {
-  background_image?: string | null;
-  background_mode?: QuizAppearance["backgroundMode"] | null;
-  background_preset?: QuizAppearance["backgroundPreset"] | null;
-  description?: string | null;
-  classic_mode?: boolean | null;
-  quiz_id: string;
-  title: string;
-  text_color?: string | null;
-  timer_duration?: number | null;
-  timer_enabled?: boolean | null;
-  updated_at: string;
-};
-
-type SavedQuizzesQueryResult = {
-  quizzes: SavedQuiz[];
-};
-
-type SavedQuizQuestionsQueryResult = {
-  questions: SavedQuizQuestion[];
-};
 
 export default function SavedQuizzes() {
   const navigate = useNavigate();
   const confirm = useConfirm();
   const { loadQuiz } = useQuiz();
   const { currentUser, isLoading: isLoadingCurrentUser } = useCurrentUser();
+  const queryClient = useQueryClient();
   const {
     data,
-    loading,
     error,
+    isPending: isLoadingQuizzes,
     refetch: refetchQuizzes,
-  } = useQuery<SavedQuizzesQueryResult>(GET_SAVED_QUIZZES_QUERY, {
-    skip: !currentUser,
-    variables: currentUser ? { ownerId: currentUser.user_id } : undefined,
+  } = useQuery({
+    enabled: Boolean(currentUser),
+    queryFn: () => api.getQuizzes(currentUser?.user_id),
+    queryKey: ["quizzes", currentUser?.user_id],
   });
   const quizzes = data?.quizzes ?? [];
-  const quizIds = quizzes.map((quiz) => quiz.quiz_id);
-  const {
-    data: questionsData,
-    loading: isLoadingQuestions,
-    error: questionsError,
-  } = useQuery<SavedQuizQuestionsQueryResult>(GET_SAVED_QUIZ_QUESTIONS_QUERY, {
-    skip: !quizIds.length,
-    variables: { quizIds },
+  const deleteQuiz = useMutation({
+    mutationFn: (quizId: string) =>
+      api.deleteQuiz(quizId, currentUser?.user_id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["quizzes"] }),
   });
-  const [deleteQuiz, { loading: isDeleting }] =
-    useMutation(DELETE_QUIZ_MUTATION);
 
-  if (isLoadingCurrentUser || loading || isLoadingQuestions) {
+  if (isLoadingCurrentUser || isLoadingQuizzes) {
     return (
       <div className="p-8 text-center text-[#24211c]">Kvízek betöltése...</div>
     );
@@ -140,20 +48,16 @@ export default function SavedQuizzes() {
     );
   }
 
-  if (error || questionsError) {
+  if (error) {
     return (
       <div className="p-8 text-center text-[#b83e18]">
         <h1 className="text-2xl font-bold">
           Nem sikerült betölteni a kvízeket
         </h1>
-        <p className="mt-2 text-sm">
-          {error?.message ?? questionsError?.message}
-        </p>
+        <p className="mt-2 text-sm">{error.message}</p>
       </div>
     );
   }
-
-  const questions = questionsData?.questions ?? [];
 
   return (
     <div className="min-h-screen p-8 text-black">
@@ -190,9 +94,7 @@ export default function SavedQuizzes() {
         ) : (
           <div className="grid gap-4">
             {quizzes.map((quiz) => {
-              const quizQuestions = questions.filter(
-                (question) => question.quiz_id === quiz.quiz_id,
-              );
+              const quizQuestions = quiz.questions;
               const categories: Category[] =
                 buildCategoriesFromPersistedQuestions(quizQuestions);
               const questionCount = quizQuestions.length;
@@ -235,9 +137,9 @@ export default function SavedQuizzes() {
                               defaultQuizAppearance.textColor,
                           },
                           {
-                            classicMode: quiz.classic_mode ?? false,
-                            timerEnabled: quiz.timer_enabled ?? true,
-                            timerDuration: quiz.timer_duration ?? 2,
+                            classicMode: quiz.classic_mode ?? true,
+                            timerEnabled: quiz.timer_enabled ?? false,
+                            timerDuration: quiz.timer_duration ?? 30,
                           } satisfies Settings,
                         );
                         navigate("/editor");
@@ -261,12 +163,7 @@ export default function SavedQuizzes() {
                         }
 
                         try {
-                          await deleteQuiz({
-                            variables: {
-                              ownerId: currentUser.user_id,
-                              quizId: quiz.quiz_id,
-                            },
-                          });
+                          await deleteQuiz.mutateAsync(quiz.quiz_id);
                           await refetchQuizzes();
                           toast.success("A kvíz törölve.");
                         } catch (mutationError) {
@@ -277,7 +174,7 @@ export default function SavedQuizzes() {
                           toast.error(`A törlés nem sikerült: ${message}`);
                         }
                       }}
-                      disabled={isDeleting}
+                      disabled={deleteQuiz.isPending}
                       className="inline-flex items-center justify-center gap-2 rounded-xl bg-red-600 px-4 py-3 text-white hover:bg-red-700 disabled:cursor-wait disabled:bg-red-400"
                     >
                       <FaTrash size={16} />

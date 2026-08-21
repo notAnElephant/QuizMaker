@@ -1,23 +1,15 @@
-import { gql } from "@apollo/client";
-import { useMutation } from "@apollo/client/react";
+import { useMutation } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef } from "react";
 import { FaUser, FaUsers } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import "./index.css";
+import { api } from "./api/client";
 import { Board } from "./components/Board";
 import TeamBar from "./components/TeamBar";
 import { useQuiz } from "./context/QuizContext";
 import { useCurrentUser } from "./context/useCurrentUser";
 import { useQuizPersistence } from "./hooks/useQuizPersistence";
-
-const SAVE_QUIZ_PLAYS_MUTATION = gql`
-  mutation SaveQuizPlays($plays: [quiz_plays_insert_input!]!) {
-    insert_quiz_plays(objects: $plays) {
-      affected_rows
-    }
-  }
-`;
 
 function SidebarAction({
   icon,
@@ -62,7 +54,10 @@ function App() {
   const { currentUser } = useCurrentUser();
   const { persistQuiz } = useQuizPersistence();
   const navigate = useNavigate();
-  const [saveQuizPlays] = useMutation(SAVE_QUIZ_PLAYS_MUTATION);
+  const saveQuizPlays = useMutation({
+    mutationFn: (input: Parameters<typeof api.savePlaySession>[0]) =>
+      api.savePlaySession(input, currentUser?.user_id),
+  });
   const playSaveStartedForSession = useRef<string | null>(null);
   const allQuestionsUsed = categories.every((category) =>
     category.questions.every((question) => question.isUsed),
@@ -91,28 +86,25 @@ function App() {
       const plays = teams.length
         ? teams.map((team) => ({
             play_id: crypto.randomUUID(),
-            play_time: playedAt,
-            quiz_id: persistedQuiz.quizId,
             score: team.points,
-            session_id: playSessionId,
             team_name: team.name,
             team_score: team.points,
-            user_id: currentUser.user_id,
           }))
         : [
             {
               play_id: crypto.randomUUID(),
-              play_time: playedAt,
-              quiz_id: persistedQuiz.quizId,
               score: 0,
-              session_id: playSessionId,
               team_name: null,
               team_score: 0,
-              user_id: currentUser.user_id,
             },
           ];
 
-      await saveQuizPlays({ variables: { plays } });
+      await saveQuizPlays.mutateAsync({
+        played_at: playedAt,
+        plays,
+        quiz_id: persistedQuiz.quizId,
+        session_id: playSessionId,
+      });
       setPlaySaveStatus("saved");
       toast.success("Lejátszás elmentve", { id: saveToastId });
     } catch (error) {
