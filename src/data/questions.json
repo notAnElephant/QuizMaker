@@ -1,160 +1,151 @@
 [
   {
-    "category": "Éjáj",
+    "category": "Hűlt helye!",
     "questions": [
       {
-        "type": "image",
-        "content": "Melyik település látható a képen?",
-        "source": "/assets/ai1.jpg",
-        "points": 1000
+        "content": "Melyik nevezetesség hiányzik a képről?",
+        "source": "hult-helye-question-1.png",
+        "points": 1000,
+        "correctAnswer": "Krisztus-szobor, Rio de Janeiro",
+        "revealAnswer": true,
+        "answerSource": "hult-helye-answer-1.jpg"
       },
       {
-        "type": "image",
-        "content": "Melyik település látható a képen?",
-        "source": "/assets/ai2.jpg",
-        "points": 2000
+        "content": "Melyik nevezetesség hiányzik a képről?",
+        "source": "hult-helye-question-2.png",
+        "points": 2000,
+        "correctAnswer": "Pisai ferde torony",
+        "revealAnswer": true,
+        "answerSource": "hult-helye-answer-2.jpg"
       },
       {
-        "type": "image",
-        "content": "Melyik település látható a képen?",
-        "source": "/assets/ai3.jpg",
-        "points": 3000
+        "content": "Melyik nevezetesség hiányzik a képről?",
+        "source": "hult-helye-question-3.jpg",
+        "points": 3000,
+        "correctAnswer": "Húsvét-szigeteki szobrok",
+        "revealAnswer": true,
+        "answerSource": "hult-helye-answer-3.jpg"
       },
       {
-        "type": "image",
-        "content": "Melyik település látható a képen?",
-        "source": "/assets/ai4.jpg",
-        "points": 4000
+        "content": "Melyik nevezetesség hiányzik a képről?",
+        "source": "hult-helye-question-4.png",
+        "points": 4000,
+        "correctAnswer": "Fudzsi-hegy",
+        "revealAnswer": true,
+        "answerSource": "hult-helye-answer-4.jpg"
       },
       {
-        "type": "image",
-        "content": "Melyik település látható a képen?",
-        "source": "/assets/ai5.jpg",
-        "points": 5000
+        "content": "Melyik nevezetesség hiányzik a képről?",
+        "source": "hult-helye-question-5.png",
+        "points": 5000,
+        "correctAnswer": "Louvre",
+        "revealAnswer": true,
+        "answerSource": "hult-helye-answer-5.jpg"
       }
     ]
   },
   {
-    "category": "Közs területt",
+    "category": "TV Maci",
     "questions": [
       {
-        "type": "text",
-        "content": "Az alábbi hat közterület-jelleg közül melyik az a kettő, amelyik nem létezik Magyarországon?",
-        "list": ["lépcső", "udvar", "puszta", "elágazás", "körtér", "mellékút"],
-        "points": 1000
+        "content": "Hány panda él jelenleg fogságban Kínában??",
+        "points": 1000,
+        "correctAnswer": "808",
+        "revealAnswer": true
       },
       {
-        "type": "text",
-        "content": "Az alábbi hat közterület-jelleg közül melyik az a kettő, amelyik nem létezik Magyarországon?",
-        "list": [
-          "lépcsősor",
-          "gyársor",
-          "házsor",
-          "villasor",
-          "határsor",
-          "kertsor"
-        ],
-        "points": 2000
+        "content": "Melyik amerikai elnök ihlette Teddy maci karakterét?",
+        "points": 2000,
+        "correctAnswer": "Theodore Roosevelt",
+        "revealAnswer": true
       },
       {
-        "type": "text",
-        "content": "Az alábbi hat közterület-jelleg közül melyik az a kettő, amelyik nem létezik Magyarországon?",
-        "list": ["sikátor", "zug", "barlang", "vár", "csapás", "part"],
-        "points": 3000
+        "content": "Melyik amerikai állam zászlóján szerepel egy mára kihalt medvefaj?",
+        "points": 3000,
+        "correctAnswer": "Kalifornia (kaliforniai grizzly)",
+        "revealAnswer": true
       },
       {
-        "type": "text",
-        "content": "Az alábbi hat közterület-jelleg közül melyik az a kettő, amelyik nem létezik Magyarországon?",
-        "list": [
-          "tető",
-          "dűlő",
-          "utcza",
-          "szektor",
-          "üdülőpart",
-          "körforgalom"
-        ],
-        "points": 4000
+        "content": "Hány medvefaj őshonos a déli féltekén?",
+        "points": 4000,
+        "correctAnswer": "1, a pápaszemes medve",
+        "revealAnswer": true
       },
       {
-        "type": "text",
-        "content": "Az alábbi hat közterület-jelleg közül melyik az a kettő, amelyik nem létezik Magyarországon?",
-        "list": ["major", "tere", "járda", "lagúna", "liget", "negyed"],
-        "points": 5000
+        "content": "Mekkora volt a legnagyobb táv, amit bizonyítottan úszott egy jegesmedve?",
+        "points": 5000,
+        "correctAnswer": "354 km",
+        "revealAnswer": true
       }
     ]
   },
   {
-    "category": "Mutsarötsöge",
+    "category": "Dobogó",
     "questions": [
       {
-        "type": "text",
-        "content": "Melyik település van az alábbiak közül Magyarország területén?",
-        "list": [
-          "Mákfalva",
-          "Tiszakarácsonyfalva",
-          "Kisjakabfalva",
-          "Küküllőkeményfalva"
-        ],
-        "points": 1000
+        "content": "Melyik a három legnépesebb magyar város?",
+        "points": 1000,
+        "correctAnswer": "1. Budapest – kb. 1,68–1,75 millió fő; 2. Debrecen – kb. 201 000 fő; 3. Szeged – kb. 158 000–160 000 fő",
+        "revealAnswer": true
       },
       {
-        "type": "text",
-        "content": "Melyik település van az alábbiak közül Magyarország területén?",
-        "list": [
-          "Monyorókerék",
-          "Fugyivásárhely",
-          "Kakáktelep",
-          "Egyházasdengeleg"
-        ],
-        "points": 2000
+        "content": "Melyik három animációs film érte el a legnagyobb mozis bevételt?",
+        "points": 2000,
+        "correctAnswer": "1. Agymanók 2; 2. Az oroszlánkirály; 3. Jégvarázs 2",
+        "revealAnswer": true
       },
       {
-        "type": "text",
-        "content": "Melyik település van az alábbiak közül Magyarország területén?",
-        "list": ["Chernelházadamonya", "Magyarkapus", "Bojt", "Göcs"],
-        "points": 3000
+        "content": "Melyik a Spotify három legtöbbet hallgatott zeneszáma?",
+        "points": 3000,
+        "correctAnswer": "1. The Weeknd – Blinding Lights; 2. Ed Sheeran – Shape of You; 3. The Neighbourhood – Sweater Weather",
+        "revealAnswer": true
       },
       {
-        "type": "text",
-        "content": "Melyik település van az alábbiak közül Európa területén?",
-        "list": ["Ribi", "Bré", "Pina", "Tanga"],
-        "points": 4000
+        "content": "Melyik a három legnépszerűbb gyorsétterem-franchise globálisan?",
+        "points": 4000,
+        "correctAnswer": "1. McDonald’s; 2. KFC; 3. Subway",
+        "revealAnswer": true
       },
       {
-        "type": "text",
-        "content": "Melyik településnek van az alábbiak közül magyar vonatkozása?",
-        "list": ["Rum", "Söre", "Borod"],
-        "points": 5000
+        "content": "Melyik három film kapta a legtöbb Oscar-díjat?",
+        "points": 5000,
+        "correctAnswer": "Ben-Hur (1959), Titanic (1997), A Gyűrűk Ura: A király visszatér (2003) - mindegyik 11-et kapott",
+        "revealAnswer": true
       }
     ]
   },
   {
-    "category": "Nemmkelidearabzám",
+    "category": "Egy nem elég",
     "questions": [
       {
-        "type": "text",
-        "content": "Hány karakterből áll a leghosszabb európai település neve?",
-        "points": 1000
+        "content": "Sorolj fel európai fővárosokat!",
+        "points": 1000,
+        "correctAnswer": "Albánia–Tirana, Andorra–Andorra la Vella, Ausztria–Bécs, Belgium–Brüsszel, Bosznia-Hercegovina–Szarajevó, Bulgária–Szófia, Ciprus–Nicosia, Csehország–Prága, Dánia–Koppenhága, Egyesült Királyság–London, Észak-Macedónia–Szkopje, Észtország–Tallinn, Fehéroroszország–Minszk, Finnország–Helsinki, Franciaország–Párizs, Grúzia–Tbiliszi, Görögország–Athén, Hollandia–Amszterdam, Horvátország–Zágráb, Írország–Dublin, Izland–Reykjavík, Koszovó–Pristina, Lengyelország–Varsó, Lettország–Riga, Liechtenstein–Vaduz, Litvánia–Vilnius, Luxemburg–Luxembourg, Magyarország–Budapest, Málta–Valletta, Moldova–Chișinău, Monaco–Monaco, Montenegró–Podgorica, Németország–Berlin, Norvégia–Oslo, Olaszország–Róma, Oroszország–Moszkva, Örményország–Jereván, Portugália–Lisszabon, Románia–Bukarest, San Marino–San Marino, Spanyolország–Madrid, Svájc–Bern, Svédország–Stockholm, Szerbia–Belgrád, Szlovákia–Pozsony, Szlovénia–Ljubljana, Törökország–Ankara, Ukrajna–Kijev, Vatikán–Vatikánváros",
+        "revealAnswer": true
       },
       {
-        "type": "text",
-        "content": "Mennyi idő végiggyalogolni a Földön a két legtávolabbi pont közt megtehető legrövidebb utat a Google Maps szerint?",
-        "points": 2000
+        "content": "Sorolj fel tésztaformákat!",
+        "points": 2000,
+        "correctAnswer": "Orsó (fusilli), szarvacska (chifferi), masni vagy pillangótészta (farfalle), penne, kagyló (conchiglie), csiga (lumache), rigatoni, ziti, maccheroni, kocka, fodros kocka, cavatappi, kocsikerék (rotelle), radiatori, orecchiette, campanelle, gemelli, anellini, spagetti, makaróni, tagliatelle, fettuccine, gyufatészta, linguine, bucatini, pappardelle, mafaldine, angyalhaj, tarhonya, eperlevél, cérnametélt, lúdgége, csillag, betűtészta, orzo, zabhegy, csipetke, fregola, lasagne, cannelloni, conchiglioni",
+        "revealAnswer": true
       },
       {
-        "type": "text",
-        "content": "Hány olyan tó van, ami egy olyan szigeten van, ami egy olyan tavon van, ami egy olyan szigeten van, ami egy tavon van?",
-        "points": 3000
+        "content": "Sorolj fel autómárkákat!",
+        "points": 3000,
+        "correctAnswer": "Abarth, Alfa Romeo, Aston Martin, Audi, Bentley, BMW, Bugatti, Buick, Cadillac, Chevrolet, Chrysler, Citroën, Dacia, Dodge, Ferrari, Fiat, Ford, Genesis, GMC, Honda, Hyundai, Infiniti, Jaguar, Jeep, Kia, Koenigsegg, Lada, Lamborghini, Lancia, Land Rover, Lexus, Lincoln, Lotus, Maserati, Mazda, McLaren, Mercedes-Benz, MG, Mini, Mitsubishi, Nissan, Opel, Pagani, Peugeot, Polestar, Porsche, Ram, Renault, Rolls-Royce, Saab, Seat, Škoda, Smart, SsangYong, Subaru, Suzuki, Tesla, Toyota, Volkswagen, Volvo",
+        "revealAnswer": true
       },
       {
-        "type": "text",
-        "content": "Hány nyelvet beszélnek abban az országban, ahol a világon a legtöbbet beszélik?",
-        "points": 4000
+        "content": "Sorolj fel gyümölcsöket!",
+        "points": 4000,
+        "correctAnswer": "Alma, körte, banán, narancs, mandarin, citrom, lime, grapefruit, szőlő, cseresznye, meggy, szilva, barack, őszibarack, nektarin, sárgabarack, eper, málna, szeder, áfonya, ribizli, egres, kivi, ananász, mangó, papaja, maracuja, gránátalma, kókuszdió, avokádó, görögdinnye, sárgadinnye, datolya, füge, licsi, kaktuszfüge, datolyaszilva, birsalma, csillaggyümölcs, guáva",
+        "revealAnswer": true
       },
       {
-        "type": "text",
-        "content": "Hány szóból áll Bangkok neve?",
-        "points": 5000
+        "content": "Sorolj fel hungarikumokat!",
+        "points": 5000,
+        "correctAnswer": "https://www.hungarikumoklistaja.hu/",
+        "revealAnswer": true
       }
     ]
   }
