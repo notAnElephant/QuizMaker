@@ -1,6 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef } from "react";
-import { FaUser, FaUsers } from "react-icons/fa";
+import { FaEdit, FaUser, FaUsers } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import "./index.css";
@@ -163,6 +163,11 @@ function App() {
         aria-label="Game controls"
         className="fixed bottom-4 left-4 z-30 flex flex-col items-start gap-2"
       >
+        <SidebarAction
+          icon={<FaEdit aria-hidden="true" size={20} />}
+          label="Szerkesztő"
+          onClick={() => navigate("/editor")}
+        />
         <SidebarAction
           icon={<FaUsers aria-hidden="true" size={20} />}
           label="Csapatok"
