@@ -1,6 +1,6 @@
 import { type Static, Type } from "@sinclair/typebox";
 import type { FastifyPluginAsyncTypebox } from "@fastify/type-provider-typebox";
-import { Prisma } from "../generated/prisma/index.js";
+import { Prisma } from "@prisma/client";
 import { authenticate } from "../auth.js";
 import { prisma } from "../database.js";
 
