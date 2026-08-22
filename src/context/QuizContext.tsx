@@ -62,9 +62,9 @@ const initialData: Category[] = (rawData as RawCategory[]).map((category) => ({
 }));
 
 const defaultSettings: Settings = {
-  classicMode: false,
-  timerEnabled: true,
-  timerDuration: 2,
+  classicMode: true,
+  timerEnabled: false,
+  timerDuration: 30,
 };
 const SETTINGS_STORAGE_KEY = "quizmaker.settings.qa";
 const EDITOR_STORAGE_KEY_PREFIX = "quizmaker.editor";
