@@ -28,7 +28,7 @@
     "clsx": "^2.1.1",
     "fastify": "^5.12.1",
     "firebase": "^12.15.0",
-    "firebase-admin": "^14.2.0",
+    "firebase-admin": "13.6.0",
     "react": "19.2.0",
     "react-confetti-explosion": "^3.0.3",
     "react-dom": "^19.2.0",
