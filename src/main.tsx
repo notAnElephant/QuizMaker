@@ -12,6 +12,7 @@ import Profile from "./components/Profile.tsx";
 import QuestionView from "./components/QuestionView";
 import QuizPreview from "./components/QuizPreview";
 import RequireLogin from "./components/RequireLogin";
+import RequireQuizEditorAccess from "./components/RequireQuizEditorAccess";
 import SavedQuizzes from "./components/SavedQuizzes.tsx";
 import Teams from "./components/Teams.tsx";
 import { CurrentUserProvider } from "./context/CurrentUserContext.tsx";
@@ -86,7 +87,9 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
                   path="/editor"
                   element={
                     <RequireLogin>
-                      <Editor />
+                      <RequireQuizEditorAccess>
+                        <Editor />
+                      </RequireQuizEditorAccess>
                     </RequireLogin>
                   }
                 />

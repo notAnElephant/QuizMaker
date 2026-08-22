@@ -2,6 +2,7 @@ import { type Static, Type } from "@sinclair/typebox";
 import type { FastifyPluginAsyncTypebox } from "@fastify/type-provider-typebox";
 import { authenticate } from "../auth.js";
 import { prisma } from "../database.js";
+import { readableQuizWhere } from "../quizAccess.js";
 
 const playSessionSchema = Type.Object({
   played_at: Type.String({ format: "date-time" }),
@@ -26,10 +27,7 @@ export const playSessionRoutes: FastifyPluginAsyncTypebox = async (app) => {
       const body = request.body as Static<typeof playSessionSchema>;
       const quiz = await prisma.quiz.findFirst({
         select: { quiz_id: true },
-        where: {
-          owner_id: request.currentUserId,
-          quiz_id: body.quiz_id,
-        },
+        where: readableQuizWhere(body.quiz_id, request.currentUserId),
       });
 
       if (!quiz) {

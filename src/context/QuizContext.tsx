@@ -7,6 +7,7 @@ import {
   useState,
 } from "react";
 import rawData from "../data/questions.json";
+import type { QuizAccessRole } from "../api/types";
 import { AnswerMediaType, Question, QuestionType } from "../models/Question";
 import {
   defaultQuizAppearance,
@@ -73,6 +74,7 @@ const DEFAULT_QUIZ_ID = "47559e6f-f126-4124-84d7-9d71d9467f6d";
 const DEFAULT_QUIZ_TITLE = "Vágó Pesta";
 
 type StoredEditorState = {
+  accessRole?: QuizAccessRole;
   appearance: QuizAppearance;
   categories: RawCategory[];
   description: string;
@@ -140,6 +142,7 @@ type QuizContextValue = {
     questionsPerCategory: number,
   ) => void;
   currentQuizDescription: string;
+  currentQuizAccessRole: QuizAccessRole;
   currentQuizId: string | null;
   currentQuizTitle: string;
   describeQuiz: (description: string) => void;
@@ -150,6 +153,7 @@ type QuizContextValue = {
     nextCategories: Category[],
     nextAppearance?: QuizAppearance,
     nextSettings?: Settings,
+    accessRole?: QuizAccessRole,
   ) => void;
   importCategories: (nextCategories: Category[]) => void;
   markPlayReadyToSave: () => void;
@@ -206,6 +210,8 @@ export function QuizProvider({ children }: { children: ReactNode }) {
   const [currentQuizDescription, setCurrentQuizDescription] = useState(
     DEFAULT_QUIZ_DESCRIPTION,
   );
+  const [currentQuizAccessRole, setCurrentQuizAccessRole] =
+    useState<QuizAccessRole>("OWNER");
   const [currentQuizId, setCurrentQuizId] = useState<string | null>(
     DEFAULT_QUIZ_ID,
   );
@@ -316,7 +322,9 @@ export function QuizProvider({ children }: { children: ReactNode }) {
     nextCategories: Category[],
     nextAppearance: QuizAppearance = defaultQuizAppearance,
     nextSettings: Settings = defaultSettings,
+    accessRole: QuizAccessRole = "OWNER",
   ) => {
+    setCurrentQuizAccessRole(accessRole);
     setCurrentQuizId(quizId);
     setCurrentQuizTitle(title);
     setCurrentQuizDescription(description);
@@ -329,6 +337,7 @@ export function QuizProvider({ children }: { children: ReactNode }) {
   };
 
   const importCategories = (nextCategories: Category[]) => {
+    setCurrentQuizAccessRole("OWNER");
     setCurrentQuizId(null);
     setCategories(nextCategories);
     setPlaySessionId(crypto.randomUUID());
@@ -452,6 +461,7 @@ export function QuizProvider({ children }: { children: ReactNode }) {
     categoryNames: string[],
     questionsPerCategory: number,
   ) => {
+    setCurrentQuizAccessRole("OWNER");
     const questionCount = Math.max(1, questionsPerCategory);
     const nextCategories = categoryNames.map((category) => ({
       category,
@@ -495,6 +505,7 @@ export function QuizProvider({ children }: { children: ReactNode }) {
     setCurrentQuizDescription(
       storedState?.description ?? DEFAULT_QUIZ_DESCRIPTION,
     );
+    setCurrentQuizAccessRole(storedState?.accessRole ?? "OWNER");
     setCurrentQuizId(storedState?.quizId ?? DEFAULT_QUIZ_ID);
     setCurrentQuizTitle(storedState?.title ?? DEFAULT_QUIZ_TITLE);
     setSettings(storedState?.settings ?? defaultSettings);
@@ -505,6 +516,7 @@ export function QuizProvider({ children }: { children: ReactNode }) {
     if (!currentUserId || hydratedOwnerId !== currentUserId) return;
 
     const editorState: StoredEditorState = {
+      accessRole: currentQuizAccessRole,
       appearance,
       categories,
       description: currentQuizDescription,
@@ -520,6 +532,7 @@ export function QuizProvider({ children }: { children: ReactNode }) {
     appearance,
     categories,
     currentQuizDescription,
+    currentQuizAccessRole,
     currentQuizId,
     currentQuizTitle,
     currentUserId,
@@ -544,6 +557,7 @@ export function QuizProvider({ children }: { children: ReactNode }) {
         appearance,
         categories,
         createQuiz,
+        currentQuizAccessRole,
         currentQuizDescription,
         currentQuizId,
         currentQuizTitle,

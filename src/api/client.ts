@@ -1,5 +1,11 @@
 import { firebaseAuth } from "../firebase";
-import type { ApiUser, PlaySessionInput, QuizInput, SavedQuiz } from "./types";
+import type {
+  ApiUser,
+  PlaySessionInput,
+  QuizInput,
+  QuizShare,
+  SavedQuiz,
+} from "./types";
 
 const API_URL = (import.meta.env.VITE_API_URL ?? "").replace(/\/$/, "");
 
@@ -47,6 +53,25 @@ export const api = {
       localUserId,
       method: "POST",
     }),
+  createQuizShare: (
+    quizId: string,
+    email: string,
+    localUserId?: string | null,
+  ) =>
+    apiRequest<{ share: QuizShare }>(`/quizzes/${quizId}/shares`, {
+      body: { email, role: "VIEWER" },
+      localUserId,
+      method: "POST",
+    }),
+  deleteQuizShare: (
+    quizId: string,
+    userId: string,
+    localUserId?: string | null,
+  ) =>
+    apiRequest<void>(`/quizzes/${quizId}/shares/${userId}`, {
+      localUserId,
+      method: "DELETE",
+    }),
   deleteQuiz: (quizId: string, localUserId?: string | null) =>
     apiRequest<void>(`/quizzes/${quizId}`, {
       localUserId,
@@ -54,6 +79,10 @@ export const api = {
     }),
   getQuizzes: (localUserId?: string | null) =>
     apiRequest<{ quizzes: SavedQuiz[] }>("/quizzes", { localUserId }),
+  getQuizShares: (quizId: string, localUserId?: string | null) =>
+    apiRequest<{ shares: QuizShare[] }>(`/quizzes/${quizId}/shares`, {
+      localUserId,
+    }),
   getUsers: () => apiRequest<{ users: ApiUser[] }>("/users"),
   savePlaySession: (input: PlaySessionInput, localUserId?: string | null) =>
     apiRequest<{ saved: number }>("/play-sessions", {

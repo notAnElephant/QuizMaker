@@ -42,6 +42,7 @@ function App() {
   const {
     appearance,
     categories,
+    currentQuizAccessRole,
     currentQuizId,
     currentQuizTitle,
     markUsed,
@@ -163,11 +164,13 @@ function App() {
         aria-label="Game controls"
         className="fixed bottom-4 left-4 z-30 flex flex-col items-start gap-2"
       >
-        <SidebarAction
-          icon={<FaEdit aria-hidden="true" size={20} />}
-          label="Szerkesztő"
-          onClick={() => navigate("/editor")}
-        />
+        {currentQuizAccessRole !== "VIEWER" ? (
+          <SidebarAction
+            icon={<FaEdit aria-hidden="true" size={20} />}
+            label="Szerkesztő"
+            onClick={() => navigate("/editor")}
+          />
+        ) : null}
         <SidebarAction
           icon={<FaUsers aria-hidden="true" size={20} />}
           label="Csapatok"

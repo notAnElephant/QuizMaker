@@ -1,5 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { FaArrowLeft, FaFolderOpen, FaTrash } from "react-icons/fa";
+import { useState } from "react";
+import {
+  FaArrowLeft,
+  FaFolderOpen,
+  FaPlay,
+  FaShareAlt,
+  FaTrash,
+} from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { api } from "../api/client";
@@ -10,6 +17,7 @@ import { useCurrentUser } from "../context/useCurrentUser";
 import { defaultQuizAppearance } from "../utility/quizAppearance";
 import { buildCategoriesFromPersistedQuestions } from "../utility/quizPersistence";
 import UserSwitcher from "./UserSwitcher";
+import QuizShareDialog from "./QuizShareDialog";
 
 export default function SavedQuizzes() {
   const navigate = useNavigate();
@@ -17,6 +25,7 @@ export default function SavedQuizzes() {
   const { loadQuiz } = useQuiz();
   const { currentUser, isLoading: isLoadingCurrentUser } = useCurrentUser();
   const queryClient = useQueryClient();
+  const [sharingQuizId, setSharingQuizId] = useState<string | null>(null);
   const {
     data,
     error,
@@ -28,6 +37,7 @@ export default function SavedQuizzes() {
     queryKey: ["quizzes", currentUser?.user_id],
   });
   const quizzes = data?.quizzes ?? [];
+  const sharingQuiz = quizzes.find((quiz) => quiz.quiz_id === sharingQuizId);
   const deleteQuiz = useMutation({
     mutationFn: (quizId: string) =>
       api.deleteQuiz(quizId, currentUser?.user_id),
@@ -68,11 +78,11 @@ export default function SavedQuizzes() {
               Mentett kvízek
             </h1>
             <p className="text-sm text-[#756b5c]">
-              Csak a(z){" "}
+              A(z){" "}
               {currentUser.display_name ||
                 currentUser.email ||
                 "aktív felhasználó"}{" "}
-              saját kvízei látszanak.
+              saját és vele megosztott kvízei látszanak.
             </p>
           </div>
           <div className="flex flex-wrap items-center justify-between gap-3 sm:justify-end">
@@ -107,6 +117,25 @@ export default function SavedQuizzes() {
                   <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                     <div>
                       <h2 className="text-2xl font-bold">{quiz.title}</h2>
+                      <div className="mt-2 flex flex-wrap items-center gap-2 text-xs font-bold uppercase tracking-wide">
+                        <span
+                          className={`rounded-full px-2.5 py-1 ${
+                            quiz.access_role === "OWNER"
+                              ? "bg-[#ffd75a] text-[#5c3c00]"
+                              : "bg-[#dcecff] text-[#174c86]"
+                          }`}
+                        >
+                          {quiz.access_role === "OWNER"
+                            ? "Saját kvíz"
+                            : "Megosztva velem"}
+                        </span>
+                        {quiz.access_role !== "OWNER" && quiz.owner ? (
+                          <span className="normal-case tracking-normal text-gray-500">
+                            Tulajdonos:{" "}
+                            {quiz.owner.display_name || quiz.owner.email}
+                          </span>
+                        ) : null}
+                      </div>
                       <p className="mt-1 text-sm text-gray-600">
                         {categories.length} kategória, {questionCount} kérdés
                       </p>
@@ -141,45 +170,63 @@ export default function SavedQuizzes() {
                             timerEnabled: quiz.timer_enabled ?? false,
                             timerDuration: quiz.timer_duration ?? 30,
                           } satisfies Settings,
+                          quiz.access_role,
                         );
-                        navigate("/editor");
+                        navigate(
+                          quiz.access_role === "VIEWER" ? "/" : "/editor",
+                        );
                       }}
                       className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3 text-white hover:bg-blue-700"
                     >
-                      <FaFolderOpen size={16} />
-                      Betöltés
+                      {quiz.access_role === "VIEWER" ? (
+                        <FaPlay size={14} />
+                      ) : (
+                        <FaFolderOpen size={16} />
+                      )}
+                      {quiz.access_role === "VIEWER" ? "Játék" : "Betöltés"}
                     </button>
-                    <button
-                      onClick={async () => {
-                        const shouldDelete = await confirm({
-                          confirmLabel: "Kvíz törlése",
-                          description: `A(z) „${quiz.title}” kvíz és minden kérdése végleg törlődik.`,
-                          destructive: true,
-                          title: "Kvíz törlése",
-                        });
+                    {quiz.access_role === "OWNER" ? (
+                      <button
+                        onClick={() => setSharingQuizId(quiz.quiz_id)}
+                        className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#d48313] px-4 py-3 text-white hover:bg-[#b96d08]"
+                      >
+                        <FaShareAlt size={15} />
+                        Megosztás
+                      </button>
+                    ) : null}
+                    {quiz.access_role === "OWNER" ? (
+                      <button
+                        onClick={async () => {
+                          const shouldDelete = await confirm({
+                            confirmLabel: "Kvíz törlése",
+                            description: `A(z) „${quiz.title}” kvíz és minden kérdése végleg törlődik.`,
+                            destructive: true,
+                            title: "Kvíz törlése",
+                          });
 
-                        if (!shouldDelete) {
-                          return;
-                        }
+                          if (!shouldDelete) {
+                            return;
+                          }
 
-                        try {
-                          await deleteQuiz.mutateAsync(quiz.quiz_id);
-                          await refetchQuizzes();
-                          toast.success("A kvíz törölve.");
-                        } catch (mutationError) {
-                          const message =
-                            mutationError instanceof Error
-                              ? mutationError.message
-                              : "Ismeretlen törlési hiba.";
-                          toast.error(`A törlés nem sikerült: ${message}`);
-                        }
-                      }}
-                      disabled={deleteQuiz.isPending}
-                      className="inline-flex items-center justify-center gap-2 rounded-xl bg-red-600 px-4 py-3 text-white hover:bg-red-700 disabled:cursor-wait disabled:bg-red-400"
-                    >
-                      <FaTrash size={16} />
-                      Törlés
-                    </button>
+                          try {
+                            await deleteQuiz.mutateAsync(quiz.quiz_id);
+                            await refetchQuizzes();
+                            toast.success("A kvíz törölve.");
+                          } catch (mutationError) {
+                            const message =
+                              mutationError instanceof Error
+                                ? mutationError.message
+                                : "Ismeretlen törlési hiba.";
+                            toast.error(`A törlés nem sikerült: ${message}`);
+                          }
+                        }}
+                        disabled={deleteQuiz.isPending}
+                        className="inline-flex items-center justify-center gap-2 rounded-xl bg-red-600 px-4 py-3 text-white hover:bg-red-700 disabled:cursor-wait disabled:bg-red-400"
+                      >
+                        <FaTrash size={16} />
+                        Törlés
+                      </button>
+                    ) : null}
                   </div>
                 </div>
               );
@@ -187,6 +234,13 @@ export default function SavedQuizzes() {
           </div>
         )}
       </div>
+      {sharingQuiz ? (
+        <QuizShareDialog
+          onClose={() => setSharingQuizId(null)}
+          quizId={sharingQuiz.quiz_id}
+          quizTitle={sharingQuiz.title}
+        />
+      ) : null}
     </div>
   );
 }

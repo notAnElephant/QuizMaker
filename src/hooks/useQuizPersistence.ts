@@ -10,6 +10,7 @@ export function useQuizPersistence() {
   const {
     appearance,
     categories,
+    currentQuizAccessRole,
     currentQuizDescription,
     currentQuizId,
     currentQuizTitle,
@@ -37,6 +38,9 @@ export function useQuizPersistence() {
   const persistQuiz = useCallback(async () => {
     if (!currentUser) {
       throw new Error("Nincs kiválasztott felhasználó a mentéshez.");
+    }
+    if (currentQuizAccessRole === "VIEWER") {
+      throw new Error("A megosztott kvíz csak megtekinthető.");
     }
 
     const title = currentQuizTitle.trim();
@@ -99,6 +103,7 @@ export function useQuizPersistence() {
     appearance,
     categories,
     currentQuizDescription,
+    currentQuizAccessRole,
     currentQuizId,
     currentQuizTitle,
     currentUser,

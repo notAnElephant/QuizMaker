@@ -6,6 +6,14 @@ export type ApiUser = {
   user_id: string;
 };
 
+export type QuizAccessRole = "EDITOR" | "OWNER" | "VIEWER";
+
+export type QuizShare = {
+  created_at: string;
+  role: "EDITOR" | "VIEWER";
+  user: ApiUser;
+};
+
 export type SavedQuizQuestion = {
   answer_options: string[];
   answer_media_source?: string | null;
@@ -20,11 +28,13 @@ export type SavedQuizQuestion = {
 };
 
 export type SavedQuiz = {
+  access_role: QuizAccessRole;
   background_image?: string | null;
   background_mode: QuizAppearance["backgroundMode"];
   background_preset: QuizAppearance["backgroundPreset"];
   classic_mode: boolean;
   description?: string | null;
+  owner: ApiUser | null;
   questions: SavedQuizQuestion[];
   quiz_id: string;
   text_color: string;
@@ -34,7 +44,10 @@ export type SavedQuiz = {
   updated_at: string;
 };
 
-export type QuizInput = Omit<SavedQuiz, "quiz_id" | "updated_at">;
+export type QuizInput = Omit<
+  SavedQuiz,
+  "access_role" | "owner" | "quiz_id" | "updated_at"
+>;
 
 export type PlaySessionInput = {
   played_at: string;
