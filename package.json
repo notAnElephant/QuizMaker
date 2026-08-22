@@ -7,7 +7,7 @@
     "dev": "concurrently -k -n api,web -c magenta,cyan \"pnpm dev:api\" \"pnpm dev:web\"",
     "dev:api": "tsx watch --env-file-if-exists=.env --env-file-if-exists=.env.local server/index.ts",
     "dev:web": "vite",
-    "build": "prisma generate && tsc -b && tsc -p tsconfig.server.json && vite build",
+    "build": "prisma generate && tsc -b && pnpm build:api && vite build",
     "build:api": "tsc -p tsconfig.server.json",
     "lint": "eslint .",
     "preview": "vite preview",

@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "./generated/prisma/index.js";
 
 const localDatabaseUrl = `postgresql://postgres:${process.env.POSTGRES_PASSWORD ?? "postgrespassword"}@localhost:55432/postgres`;
 const databaseUrl =
