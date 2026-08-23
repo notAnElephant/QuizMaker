@@ -34,3 +34,4 @@ dist-ssr
 !/.env.production.example
 .vercel
 .env*.local
+gha-creds-*.json

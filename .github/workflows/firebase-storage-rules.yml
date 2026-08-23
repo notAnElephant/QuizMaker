@@ -1,0 +1,42 @@
+name: Deploy Firebase Storage Rules
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .firebaserc
+      - .github/workflows/firebase-storage-rules.yml
+      - firebase.json
+      - storage.rules
+  workflow_dispatch:
+
+concurrency:
+  group: production-firebase-storage-rules
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy-storage-rules:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v3
+        with:
+          credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          project_id: mok-wiki
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+
+      - name: Install Firebase CLI
+        run: npm install --global firebase-tools@15.28.1
+
+      - name: Deploy Storage rules
+        run: firebase deploy --only storage --project mok-wiki --non-interactive

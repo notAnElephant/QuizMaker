@@ -58,3 +58,9 @@ Without Firebase, non-production API instances allow the seeded local users. Set
 The connected Vercel project deploys the Vite frontend and Fastify API together. Requests under `/api/*` run in a Vercel Node function; all other routes use the SPA fallback.
 
 Set `DATABASE_URL` and `FIREBASE_PROJECT_ID` in Vercel. `VITE_API_URL` should remain empty for the default same-origin deployment. Run `pnpm db:migrate` as a release step whenever new Prisma migrations are added.
+
+Pushes to `main` automatically apply Prisma migrations and deploy changes to
+Firebase Storage Security Rules. Add a GitHub Actions secret named
+`FIREBASE_SERVICE_ACCOUNT` containing the JSON key for a service account that
+can deploy Firebase Storage rules to the `mok-wiki` project. Keep the JSON key
+out of the repository.
