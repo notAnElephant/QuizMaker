@@ -62,5 +62,5 @@ Set `DATABASE_URL` and `FIREBASE_PROJECT_ID` in Vercel. `VITE_API_URL` should re
 Pushes to `main` automatically apply Prisma migrations and deploy changes to
 Firebase Storage Security Rules. Add a GitHub Actions secret named
 `FIREBASE_SERVICE_ACCOUNT` containing the JSON key for a service account that
-can deploy Firebase Storage rules to the `mok-wiki` project. Keep the JSON key
-out of the repository.
+can deploy Firebase Storage rules to the `quiz-maker-mok` project. Keep the
+JSON key out of the repository.
