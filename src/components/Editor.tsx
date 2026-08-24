@@ -54,6 +54,11 @@ type DraggedQuestion = {
   sourceQuestionIndex: number;
 };
 
+type QuestionDropTarget = {
+  catIndex: number;
+  questionIndex: number;
+};
+
 type PendingQuestionsImport = {
   categories: Category[];
   fileName: string;
@@ -121,9 +126,11 @@ export default function Editor() {
   const { currentUser } = useCurrentUser();
   const { persistQuiz } = useQuizPersistence();
   const [selectedCategory, setSelectedCategory] = useState(0);
-  const [selectedQuestion, setSelectedQuestion] = useState(0);
+  const [selectedQuestion, setSelectedQuestion] = useState<number | null>(0);
   const [draggedQuestion, setDraggedQuestion] =
     useState<DraggedQuestion | null>(null);
+  const [questionDropTarget, setQuestionDropTarget] =
+    useState<QuestionDropTarget | null>(null);
   const [pendingImport, setPendingImport] =
     useState<PendingQuestionsImport | null>(null);
   const [customBackgrounds, setCustomBackgrounds] = useState<
@@ -136,7 +143,10 @@ export default function Editor() {
   const [isStartingGame, setIsStartingGame] = useState(false);
 
   const activeCategory = categories[selectedCategory];
-  const activeQuestion = activeCategory?.questions[selectedQuestion];
+  const activeQuestion =
+    selectedQuestion === null
+      ? undefined
+      : activeCategory?.questions[selectedQuestion];
   const questionCount = useMemo(
     () =>
       categories.reduce(
@@ -225,11 +235,12 @@ export default function Editor() {
       setSelectedCategory(Math.max(0, categories.length - 1));
       setSelectedQuestion(0);
     } else if (
+      selectedQuestion !== null &&
       selectedQuestion >= (categories[selectedCategory]?.questions.length ?? 0)
     ) {
-      setSelectedQuestion(
-        Math.max(0, (categories[selectedCategory]?.questions.length ?? 1) - 1),
-      );
+      const lastQuestionIndex =
+        (categories[selectedCategory]?.questions.length ?? 0) - 1;
+      setSelectedQuestion(lastQuestionIndex >= 0 ? lastQuestionIndex : null);
     }
   }, [categories, selectedCategory, selectedQuestion]);
 
@@ -360,11 +371,12 @@ export default function Editor() {
   };
 
   const handleQuestionMediaUpload = async (file?: File) => {
-    if (!file || !activeQuestion) return;
+    if (!file || selectedQuestion === null || !activeQuestion) return;
+    const questionIndex = selectedQuestion;
     setUploadingMedia("question");
     try {
       const uploaded = await uploadQuizMedia(file);
-      updateQuestion(selectedCategory, selectedQuestion, {
+      updateQuestion(selectedCategory, questionIndex, {
         source: uploaded.url,
         type: uploaded.type,
       });
@@ -379,11 +391,12 @@ export default function Editor() {
   };
 
   const handleAnswerMediaUpload = async (file?: File) => {
-    if (!file || !activeQuestion) return;
+    if (!file || selectedQuestion === null || !activeQuestion) return;
+    const questionIndex = selectedQuestion;
     setUploadingMedia("answer");
     try {
       const uploaded = await uploadQuizMedia(file);
-      updateQuestion(selectedCategory, selectedQuestion, {
+      updateQuestion(selectedCategory, questionIndex, {
         answerMediaType: uploaded.type,
         answerSource: uploaded.url,
       });
@@ -501,6 +514,11 @@ export default function Editor() {
 
   const handleDrop = (targetCatIndex: number, targetQuestionIndex: number) => {
     if (!draggedQuestion) return;
+    const nextSelectedQuestion =
+      draggedQuestion.sourceCatIndex === targetCatIndex &&
+      targetQuestionIndex > draggedQuestion.sourceQuestionIndex
+        ? targetQuestionIndex - 1
+        : targetQuestionIndex;
     moveQuestion(
       draggedQuestion.sourceCatIndex,
       draggedQuestion.sourceQuestionIndex,
@@ -508,8 +526,9 @@ export default function Editor() {
       targetQuestionIndex,
     );
     setSelectedCategory(targetCatIndex);
-    setSelectedQuestion(targetQuestionIndex);
+    setSelectedQuestion(nextSelectedQuestion);
     setDraggedQuestion(null);
+    setQuestionDropTarget(null);
   };
 
   return (
@@ -777,33 +796,91 @@ export default function Editor() {
               <div className="grid gap-2">
                 {activeCategory.questions.map((question, qIndex) => {
                   const isSelected = selectedQuestion === qIndex;
+                  const isDropTarget =
+                    questionDropTarget?.catIndex === selectedCategory &&
+                    questionDropTarget.questionIndex === qIndex;
                   return (
                     <article
                       key={`${selectedCategory}-${qIndex}`}
                       draggable
                       onDragStart={(event: DragEvent<HTMLElement>) => {
+                        if (
+                          !(event.target as Element).closest(
+                            "[data-question-drag-handle]",
+                          )
+                        ) {
+                          event.preventDefault();
+                          return;
+                        }
                         event.dataTransfer.effectAllowed = "move";
+                        event.dataTransfer.setData("text/plain", `${qIndex}`);
                         setDraggedQuestion({
                           sourceCatIndex: selectedCategory,
                           sourceQuestionIndex: qIndex,
                         });
                       }}
-                      onDragOver={(event) => event.preventDefault()}
+                      onDragEnd={() => {
+                        setDraggedQuestion(null);
+                        setQuestionDropTarget(null);
+                      }}
+                      onDragOver={(event) => {
+                        event.preventDefault();
+                        event.dataTransfer.dropEffect = "move";
+                        const bounds =
+                          event.currentTarget.getBoundingClientRect();
+                        const targetQuestionIndex =
+                          event.clientY < bounds.top + bounds.height / 2
+                            ? qIndex
+                            : qIndex + 1;
+                        setQuestionDropTarget((currentTarget) =>
+                          currentTarget?.catIndex === selectedCategory &&
+                          currentTarget.questionIndex === targetQuestionIndex
+                            ? currentTarget
+                            : {
+                                catIndex: selectedCategory,
+                                questionIndex: targetQuestionIndex,
+                              },
+                        );
+                      }}
                       onDrop={(event) => {
                         event.preventDefault();
-                        handleDrop(selectedCategory, qIndex);
+                        const bounds =
+                          event.currentTarget.getBoundingClientRect();
+                        handleDrop(
+                          selectedCategory,
+                          event.clientY < bounds.top + bounds.height / 2
+                            ? qIndex
+                            : qIndex + 1,
+                        );
                       }}
-                      className={`overflow-hidden rounded-lg border transition ${
+                      className={`relative overflow-hidden rounded-lg border transition ${
                         isSelected
                           ? "border-[#e0a20c] bg-[#fffaf0] shadow-[0_3px_0_#e0a20c]"
                           : "border-[#cfc2aa] bg-white/45 hover:bg-white/75"
-                      }`}
+                      } ${draggedQuestion?.sourceQuestionIndex === qIndex ? "opacity-55" : ""}`}
                     >
+                      {isDropTarget ? (
+                        <span className="pointer-events-none absolute inset-x-0 top-0 z-10 h-1 bg-[#d5572a]" />
+                      ) : null}
                       <button
-                        onClick={() => setSelectedQuestion(qIndex)}
+                        type="button"
+                        aria-expanded={isSelected}
+                        aria-controls={`question-editor-${selectedCategory}-${qIndex}`}
+                        onClick={() =>
+                          setSelectedQuestion((currentQuestion) =>
+                            currentQuestion === qIndex ? null : qIndex,
+                          )
+                        }
                         className="grid w-full grid-cols-[20px_38px_minmax(0,1fr)_76px_26px] items-center gap-2 px-3 py-3 text-left"
                       >
-                        <FaGripVertical className="text-[#877b68]" />
+                        <span
+                          data-question-drag-handle
+                          title="Húzd a kérdés átrendezéséhez"
+                          className="cursor-grab touch-none text-[#877b68] active:cursor-grabbing"
+                        >
+                          <FaGripVertical aria-hidden="true" />
+                          <span className="sr-only">Kérdés átrendezése</span>
+                        </span>
                         <strong>{qIndex + 1}</strong>
                         <span className="truncate text-sm font-semibold">
                           {question.content || "Üres kérdés"}
@@ -817,7 +894,10 @@ export default function Editor() {
                       </button>
 
                       {isSelected ? (
-                        <div className="border-t border-[#e7d7b7] p-4 sm:p-5">
+                        <div
+                          id={`question-editor-${selectedCategory}-${qIndex}`}
+                          className="border-t border-[#e7d7b7] p-4 sm:p-5"
+                        >
                           <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_120px]">
                             <label className="editor-field-label">
                               Kérdés
@@ -1018,7 +1098,14 @@ export default function Editor() {
                     addQuestionToCategory(selectedCategory);
                     setSelectedQuestion(activeCategory.questions.length);
                   }}
-                  onDragOver={(event) => event.preventDefault()}
+                  onDragOver={(event) => {
+                    event.preventDefault();
+                    event.dataTransfer.dropEffect = "move";
+                    setQuestionDropTarget({
+                      catIndex: selectedCategory,
+                      questionIndex: activeCategory.questions.length,
+                    });
+                  }}
                   onDrop={(event) => {
                     event.preventDefault();
                     handleDrop(
@@ -1026,7 +1113,13 @@ export default function Editor() {
                       activeCategory.questions.length,
                     );
                   }}
-                  className="mt-2 inline-flex items-center justify-center gap-2 rounded-lg border-2 border-dashed border-[#aa9d86] px-4 py-4 font-bold text-[#d5572a] hover:bg-white/50"
+                  className={`mt-2 inline-flex items-center justify-center gap-2 rounded-lg border-2 border-dashed px-4 py-4 font-bold text-[#d5572a] hover:bg-white/50 ${
+                    questionDropTarget?.catIndex === selectedCategory &&
+                    questionDropTarget.questionIndex ===
+                      activeCategory.questions.length
+                      ? "border-[#d5572a] bg-white/60"
+                      : "border-[#aa9d86]"
+                  }`}
                 >
                   <FaPlus /> Új kérdés
                 </button>
