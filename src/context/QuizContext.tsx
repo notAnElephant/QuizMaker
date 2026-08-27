@@ -70,7 +70,7 @@ const defaultSettings: Settings = {
 const SETTINGS_STORAGE_KEY = "quizmaker.settings.qa";
 const EDITOR_STORAGE_KEY_PREFIX = "quizmaker.editor";
 const DEFAULT_QUIZ_DESCRIPTION = "Imported sample board quiz";
-const DEFAULT_QUIZ_ID = "47559e6f-f126-4124-84d7-9d71d9467f6d";
+const LEGACY_DEFAULT_QUIZ_ID = "47559e6f-f126-4124-84d7-9d71d9467f6d";
 const DEFAULT_QUIZ_TITLE = "Vágó Pesta";
 
 type StoredEditorState = {
@@ -87,6 +87,10 @@ function normalizeQuestionType(type: unknown): QuestionType {
   return type === "image" || type === "video" || type === "audio"
     ? type
     : "text";
+}
+
+function normalizeStoredQuizId(quizId: string | null | undefined) {
+  return quizId === LEGACY_DEFAULT_QUIZ_ID ? null : (quizId ?? null);
 }
 
 function getEditorStorageKey(ownerId: string) {
@@ -218,9 +222,7 @@ export function QuizProvider({ children }: { children: ReactNode }) {
   );
   const [currentQuizAccessRole, setCurrentQuizAccessRole] =
     useState<QuizAccessRole>("OWNER");
-  const [currentQuizId, setCurrentQuizId] = useState<string | null>(
-    DEFAULT_QUIZ_ID,
-  );
+  const [currentQuizId, setCurrentQuizId] = useState<string | null>(null);
   const [currentQuizTitle, setCurrentQuizTitle] = useState(DEFAULT_QUIZ_TITLE);
   const [hydratedOwnerId, setHydratedOwnerId] = useState<string | null>(null);
   const [playSessionId, setPlaySessionId] = useState(() => crypto.randomUUID());
@@ -512,7 +514,7 @@ export function QuizProvider({ children }: { children: ReactNode }) {
       storedState?.description ?? DEFAULT_QUIZ_DESCRIPTION,
     );
     setCurrentQuizAccessRole(storedState?.accessRole ?? "OWNER");
-    setCurrentQuizId(storedState?.quizId ?? DEFAULT_QUIZ_ID);
+    setCurrentQuizId(normalizeStoredQuizId(storedState?.quizId));
     setCurrentQuizTitle(storedState?.title ?? DEFAULT_QUIZ_TITLE);
     setSettings(storedState?.settings ?? defaultSettings);
     setHydratedOwnerId(currentUserId);
