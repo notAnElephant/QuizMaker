@@ -6,6 +6,12 @@ import { useQuiz } from "../context/QuizContext";
 import { useCurrentUser } from "../context/useCurrentUser";
 import { buildStoredQuestionText } from "../utility/quizPersistence";
 
+function normalizeQuestionType(type: unknown) {
+  return type === "image" || type === "video" || type === "audio"
+    ? type
+    : "text";
+}
+
 export function useQuizPersistence() {
   const {
     appearance,
@@ -67,7 +73,7 @@ export function useQuizPersistence() {
           question.content,
           question.source,
         ),
-        question_type: question.type,
+        question_type: normalizeQuestionType(question.type),
         reveal_answer: question.revealAnswer,
       })),
     );

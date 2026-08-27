@@ -83,6 +83,12 @@ type StoredEditorState = {
   title: string;
 };
 
+function normalizeQuestionType(type: unknown): QuestionType {
+  return type === "image" || type === "video" || type === "audio"
+    ? type
+    : "text";
+}
+
 function getEditorStorageKey(ownerId: string) {
   return `${EDITOR_STORAGE_KEY_PREFIX}.${ownerId}`;
 }
@@ -116,7 +122,7 @@ function hydrateCategories(categories: RawCategory[]): Category[] {
     questions: category.questions.map(
       (question) =>
         new Question(
-          question.type,
+          normalizeQuestionType(question.type),
           question.content,
           question.source,
           question.points,
