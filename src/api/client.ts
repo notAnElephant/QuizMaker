@@ -3,7 +3,9 @@ import type {
   ApiUser,
   PlaySessionInput,
   QuizInput,
+  QuizInvitation,
   QuizShare,
+  QuizShareRole,
   SavedQuiz,
 } from "./types";
 
@@ -12,7 +14,7 @@ const API_URL = (import.meta.env.VITE_API_URL ?? "").replace(/\/$/, "");
 type RequestOptions = {
   body?: unknown;
   localUserId?: string | null;
-  method?: "DELETE" | "GET" | "POST" | "PUT";
+  method?: "DELETE" | "GET" | "PATCH" | "POST" | "PUT";
 };
 
 export async function apiRequest<T>(
@@ -56,12 +58,26 @@ export const api = {
   createQuizShare: (
     quizId: string,
     email: string,
+    role: QuizShareRole,
     localUserId?: string | null,
   ) =>
-    apiRequest<{ share: QuizShare }>(`/quizzes/${quizId}/shares`, {
-      body: { email, role: "VIEWER" },
+    apiRequest<{
+      invitation?: QuizInvitation;
+      outcome: "INVITED" | "INVITATION_DELIVERY_FAILED" | "SHARED";
+      share?: QuizShare;
+    }>(`/quizzes/${quizId}/shares`, {
+      body: { email, role },
       localUserId,
       method: "POST",
+    }),
+  deleteQuizInvitation: (
+    quizId: string,
+    invitationId: string,
+    localUserId?: string | null,
+  ) =>
+    apiRequest<void>(`/quizzes/${quizId}/invitations/${invitationId}`, {
+      localUserId,
+      method: "DELETE",
     }),
   deleteQuizShare: (
     quizId: string,
@@ -80,9 +96,19 @@ export const api = {
   getQuizzes: (localUserId?: string | null) =>
     apiRequest<{ quizzes: SavedQuiz[] }>("/quizzes", { localUserId }),
   getQuizShares: (quizId: string, localUserId?: string | null) =>
-    apiRequest<{ shares: QuizShare[] }>(`/quizzes/${quizId}/shares`, {
-      localUserId,
-    }),
+    apiRequest<{ invitations: QuizInvitation[]; shares: QuizShare[] }>(
+      `/quizzes/${quizId}/shares`,
+      { localUserId },
+    ),
+  resendQuizInvitation: (
+    quizId: string,
+    invitationId: string,
+    localUserId?: string | null,
+  ) =>
+    apiRequest<{ resent: true }>(
+      `/quizzes/${quizId}/invitations/${invitationId}/resend`,
+      { localUserId, method: "POST" },
+    ),
   getUsers: () => apiRequest<{ users: ApiUser[] }>("/users"),
   savePlaySession: (input: PlaySessionInput, localUserId?: string | null) =>
     apiRequest<{ saved: number }>("/play-sessions", {
@@ -100,5 +126,26 @@ export const api = {
       body: input,
       localUserId,
       method: "PUT",
+    }),
+  updateQuizInvitationRole: (
+    quizId: string,
+    invitationId: string,
+    role: QuizShareRole,
+    localUserId?: string | null,
+  ) =>
+    apiRequest<{ updated: true }>(
+      `/quizzes/${quizId}/invitations/${invitationId}`,
+      { body: { role }, localUserId, method: "PATCH" },
+    ),
+  updateQuizShareRole: (
+    quizId: string,
+    userId: string,
+    role: QuizShareRole,
+    localUserId?: string | null,
+  ) =>
+    apiRequest<{ updated: true }>(`/quizzes/${quizId}/shares/${userId}`, {
+      body: { role },
+      localUserId,
+      method: "PATCH",
     }),
 };

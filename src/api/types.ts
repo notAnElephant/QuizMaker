@@ -14,6 +14,16 @@ export type QuizShare = {
   user: ApiUser;
 };
 
+export type QuizInvitation = {
+  created_at: string;
+  delivery_status: "FAILED" | "PENDING" | "SENT";
+  email: string;
+  invitation_id: string;
+  role: "EDITOR" | "VIEWER";
+};
+
+export type QuizShareRole = QuizShare["role"];
+
 export type SavedQuizQuestion = {
   answer_options: string[];
   answer_media_source?: string | null;

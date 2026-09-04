@@ -4,6 +4,7 @@ import { Prisma } from "../generated/prisma/index.js";
 import { authenticate } from "../auth.js";
 import { prisma } from "../database.js";
 import { editableQuizWhere } from "../quizAccess.js";
+import { normalizeEmail, sendQuizInvitationEmail } from "../quizInvitations.js";
 
 const quizParamsSchema = Type.Object({
   quizId: Type.String({ format: "uuid" }),
@@ -14,7 +15,16 @@ const quizShareParamsSchema = Type.Object({
 });
 const quizShareBodySchema = Type.Object({
   email: Type.String({ minLength: 3, maxLength: 320 }),
-  role: Type.Optional(Type.Literal("VIEWER")),
+  role: Type.Union([Type.Literal("VIEWER"), Type.Literal("EDITOR")]),
+});
+const quizShareRoleSchema = Type.Union([
+  Type.Literal("VIEWER"),
+  Type.Literal("EDITOR"),
+]);
+const quizShareUpdateBodySchema = Type.Object({ role: quizShareRoleSchema });
+const quizInvitationParamsSchema = Type.Object({
+  invitationId: Type.String({ format: "uuid" }),
+  quizId: Type.String({ format: "uuid" }),
 });
 const nullableString = Type.Union([Type.Null(), Type.String()]);
 const questionSchema = Type.Object({
@@ -210,6 +220,16 @@ export const quizRoutes: FastifyPluginAsyncTypebox = async (app) => {
       const params = request.params as Static<typeof quizParamsSchema>;
       const quiz = await prisma.quiz.findFirst({
         select: {
+          invitations: {
+            orderBy: { created_at: "asc" },
+            select: {
+              created_at: true,
+              delivery_status: true,
+              email: true,
+              invitation_id: true,
+              role: true,
+            },
+          },
           shares: {
             orderBy: { created_at: "asc" },
             select: {
@@ -231,7 +251,7 @@ export const quizRoutes: FastifyPluginAsyncTypebox = async (app) => {
         return reply.code(404).send({ message: "Quiz not found" });
       }
 
-      return { shares: quiz.shares };
+      return { invitations: quiz.invitations, shares: quiz.shares };
     },
   );
 
@@ -243,8 +263,9 @@ export const quizRoutes: FastifyPluginAsyncTypebox = async (app) => {
     async (request, reply) => {
       const body = request.body as Static<typeof quizShareBodySchema>;
       const params = request.params as Static<typeof quizParamsSchema>;
+      const email = normalizeEmail(body.email);
       const quiz = await prisma.quiz.findFirst({
-        select: { quiz_id: true },
+        select: { quiz_id: true, title: true },
         where: {
           owner_id: request.currentUserId,
           quiz_id: params.quizId,
@@ -255,47 +276,222 @@ export const quizRoutes: FastifyPluginAsyncTypebox = async (app) => {
         return reply.code(404).send({ message: "Quiz not found" });
       }
 
-      const recipients = await prisma.user.findMany({
-        select: { display_name: true, email: true, user_id: true },
-        take: 2,
-        where: {
-          email: { equals: body.email.trim(), mode: "insensitive" },
-        },
-      });
-
-      if (!recipients.length) {
-        return reply.code(404).send({ message: "User not found" });
-      }
-      if (recipients.length > 1) {
-        return reply.code(409).send({ message: "Email is not unique" });
-      }
-
-      const recipient = recipients[0];
-      if (recipient.user_id === request.currentUserId) {
+      if (
+        request.currentUserEmailVerified &&
+        request.currentUserEmail &&
+        email === normalizeEmail(request.currentUserEmail)
+      ) {
         return reply
           .code(400)
           .send({ message: "You cannot share a quiz with yourself" });
       }
 
-      const share = await prisma.quizShare.upsert({
-        create: {
-          quiz_id: params.quizId,
-          role: "VIEWER",
-          user_id: recipient.user_id,
-        },
-        select: { created_at: true, role: true },
-        update: { role: "VIEWER" },
+      const recipients = await prisma.user.findMany({
+        select: { display_name: true, email: true, user_id: true },
+        take: 2,
         where: {
-          quiz_id_user_id: {
-            quiz_id: params.quizId,
-            user_id: recipient.user_id,
-          },
+          email: { equals: email, mode: "insensitive" },
         },
       });
 
-      return reply.code(201).send({
-        share: { ...share, user: recipient },
+      if (recipients.length > 1) {
+        return reply.code(409).send({ message: "Email is not unique" });
+      }
+
+      const recipient = recipients[0];
+      if (recipient?.user_id === request.currentUserId) {
+        return reply
+          .code(400)
+          .send({ message: "You cannot share a quiz with yourself" });
+      }
+
+      if (recipient) {
+        const share = await prisma.$transaction(async (transaction) => {
+          await transaction.quizInvitation.deleteMany({
+            where: { email, quiz_id: params.quizId },
+          });
+          return transaction.quizShare.upsert({
+            create: {
+              quiz_id: params.quizId,
+              role: body.role,
+              user_id: recipient.user_id,
+            },
+            select: { created_at: true, role: true },
+            update: { role: body.role },
+            where: {
+              quiz_id_user_id: {
+                quiz_id: params.quizId,
+                user_id: recipient.user_id,
+              },
+            },
+          });
+        });
+
+        return reply.code(201).send({
+          outcome: "SHARED",
+          share: { ...share, user: recipient },
+        });
+      }
+
+      const invitation = await prisma.quizInvitation.upsert({
+        create: { email, quiz_id: params.quizId, role: body.role },
+        update: { role: body.role },
+        where: { quiz_id_email: { email, quiz_id: params.quizId } },
       });
+      const owner = await prisma.user.findUnique({
+        select: { display_name: true },
+        where: { user_id: request.currentUserId },
+      });
+
+      try {
+        const resendMessageId = await sendQuizInvitationEmail({
+          deliveryKey: invitation.delivery_key,
+          email: invitation.email,
+          inviterName: owner?.display_name ?? null,
+          quizTitle: quiz.title,
+          role: invitation.role,
+        });
+        const sentInvitation = await prisma.quizInvitation.update({
+          data: {
+            delivery_status: "SENT",
+            resend_message_id: resendMessageId,
+          },
+          where: { invitation_id: invitation.invitation_id },
+        });
+        return reply.code(201).send({
+          invitation: sentInvitation,
+          outcome: "INVITED",
+        });
+      } catch (error) {
+        request.log.error(error, "Quiz invitation email delivery failed");
+        const failedInvitation = await prisma.quizInvitation.update({
+          data: { delivery_status: "FAILED" },
+          where: { invitation_id: invitation.invitation_id },
+        });
+        return reply.code(201).send({
+          invitation: failedInvitation,
+          outcome: "INVITATION_DELIVERY_FAILED",
+        });
+      }
+    },
+  );
+
+  app.patch(
+    "/quizzes/:quizId/shares/:userId",
+    {
+      schema: {
+        body: quizShareUpdateBodySchema,
+        params: quizShareParamsSchema,
+      },
+    },
+    async (request, reply) => {
+      const body = request.body as Static<typeof quizShareUpdateBodySchema>;
+      const params = request.params as Static<typeof quizShareParamsSchema>;
+      const result = await prisma.quizShare.updateMany({
+        data: { role: body.role },
+        where: {
+          quiz_id: params.quizId,
+          user_id: params.userId,
+          quiz: { owner_id: request.currentUserId },
+        },
+      });
+
+      if (!result.count) {
+        return reply.code(404).send({ message: "Share not found" });
+      }
+
+      return { updated: true };
+    },
+  );
+
+  app.patch(
+    "/quizzes/:quizId/invitations/:invitationId",
+    {
+      schema: {
+        body: quizShareUpdateBodySchema,
+        params: quizInvitationParamsSchema,
+      },
+    },
+    async (request, reply) => {
+      const body = request.body as Static<typeof quizShareUpdateBodySchema>;
+      const params = request.params as Static<
+        typeof quizInvitationParamsSchema
+      >;
+      const result = await prisma.quizInvitation.updateMany({
+        data: { role: body.role },
+        where: {
+          invitation_id: params.invitationId,
+          quiz_id: params.quizId,
+          quiz: { owner_id: request.currentUserId },
+        },
+      });
+
+      if (!result.count) {
+        return reply.code(404).send({ message: "Invitation not found" });
+      }
+
+      return { updated: true };
+    },
+  );
+
+  app.post(
+    "/quizzes/:quizId/invitations/:invitationId/resend",
+    { schema: { params: quizInvitationParamsSchema } },
+    async (request, reply) => {
+      const params = request.params as Static<
+        typeof quizInvitationParamsSchema
+      >;
+      const invitation = await prisma.quizInvitation.findFirst({
+        select: {
+          email: true,
+          invitation_id: true,
+          quiz: { select: { title: true } },
+          role: true,
+        },
+        where: {
+          invitation_id: params.invitationId,
+          quiz_id: params.quizId,
+          quiz: { owner_id: request.currentUserId },
+        },
+      });
+
+      if (!invitation) {
+        return reply.code(404).send({ message: "Invitation not found" });
+      }
+
+      const owner = await prisma.user.findUnique({
+        select: { display_name: true },
+        where: { user_id: request.currentUserId },
+      });
+      const deliveryKey = crypto.randomUUID();
+
+      try {
+        const resendMessageId = await sendQuizInvitationEmail({
+          deliveryKey,
+          email: invitation.email,
+          inviterName: owner?.display_name ?? null,
+          quizTitle: invitation.quiz.title,
+          role: invitation.role,
+        });
+        await prisma.quizInvitation.update({
+          data: {
+            delivery_key: deliveryKey,
+            delivery_status: "SENT",
+            resend_message_id: resendMessageId,
+          },
+          where: { invitation_id: invitation.invitation_id },
+        });
+        return { resent: true };
+      } catch (error) {
+        request.log.error(error, "Quiz invitation email resend failed");
+        await prisma.quizInvitation.update({
+          data: { delivery_status: "FAILED" },
+          where: { invitation_id: invitation.invitation_id },
+        });
+        return reply
+          .code(502)
+          .send({ message: "Invitation email could not be sent" });
+      }
     },
   );
 
@@ -322,6 +518,29 @@ export const quizRoutes: FastifyPluginAsyncTypebox = async (app) => {
 
       if (!result.count) {
         return reply.code(404).send({ message: "Share not found" });
+      }
+
+      return reply.code(204).send();
+    },
+  );
+
+  app.delete(
+    "/quizzes/:quizId/invitations/:invitationId",
+    { schema: { params: quizInvitationParamsSchema } },
+    async (request, reply) => {
+      const params = request.params as Static<
+        typeof quizInvitationParamsSchema
+      >;
+      const result = await prisma.quizInvitation.deleteMany({
+        where: {
+          invitation_id: params.invitationId,
+          quiz_id: params.quizId,
+          quiz: { owner_id: request.currentUserId },
+        },
+      });
+
+      if (!result.count) {
+        return reply.code(404).send({ message: "Invitation not found" });
       }
 
       return reply.code(204).send();

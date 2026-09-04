@@ -17,6 +17,8 @@ export const isLocalAuthEnabled =
 declare module "fastify" {
   interface FastifyRequest {
     currentUserId: string;
+    currentUserEmail?: string;
+    currentUserEmailVerified: boolean;
   }
 }
 
@@ -34,6 +36,8 @@ export async function authenticate(
     try {
       const decodedToken = await getAuth().verifyIdToken(token);
       request.currentUserId = createStableUuid(`firebase:${decodedToken.uid}`);
+      request.currentUserEmail = decodedToken.email;
+      request.currentUserEmailVerified = decodedToken.email_verified === true;
       return;
     } catch {
       return reply.code(401).send({ message: "Unauthorized" });
@@ -44,6 +48,7 @@ export async function authenticate(
     const localUserId = request.headers["x-local-user-id"];
     if (typeof localUserId === "string" && localUserId) {
       request.currentUserId = localUserId;
+      request.currentUserEmailVerified = false;
       return;
     }
   }
