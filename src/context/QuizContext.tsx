@@ -13,7 +13,10 @@ import {
   defaultQuizAppearance,
   getQuizBackground,
 } from "../utility/quizAppearance";
-import { resolveQuestionMediaSource } from "../utility/questionMedia";
+import {
+  resolveQuestionMediaSource,
+  resolveQuestionMediaType,
+} from "../utility/questionMedia";
 import { Category, QuizAppearance, Settings, Team } from "./types";
 import { useCurrentUser } from "./useCurrentUser";
 
@@ -49,7 +52,7 @@ const initialData: Category[] = (rawData as RawCategory[]).map((category) => ({
   questions: category.questions.map(
     (question) =>
       new Question(
-        normalizeQuestionType(question.type),
+        resolveQuestionMediaType(question.type, question.source),
         question.content,
         resolveQuestionMediaSource(question.source),
         question.points,
@@ -83,12 +86,6 @@ type StoredEditorState = {
   settings?: Settings;
   title: string;
 };
-
-function normalizeQuestionType(type: unknown): QuestionType {
-  return type === "image" || type === "video" || type === "audio"
-    ? type
-    : "text";
-}
 
 function normalizeStoredQuizId(quizId: string | null | undefined) {
   return quizId === LEGACY_DEFAULT_QUIZ_ID ? null : (quizId ?? null);
@@ -127,7 +124,7 @@ function hydrateCategories(categories: RawCategory[]): Category[] {
     questions: category.questions.map(
       (question) =>
         new Question(
-          normalizeQuestionType(question.type),
+          resolveQuestionMediaType(question.type, question.source),
           question.content,
           resolveQuestionMediaSource(question.source),
           question.points,

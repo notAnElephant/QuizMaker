@@ -1,6 +1,9 @@
 import { Category } from "../context/types";
-import { AnswerMediaType, Question, QuestionType } from "../models/Question";
-import { resolveQuestionMediaSource } from "./questionMedia";
+import { AnswerMediaType, Question } from "../models/Question";
+import {
+  resolveQuestionMediaSource,
+  resolveQuestionMediaType,
+} from "./questionMedia";
 
 const SOURCE_MARKER = " [SOURCE: ";
 
@@ -43,13 +46,14 @@ export function buildCategoriesFromPersistedQuestions(
 
   for (const question of questions) {
     const { content, source } = parseStoredQuestionText(question.question_text);
+    const resolvedSource = resolveQuestionMediaSource(source);
     const categoryQuestions = categories.get(question.category_name) ?? [];
 
     categoryQuestions.push(
       new Question(
-        question.question_type as QuestionType,
+        resolveQuestionMediaType(question.question_type, resolvedSource),
         content,
-        resolveQuestionMediaSource(source),
+        resolvedSource,
         question.points ?? 1000,
         false,
         question.answer_options?.length ? question.answer_options : undefined,
