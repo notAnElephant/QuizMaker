@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Question } from "../models/Question";
 import { useQuiz } from "../context/QuizContext.tsx";
+import { Question } from "../models/Question";
 import { cn } from "../utility/utils.ts";
 
 type Category = {
@@ -114,9 +114,9 @@ export function Board({
       ref={boardRef}
       className="flex w-full flex-col items-center justify-center"
     >
-      <div className="w-full max-w-screen-xl overflow-x-auto px-1 sm:px-4">
+      <div className="w-full max-w-7xl overflow-x-auto px-1 sm:px-4">
         <div
-          className="grid gap-2 sm:gap-4"
+          className="grid gap-2 sm:gap-4 pb-4"
           style={{
             gridTemplateColumns: `repeat(${data.length}, minmax(64px, 1fr))`,
           }}
