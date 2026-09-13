@@ -21,7 +21,7 @@ body {
 }
 
 .quiz-card {
-  height: min(38rem, calc(100dvh - 10rem));
+  height: min(38rem, calc(100dvh - 11rem));
   perspective: 1600px;
 }
 

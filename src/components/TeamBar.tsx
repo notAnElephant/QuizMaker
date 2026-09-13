@@ -41,7 +41,11 @@ export default function TeamBar({ mode, questionPoints = 0 }: TeamBarProps) {
   };
 
   return (
-    <div className="flex w-full flex-wrap justify-center gap-4 px-14 py-4 sm:px-16">
+    <div
+      className={`flex flex-wrap justify-center gap-4 ${
+        mode === "question" ? "w-auto py-0" : "w-full px-14 py-4 sm:px-16"
+      }`}
+    >
       {teams.map((team, i) => (
         <div
           key={i}

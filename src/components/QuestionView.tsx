@@ -168,7 +168,7 @@ export default function QuestionView({
     >
       {preview ? <PreviewBar fixed /> : null}
 
-      <div className="flex w-full flex-1 items-center justify-center py-12">
+      <div className="flex min-h-0 w-full flex-1 items-center justify-center py-4">
         <div className="quiz-card w-full max-w-3xl">
           <div className={`quiz-card-inner ${showAnswer ? "is-flipped" : ""}`}>
             <section
@@ -265,16 +265,17 @@ export default function QuestionView({
         </div>
       </div>
 
-      <button
-        onClick={() => navigate(-1)}
-        className="fixed bottom-4 left-4 grid size-12 place-items-center rounded-full border-2 border-[#24211c] bg-[#fff4d6] text-[#24211c] shadow-[0_3px_0_#24211c]"
-        aria-label="Vissza"
-      >
-        <FaArrowLeft size={18} />
-      </button>
-      {preview ? null : (
-        <TeamBar mode="question" questionPoints={question.points} />
-      )}
+      <footer className="fixed inset-x-4 bottom-4 z-10 flex items-center justify-between gap-4">
+        <button
+          onClick={() => navigate(-1)}
+          className="grid size-12 shrink-0 place-items-center rounded-full border-2 border-[#24211c] bg-[#fff4d6] text-[#24211c] shadow-[0_3px_0_#24211c]"
+          aria-label="Vissza"
+        >
+          <FaArrowLeft size={18} />
+        </button>
+        {preview ? <div className="size-12 shrink-0" /> : <TeamBar mode="question" questionPoints={question.points} />}
+        <div className="size-12 shrink-0" aria-hidden="true" />
+      </footer>
     </main>
   );
 }
