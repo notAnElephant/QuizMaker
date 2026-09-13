@@ -4,43 +4,48 @@
     "questions": [
       {
         "content": "Melyik nevezetesség hiányzik a képről?",
-        "source": "hult-helye-question-1.png",
+        "source": "/question-media/hult-helye-question-1.png",
+        "type": "image",
         "points": 1000,
         "correctAnswer": "Krisztus-szobor, Rio de Janeiro",
         "revealAnswer": true,
-        "answerSource": "hult-helye-answer-1.jpg"
+        "answerSource": "/question-media/hult-helye-answer-1.jpg"
       },
       {
         "content": "Melyik nevezetesség hiányzik a képről?",
-        "source": "hult-helye-question-2.png",
+        "source": "/question-media/hult-helye-question-2.png",
+        "type": "image",
         "points": 2000,
         "correctAnswer": "Pisai ferde torony",
         "revealAnswer": true,
-        "answerSource": "hult-helye-answer-2.jpg"
+        "answerSource": "/question-media/hult-helye-answer-2.jpg"
       },
       {
         "content": "Melyik nevezetesség hiányzik a képről?",
-        "source": "hult-helye-question-3.jpg",
+        "source": "/question-media/hult-helye-question-3.jpg",
+        "type": "image",
         "points": 3000,
         "correctAnswer": "Húsvét-szigeteki szobrok",
         "revealAnswer": true,
-        "answerSource": "hult-helye-answer-3.jpg"
+        "answerSource": "/question-media/hult-helye-answer-3.jpg"
       },
       {
         "content": "Melyik nevezetesség hiányzik a képről?",
-        "source": "hult-helye-question-4.png",
+        "source": "/question-media/hult-helye-question-4.png",
+        "type": "image",
         "points": 4000,
         "correctAnswer": "Fudzsi-hegy",
         "revealAnswer": true,
-        "answerSource": "hult-helye-answer-4.jpg"
+        "answerSource": "/question-media/hult-helye-answer-4.jpg"
       },
       {
         "content": "Melyik nevezetesség hiányzik a képről?",
-        "source": "hult-helye-question-5.png",
+        "source": "/question-media/hult-helye-question-5.png",
+        "type": "image",
         "points": 5000,
         "correctAnswer": "Louvre",
         "revealAnswer": true,
-        "answerSource": "hult-helye-answer-5.jpg"
+        "answerSource": "/question-media/hult-helye-answer-5.jpg"
       }
     ]
   },

@@ -1,5 +1,6 @@
 import { Category } from "../context/types";
 import { AnswerMediaType, Question, QuestionType } from "../models/Question";
+import { resolveQuestionMediaSource } from "./questionMedia";
 
 const SOURCE_MARKER = " [SOURCE: ";
 
@@ -48,14 +49,14 @@ export function buildCategoriesFromPersistedQuestions(
       new Question(
         question.question_type as QuestionType,
         content,
-        source,
+        resolveQuestionMediaSource(source),
         question.points ?? 1000,
         false,
         question.answer_options?.length ? question.answer_options : undefined,
         question.correct_answer ?? undefined,
         question.reveal_answer ?? false,
         question.answer_media_type as AnswerMediaType | undefined,
-        question.answer_media_source ?? undefined,
+        resolveQuestionMediaSource(question.answer_media_source ?? undefined),
       ),
     );
 

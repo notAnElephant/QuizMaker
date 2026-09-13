@@ -13,6 +13,7 @@ import {
   defaultQuizAppearance,
   getQuizBackground,
 } from "../utility/quizAppearance";
+import { resolveQuestionMediaSource } from "../utility/questionMedia";
 import { Category, QuizAppearance, Settings, Team } from "./types";
 import { useCurrentUser } from "./useCurrentUser";
 
@@ -26,7 +27,7 @@ type RawQuestion = {
   list?: string[];
   points?: number;
   source?: string;
-  type: QuestionType;
+  type?: QuestionType;
 };
 
 type RawCategory = { category: string; questions: RawQuestion[] };
@@ -48,16 +49,16 @@ const initialData: Category[] = (rawData as RawCategory[]).map((category) => ({
   questions: category.questions.map(
     (question) =>
       new Question(
-        question.type,
+        normalizeQuestionType(question.type),
         question.content,
-        question.source,
+        resolveQuestionMediaSource(question.source),
         question.points,
         question.isUsed,
         question.list,
         question.correctAnswer,
         question.revealAnswer,
         question.answerMediaType,
-        question.answerSource,
+        resolveQuestionMediaSource(question.answerSource),
       ),
   ),
 }));
@@ -128,14 +129,14 @@ function hydrateCategories(categories: RawCategory[]): Category[] {
         new Question(
           normalizeQuestionType(question.type),
           question.content,
-          question.source,
+          resolveQuestionMediaSource(question.source),
           question.points,
           question.isUsed,
           question.list,
           question.correctAnswer,
           question.revealAnswer,
           question.answerMediaType,
-          question.answerSource,
+          resolveQuestionMediaSource(question.answerSource),
         ),
     ),
   }));
