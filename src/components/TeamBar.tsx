@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuiz } from "../context/QuizContext";
 import ConfettiExplosion from "react-confetti-explosion";
-import { FaUsers } from "react-icons/fa";
+import { FaPen, FaUsers } from "react-icons/fa";
 
 type TeamBarProps = {
   mode: "board" | "question";
@@ -13,6 +13,8 @@ export default function TeamBar({ mode, questionPoints = 0 }: TeamBarProps) {
   const [confetti, setConfetti] = useState<boolean[]>(
     Array(teams.length).fill(false),
   );
+  const [editingTeam, setEditingTeam] = useState<number | null>(null);
+  const [scoreInput, setScoreInput] = useState("");
 
   if (teams.length === 0) return null;
 
@@ -40,6 +42,25 @@ export default function TeamBar({ mode, questionPoints = 0 }: TeamBarProps) {
     });
   };
 
+  const openScoreEditor = (index: number) => {
+    setEditingTeam(index);
+    setScoreInput(String(teams[index].points || 0));
+  };
+
+  const saveScore = () => {
+    if (editingTeam === null) return;
+
+    const score = Number(scoreInput);
+    if (!Number.isFinite(score)) return;
+
+    setTeams((prev) =>
+      prev.map((team, index) =>
+        index === editingTeam ? { ...team, points: Math.trunc(score) } : team,
+      ),
+    );
+    setEditingTeam(null);
+  };
+
   return (
     <div
       className={`flex flex-wrap justify-center gap-4 ${
@@ -49,7 +70,7 @@ export default function TeamBar({ mode, questionPoints = 0 }: TeamBarProps) {
       {teams.map((team, i) => (
         <div
           key={i}
-          className="relative flex w-full max-w-70 items-center gap-3 rounded-xl px-4 py-2 shadow sm:w-70"
+          className="relative flex w-80 max-w-full items-center gap-3 rounded-xl px-4 py-2 shadow"
           style={{ backgroundColor: team.color, color: "#fff" }}
         >
           {confetti[i] && (
@@ -67,27 +88,87 @@ export default function TeamBar({ mode, questionPoints = 0 }: TeamBarProps) {
                 : "Nincs megadva csapattag."}
             </div>
           </div>
-          <span className="font-bold">{team.name}</span>
-          <span className="text-sm">({team.points || 0} pont)</span>
+          <div className="flex min-w-0 items-baseline gap-2">
+            <span className="truncate font-bold">{team.name}</span>
+            <span className="shrink-0 whitespace-nowrap text-sm">
+              ({team.points || 0} pont)
+            </span>
+          </div>
 
           {mode === "question" && (
-            <div className="flex items-center gap-2">
+            <div className="ml-auto flex shrink-0 items-center gap-2">
               <button
                 onClick={() => updatePoints(i, questionPoints)}
-                className="bg-white text-black px-2 rounded font-bold"
+                className="rounded bg-white px-2 text-black font-bold"
+                aria-label={`${team.name} pontjainak növelése`}
               >
                 +
               </button>
               <button
                 onClick={() => updatePoints(i, -questionPoints)}
-                className="bg-white text-black px-2 rounded font-bold"
+                className="rounded bg-white px-2 text-black font-bold"
+                aria-label={`${team.name} pontjainak csökkentése`}
               >
                 –
+              </button>
+              <button
+                onClick={() => openScoreEditor(i)}
+                className="grid size-6 place-items-center rounded bg-white text-black"
+                aria-label={`${team.name} pontszámának szerkesztése`}
+              >
+                <FaPen size={11} aria-hidden="true" />
               </button>
             </div>
           )}
         </div>
       ))}
+      {editingTeam !== null ? (
+        <div
+          className="fixed inset-0 z-30 grid place-items-center bg-black/40 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="score-editor-title"
+        >
+          <form
+            onSubmit={(event) => {
+              event.preventDefault();
+              saveScore();
+            }}
+            className="w-full max-w-sm rounded-2xl border-2 border-[#24211c] bg-[#fff4d6] p-6 text-[#24211c] shadow-[0_6px_0_#24211c]"
+          >
+            <h2 id="score-editor-title" className="font-display text-2xl">
+              {teams[editingTeam].name} pontszáma
+            </h2>
+            <label className="mt-5 block font-bold" htmlFor="team-score">
+              Pontszám
+            </label>
+            <input
+              id="team-score"
+              type="number"
+              step="1"
+              value={scoreInput}
+              onChange={(event) => setScoreInput(event.target.value)}
+              autoFocus
+              className="mt-2 w-full rounded-lg border-2 border-[#24211c] bg-white px-3 py-2 text-lg"
+            />
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setEditingTeam(null)}
+                className="rounded-lg border-2 border-[#24211c] px-4 py-2 font-bold"
+              >
+                Mégse
+              </button>
+              <button
+                type="submit"
+                className="rounded-lg border-2 border-[#24211c] bg-[#ffd75a] px-4 py-2 font-bold shadow-[0_3px_0_#24211c]"
+              >
+                Mentés
+              </button>
+            </div>
+          </form>
+        </div>
+      ) : null}
     </div>
   );
 }
